@@ -31,20 +31,20 @@
             align-items: center;
             flex-wrap: nowrap;
             box-sizing: border-box;
-            gap: 15px; /* Increased from 10px for better spacing */
+            gap: 15px;
         }
         .button-container {
             display: flex;
             align-items: center;
             flex: 1;
-            min-width: 150px; /* Minimum width to prevent overlap */
-            max-width: 25%; /* Limit width to avoid crowding */
+            min-width: 150px;
+            max-width: 25%;
         }
         .button-label {
             color: #FFFF00;
             font-family: 'VT323', monospace;
             font-size: calc(10px + 0.5vw);
-            margin-right: 10px; /* Slightly increased for clarity */
+            margin-right: 10px;
             flex-shrink: 0;
         }
         select {
@@ -59,7 +59,7 @@
             box-shadow: 0 0 4px #00FFFF;
             cursor: pointer;
             outline: none;
-            max-width: 100%; /* Ensure it fits within container */
+            max-width: 100%;
         }
         select:hover {
             box-shadow: 0 0 6px #00FFFF;
@@ -100,7 +100,7 @@
             }
             .button-container {
                 width: 100%;
-                max-width: none; /* Full width on mobile */
+                max-width: none;
                 margin: 5px 0;
             }
             .button-label {
@@ -199,20 +199,37 @@
         const csvUrl = 'https://raw.githubusercontent.com/aime2solve/200earths/refs/heads/main/200earths.csv';
         let data = [];
 
-        Papa.parse(csvUrl, {
-            download: true,
-            header: true,
-            complete: function(results) {
-                data = results.data;
-                console.log('Parsed Data:', data); // Debug: Check data in console
-                populateEcotronSelector();
-                updateGraph();
-            },
-            error: function(error) {
-                console.error('Error loading 200earths.csv:', error);
-                Plotly.newPlot('graph', [], {title: 'Error loading 200earths.csv'}, layoutConfig());
-            }
-        });
+        // Fetch and parse CSV with better error handling
+        fetch(csvUrl)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.text();
+            })
+            .then(csvText => {
+                Papa.parse(csvText, {
+                    header: true,
+                    dynamicTyping: true, // Automatically convert strings to numbers
+                    complete: function(results) {
+                        data = results.data.filter(row => row.Ecotron); // Remove empty rows
+                        console.log('Parsed Data:', data);
+                        if (data.length === 0) {
+                            console.error('No valid data parsed from CSV');
+                            Plotly.newPlot('graph', [], {title: 'No data available'}, layoutConfig());
+                            return;
+                        }
+                        populateEcotronSelector();
+                        updateGraph();
+                    },
+                    error: function(error) {
+                        console.error('Papa Parse Error:', error);
+                        Plotly.newPlot('graph', [], {title: 'Error parsing CSV'}, layoutConfig());
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                Plotly.newPlot('graph', [], {title: 'Error loading CSV'}, layoutConfig());
+            });
 
         function populateEcotronSelector() {
             const ecotrons = [...new Set(data.map(row => row.Ecotron))].filter(e => e);
@@ -225,6 +242,7 @@
                 option.selected = true;
                 selector.appendChild(option);
             });
+            console.log('Ecotron Options:', ecotrons);
         }
 
         function layoutConfig(title = 'Select Variables to Begin') {
@@ -254,57 +272,60 @@
             const view = document.getElementById('view-selector').value;
 
             if (!data.length || !ecotrons.length || !independent || !dependent) {
-                Plotly.newPlot('graph', [], layoutConfig());
+                console.log('Missing selections or data:', {data: data.length, ecotrons, independent, dependent});
+                Plotly.newPlot('graph', [], layoutConfig('No data or selections'));
                 return;
             }
 
             const filteredData = data.filter(row => ecotrons.includes(row.Ecotron));
-            console.log('Filtered Data:', filteredData); // Debug: Check filtered data
+            console.log('Filtered Data:', filteredData);
             let traces = [];
             let layout = layoutConfig(`${dependent} vs ${independent}`);
 
             if (view === 'scatter') {
                 ecotrons.forEach(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                    const x = ecotronData.map(row => parseFloat(row[independent])).filter(v => !isNaN(v));
-                    const y = ecotronData.map(row => parseFloat(row[dependent])).filter(v => !isNaN(v));
-                    console.log(`Ecotron: ${ecotron}, X: ${x}, Y: ${y}`); // Debug: Check X/Y values
-                    traces.push({
-                        x: x,
-                        y: y,
-                        mode: 'markers',
-                        name: ecotron,
-                        marker: {size: 12, color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
-                    });
-
-                    if (x.length === y.length && x.length > 1) {
-                        const n = x.length;
-                        const sumX = x.reduce((a, b) => a + b, 0);
-                        const sumY = y.reduce((a, b) => a + b, 0);
-                        const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
-                        const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
-                        const sumYY = y.map(yi => yi * yi).reduce((a, b) => a + b, 0);
-                        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-                        const intercept = (sumY - slope * sumX) / n;
-                        const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
-                        const fitX = [Math.min(...x), Math.max(...x)];
-                        const fitY = fitX.map(xi => slope * xi + intercept);
+                    const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                    const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    console.log(`Ecotron: ${ecotron}, X (${independent}): ${x}, Y (${dependent}): ${y}`);
+                    if (x.length > 0 && y.length > 0) {
                         traces.push({
-                            x: fitX,
-                            y: fitY,
-                            mode: 'lines',
-                            name: `Fit: ${ecotron} (R² = ${r2.toFixed(3)})`,
-                            line: {color: '#FF00FF', width: 3}
+                            x: x,
+                            y: y,
+                            mode: 'markers',
+                            name: ecotron,
+                            marker: {size: 12, color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
                         });
+
+                        if (x.length === y.length && x.length > 1) {
+                            const n = x.length;
+                            const sumX = x.reduce((a, b) => a + b, 0);
+                            const sumY = y.reduce((a, b) => a + b, 0);
+                            const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
+                            const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+                            const sumYY = y.map(yi => yi * yi).reduce((a, b) => a + b, 0);
+                            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                            const intercept = (sumY - slope * sumX) / n;
+                            const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
+                            const fitX = [Math.min(...x), Math.max(...x)];
+                            const fitY = fitX.map(xi => slope * xi + intercept);
+                            traces.push({
+                                x: fitX,
+                                y: fitY,
+                                mode: 'lines',
+                                name: `Fit: ${ecotron} (R² = ${r2.toFixed(3)})`,
+                                line: {color: '#FF00FF', width: 3}
+                            });
+                        }
                     }
                 });
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
                 layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
             } else {
-                const x = ecotrons;/Users/mattendrizzi/Desktop/index.html
+                const x = ecotrons;
                 const y = ecotrons.map(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                    const values = ecotronData.map(row => parseFloat(row[dependent])).filter(v => !isNaN(v));
+                    const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
                 });
                 traces.push({
