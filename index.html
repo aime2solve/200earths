@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparative Biospheromics</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #000000;
+            font-family: 'Exo 2', sans-serif;
+            overflow: hidden;
+        }
+        h1 {
+            color: #00FFFF;
+            text-align: center;
+            text-shadow: 0 0 10px #00FFFF;
+            padding: 1vh;
+            font-family: 'Orbitron', sans-serif;
+            font-size: calc(16px + 2vw);
+        }
+        .control-bar {
+            width: 100%;
+            padding: 1vh 1vw;
+            background-color: #1A1A1A;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+            box-sizing: border-box;
+            gap: 15px; /* Increased from 10px for better spacing */
+        }
+        .button-container {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 150px; /* Minimum width to prevent overlap */
+            max-width: 25%; /* Limit width to avoid crowding */
+        }
+        .button-label {
+            color: #FFFF00;
+            font-family: 'VT323', monospace;
+            font-size: calc(10px + 0.5vw);
+            margin-right: 10px; /* Slightly increased for clarity */
+            flex-shrink: 0;
+        }
+        select {
+            background: #1A1A1A;
+            border: 2px solid #00FFFF;
+            border-radius: 5px;
+            color: #00FFFF;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 12px;
+            padding: 5px;
+            flex-grow: 1;
+            box-shadow: 0 0 4px #00FFFF;
+            cursor: pointer;
+            outline: none;
+            max-width: 100%; /* Ensure it fits within container */
+        }
+        select:hover {
+            box-shadow: 0 0 6px #00FFFF;
+        }
+        .graph-container {
+            width: 90%;
+            height: 75vh;
+            margin: 2vh auto;
+            position: relative;
+            background-color: #1A1A1A;
+        }
+        #graph {
+            width: 100%;
+            height: 100%;
+        }
+        #graph::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(0, 255, 255, 0.06),
+                rgba(0, 255, 255, 0.06) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .control-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1vh 2vw;
+            }
+            .button-container {
+                width: 100%;
+                max-width: none; /* Full width on mobile */
+                margin: 5px 0;
+            }
+            .button-label {
+                width: 100px;
+                text-align: right;
+                margin-right: 10px;
+            }
+            select {
+                width: calc(100% - 110px);
+            }
+        }
+    </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+<body>
+    <h1>Comparative Biospheromics</h1>
+    <div class="control-bar">
+        <div class="button-container">
+            <span class="button-label">Ecotrons:</span>
+            <select id="ecotron-selector" multiple>
+                <!-- Populated dynamically from 200earths.csv -->
+            </select>
+        </div>
+        <div class="button-container">
+            <span class="button-label">Independent:</span>
+            <select id="independent-selector">
+                <option value="CO2_Level">CO2_Level</option>
+                <option value="Temperature_Level">Temperature_Level</option>
+                <option value="Fertilizer_Dose">Fertilizer_Dose</option>
+                <option value="GMO_Presence">GMO_Presence</option>
+                <option value="Vector_Presence">Vector_Presence</option>
+            </select>
+        </div>
+        <div class="button-container">
+            <span class="button-label">Dependent:</span>
+            <select id="dependent-selector">
+                <option value="Plant_Growth_Rate">Plant_Growth_Rate</option>
+                <option value="Photosynthesis_Rate">Photosynthesis_Rate</option>
+                <option value="Soil_Carbon_Content">Soil_Carbon_Content</option>
+                <option value="Species_Composition">Species_Composition</option>
+                <option value="Water_Use_Efficiency">Water_Use_Efficiency</option>
+                <option value="Phenology">Phenology</option>
+                <option value="Soil_Moisture_Content">Soil_Moisture_Content</option>
+                <option value="Net_Primary_Productivity">Net_Primary_Productivity</option>
+                <option value="Mortality_Rates">Mortality_Rates</option>
+                <option value="Plant_Biomass">Plant_Biomass</option>
+                <option value="Nutrient_Leaching">Nutrient_Leaching</option>
+                <option value="Soil_Microbial_Activity">Soil_Microbial_Activity</option>
+                <option value="Eutrophication_Levels">Eutrophication_Levels</option>
+                <option value="Gene_Flow">Gene_Flow</option>
+                <option value="Crop_Yield">Crop_Yield</option>
+                <option value="Non_Target_Species_Effects">Non_Target_Species_Effects</option>
+                <option value="Pest_Resistance">Pest_Resistance</option>
+                <option value="Target_Population_Size">Target_Population_Size</option>
+                <option value="Off_Target_Mutations">Off_Target_Mutations</option>
+                <option value="Genetic_Diversity">Genetic_Diversity</option>
+                <option value="Ecosystem_Trophic_Dynamics">Ecosystem_Trophic_Dynamics</option>
+                <option value="Vector_Persistence">Vector_Persistence</option>
+            </select>
+        </div>
+        <div class="button-container">
+            <span class="button-label">View:</span>
+            <select id="view-selector">
+                <option value="scatter">Scatter Plot</option>
+                <option value="bar">Bar Chart</option>
+            </select>
+        </div>
+    </div>
+    <div class="graph-container">
+        <div id="graph"></div>
+    </div>
+
+    <script>
+        const colors = {
+            'Plant_Growth_Rate': '#00FFFF', 'Photosynthesis_Rate': '#FF00FF', 'Soil_Carbon_Content': '#00FF00',
+            'Species_Composition': '#FFFF00', 'Water_Use_Efficiency': '#FF8000', 'Phenology': '#FF0080',
+            'Soil_Moisture_Content': '#00FF80', 'Net_Primary_Productivity': '#8000FF', 'Mortality_Rates': '#FF0000',
+            'Plant_Biomass': '#00CCFF', 'Nutrient_Leaching': '#CCFF00', 'Soil_Microbial_Activity': '#FF00CC',
+            'Eutrophication_Levels': '#80FF00', 'Gene_Flow': '#0080FF', 'Crop_Yield': '#FFCC00',
+            'Non_Target_Species_Effects': '#00FFCC', 'Pest_Resistance': '#CC00FF', 'Target_Population_Size': '#FF80FF',
+            'Off_Target_Mutations': '#80FF80', 'Genetic_Diversity': '#FF8080', 'Ecosystem_Trophic_Dynamics': '#0080CC',
+            'Vector_Persistence': '#CCFFCC'
+        };
+
+        const units = {
+            'CO2_Level': 'ppm', 'Temperature_Level': '°C', 'Fertilizer_Dose': 'kg/ha', 'GMO_Presence': 'binary', 'Vector_Presence': 'binary',
+            'Plant_Growth_Rate': 'mm/day', 'Photosynthesis_Rate': 'µmol/m²s', 'Soil_Carbon_Content': '%', 'Species_Composition': 'index',
+            'Water_Use_Efficiency': 'g/kg', 'Phenology': 'days', 'Soil_Moisture_Content': '%', 'Net_Primary_Productivity': 'g/m²',
+            'Mortality_Rates': '%', 'Plant_Biomass': 'g/m²', 'Nutrient_Leaching': 'mg/L', 'Soil_Microbial_Activity': 'µg/g',
+            'Eutrophication_Levels': 'mg/L', 'Gene_Flow': '%', 'Crop_Yield': 't/ha', 'Non_Target_Species_Effects': '%',
+            'Pest_Resistance': '%', 'Target_Population_Size': 'count', 'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index',
+            'Ecosystem_Trophic_Dynamics': 'index', 'Vector_Persistence': 'days'
+        };
+
+        const csvUrl = 'https://raw.githubusercontent.com/aime2solve/200earths/refs/heads/main/200earths.csv';
+        let data = [];
+
+        Papa.parse(csvUrl, {
+            download: true,
+            header: true,
+            complete: function(results) {
+                data = results.data;
+                console.log('Parsed Data:', data); // Debug: Check data in console
+                populateEcotronSelector();
+                updateGraph();
+            },
+            error: function(error) {
+                console.error('Error loading 200earths.csv:', error);
+                Plotly.newPlot('graph', [], {title: 'Error loading 200earths.csv'}, layoutConfig());
+            }
+        });
+
+        function populateEcotronSelector() {
+            const ecotrons = [...new Set(data.map(row => row.Ecotron))].filter(e => e);
+            const selector = document.getElementById('ecotron-selector');
+            selector.innerHTML = '';
+            ecotrons.forEach(ecotron => {
+                const option = document.createElement('option');
+                option.value = ecotron;
+                option.text = ecotron;
+                option.selected = true;
+                selector.appendChild(option);
+            });
+        }
+
+        function layoutConfig(title = 'Select Variables to Begin') {
+            return {
+                plot_bgcolor: '#1A1A1A',
+                paper_bgcolor: '#1A1A1A',
+                font: {color: '#FFFFFF', family: 'Exo 2', sans-serif', size: 14},
+                title: {
+                    text: title,
+                    font: {size: 24, color: '#00FFFF', family: 'VT323', monospace'},
+                    x: 0.05,
+                    xanchor: 'left',
+                    y: 0.95,
+                    yanchor: 'top'
+                },
+                xaxis: {gridcolor: '#333333', automargin: true},
+                yaxis: {gridcolor: '#333333', automargin: true},
+                legend: {font: {color: '#00FF00', size: 12, family: 'VT323', monospace'}, x: 0.01, y: 0.99, xanchor: 'left', yanchor: 'top'},
+                margin: {l: 40, r: 40, t: 60, b: 40}
+            };
+        }
+
+        function updateGraph() {
+            const ecotrons = Array.from(document.getElementById('ecotron-selector').selectedOptions).map(opt => opt.value);
+            const independent = document.getElementById('independent-selector').value;
+            const dependent = document.getElementById('dependent-selector').value;
+            const view = document.getElementById('view-selector').value;
+
+            if (!data.length || !ecotrons.length || !independent || !dependent) {
+                Plotly.newPlot('graph', [], layoutConfig());
+                return;
+            }
+
+            const filteredData = data.filter(row => ecotrons.includes(row.Ecotron));
+            console.log('Filtered Data:', filteredData); // Debug: Check filtered data
+            let traces = [];
+            let layout = layoutConfig(`${dependent} vs ${independent}`);
+
+            if (view === 'scatter') {
+                ecotrons.forEach(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const x = ecotronData.map(row => parseFloat(row[independent])).filter(v => !isNaN(v));
+                    const y = ecotronData.map(row => parseFloat(row[dependent])).filter(v => !isNaN(v));
+                    console.log(`Ecotron: ${ecotron}, X: ${x}, Y: ${y}`); // Debug: Check X/Y values
+                    traces.push({
+                        x: x,
+                        y: y,
+                        mode: 'markers',
+                        name: ecotron,
+                        marker: {size: 12, color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
+                    });
+
+                    if (x.length === y.length && x.length > 1) {
+                        const n = x.length;
+                        const sumX = x.reduce((a, b) => a + b, 0);
+                        const sumY = y.reduce((a, b) => a + b, 0);
+                        const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
+                        const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+                        const sumYY = y.map(yi => yi * yi).reduce((a, b) => a + b, 0);
+                        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                        const intercept = (sumY - slope * sumX) / n;
+                        const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
+                        const fitX = [Math.min(...x), Math.max(...x)];
+                        const fitY = fitX.map(xi => slope * xi + intercept);
+                        traces.push({
+                            x: fitX,
+                            y: fitY,
+                            mode: 'lines',
+                            name: `Fit: ${ecotron} (R² = ${r2.toFixed(3)})`,
+                            line: {color: '#FF00FF', width: 3}
+                        });
+                    }
+                });
+                layout.xaxis.title = `${independent} (${units[independent] || ''})`;
+                layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
+            } else {
+                const x = ecotrons;/Users/mattendrizzi/Desktop/index.html
+                const y = ecotrons.map(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const values = ecotronData.map(row => parseFloat(row[dependent])).filter(v => !isNaN(v));
+                    return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+                });
+                traces.push({
+                    x: x,
+                    y: y,
+                    type: 'bar',
+                    marker: {color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
+                });
+                layout.xaxis.title = 'Ecotron';
+                layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
+            }
+
+            Plotly.newPlot('graph', traces, layout);
+        }
+
+        document.getElementById('ecotron-selector').addEventListener('change', updateGraph);
+        document.getElementById('independent-selector').addEventListener('change', updateGraph);
+        document.getElementById('dependent-selector').addEventListener('change', updateGraph);
+        document.getElementById('view-selector').addEventListener('change', updateGraph);
+    </script>
+</body>
+</html>
