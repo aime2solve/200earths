@@ -68,7 +68,7 @@
             color: #00FFFF;
         }
         option.inactive {
-            color: rgba(0, 255, 255, 0.5); /* Shaded for inapplicable options */
+            color: rgba(0, 255, 255, 0.5);
         }
         .graph-container {
             width: 90%;
@@ -258,15 +258,17 @@
                 selector.appendChild(option);
             });
             console.log('Ecotron Options:', ecotrons);
+            if (ecotrons.length === 0) {
+                console.error('No Ecotrons found');
+            }
         }
 
         function updateViewOptions() {
-            const independent = document.getElementById('independent-selector').value;
             const dependent = document.getElementById('dependent-selector').value;
             const viewOptions = document.getElementById('view-selector').options;
 
             const genomicsVars = ['Gene_Flow', 'Off_Target_Mutations', 'Genetic_Diversity'];
-            const isGenomicsPair = genomicsVars.includes(dependent);
+            const isGenomics = genomicsVars.includes(dependent);
 
             Array.from(viewOptions).forEach(option => {
                 const value = option.value;
@@ -377,6 +379,11 @@
                 layout.xaxis.title = 'Ecotron';
                 layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
             } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
+                const url = filteredData[0].Data_URL || '<enter data URL here>';
+                if (url !== '') {
+                    Plotly.newPlot('graph', [], layoutConfig(`Gene Flow data at: ${url}`));
+                    return;
+                }
                 ecotrons.forEach(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
@@ -395,6 +402,11 @@
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Gene Flow (%)';
             } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
+                const url = filteredData[0].Data_URL || '<enter data URL here>';
+                if (url !== '') {
+                    Plotly.newPlot('graph', [], layoutConfig(`Mutation data at: ${url}`));
+                    return;
+                }
                 const z = ecotrons.map(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
                     return ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : 0);
@@ -409,6 +421,11 @@
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Ecotron';
             } else if (view === 'diversity_bar' && dependent === 'Genetic_Diversity') {
+                const url = filteredData[0].Data_URL || '<enter data URL here>';
+                if (url !== '') {
+                    Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
+                    return;
+                }
                 const x = ecotrons;
                 const y = ecotrons.map(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
@@ -424,7 +441,7 @@
                 layout.xaxis.title = 'Ecotron';
                 layout.yaxis.title = 'Genetic Diversity (index)';
             } else {
-                console.log('View not applicable for this pair');
+                console.log('View not applicable');
                 Plotly.newPlot('graph', [], layoutConfig('View not applicable'));
                 return;
             }
