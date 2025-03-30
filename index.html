@@ -51,7 +51,7 @@
             z-index: 10;
         }
     </style>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 </head>
 <body>
     <h1>Comparative Biospheromics</h1>
@@ -76,10 +76,10 @@
             return {
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
-                font: {color: '#FFFFFF', family: 'Exo 2', sans-serif', size: 14},
+                font: {color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14}, // Fixed typo
                 title: {
                     text: title,
-                    font: {size: 24, color: '#00FFFF', family: 'VT323', monospace'},
+                    font: {size: 24, color: '#00FFFF', family: 'VT323, monospace'},
                     x: 0.05,
                     xanchor: 'left',
                     y: 0.95,
@@ -87,7 +87,7 @@
                 },
                 xaxis: {title: 'CO2 Level (ppm)', gridcolor: '#333333', automargin: true},
                 yaxis: {title: 'Plant Growth Rate (mm/day)', gridcolor: '#333333', automargin: true},
-                legend: {font: {color: '#00FF00', size: 12, family: 'VT323', monospace'}, x: 0.01, y: 0.99, xanchor: 'left', yanchor: 'top'},
+                legend: {font: {color: '#00FF00', size: 12, family: 'VT323, monospace'}, x: 0.01, y: 0.99, xanchor: 'left', yanchor: 'top'},
                 margin: {l: 40, r: 40, t: 60, b: 40}
             };
         }
