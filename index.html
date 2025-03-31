@@ -95,7 +95,7 @@
         }
         .stats-container {
             display: flex;
-            flex-direction: column; /* Stack button and panel vertically */
+            flex-direction: column;
             width: 100%;
             position: relative;
         }
@@ -113,7 +113,7 @@
             text-align: right;
             flex-shrink: 0;
         }
-        .dropdown-toggle, #stats-toggle, .csv-button {
+        .dropdown-toggle {
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
             border-radius: 10px;
@@ -124,8 +124,9 @@
             box-shadow: 0 0 8px #00FFFF;
             cursor: pointer;
             width: calc(100% - 120px);
+            text-align: left;
         }
-        .dropdown-toggle:hover, #stats-toggle:hover, .csv-button:hover {
+        .dropdown-toggle:hover {
             box-shadow: 0 0 12px #00FFFF;
         }
         .dropdown-menu {
@@ -149,7 +150,7 @@
         .dropdown-menu.open {
             display: block;
         }
-        #ecotron-full-list {
+        #ecotron-full-list, #independent-menu, #dependent-menu, #view-menu {
             max-height: 400px;
         }
         .dropdown-item {
@@ -157,29 +158,12 @@
             align-items: center;
             margin-bottom: 5px;
         }
+        .dropdown-item input[type="radio"],
         .dropdown-item input[type="checkbox"] {
             margin-right: 10px;
             accent-color: #00FFFF;
         }
-        select {
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 12px;
-            padding: 6px 12px;
-            box-shadow: 0 0 8px #00FFFF;
-            cursor: pointer;
-            width: calc(100% - 120px);
-        }
-        select:hover {
-            box-shadow: 0 0 12px #00FFFF;
-        }
-        option {
-            background: #1A1A1A;
-        }
-        option.inactive {
+        .dropdown-item.inactive {
             color: #006666;
             pointer-events: none;
         }
@@ -263,7 +247,7 @@
                 width: calc(100% - 90px);
                 margin-left: 90px;
             }
-            select, .dropdown-toggle, #stats-toggle, .csv-button {
+            .dropdown-toggle {
                 font-size: 10px;
                 padding: 4px 8px;
                 width: calc(100% - 90px);
@@ -299,7 +283,7 @@
                 <div class="dropdown-menu" id="biome-menu"></div>
             </div>
             <div class="button-container">
-                <span class="button-label">Conditions Tested:</span>
+                <span class="button-label">Exp. Condition:</span>
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item"><input type="checkbox" id="Control" value="Control"><label for="Control">Control</label></div>
@@ -311,66 +295,69 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Ecotrons:</span>
-                <div class="dropdown-toggle" id="ecotron-toggle">Show All</div> <!-- Now styled like other buttons -->
+                <div class="dropdown-toggle" id="ecotron-toggle">Show All</div>
                 <div class="dropdown-menu" id="ecotron-full-list"></div>
             </div>
             <div class="button-container">
                 <span class="button-label">Independent:</span>
-                <select id="independent-selector">
-                    <option value="CO2_Level">CO2_Level</option>
-                    <option value="Temperature_Level">Temperature_Level</option>
-                    <option value="Fertilizer_Dose">Fertilizer_Dose</option>
-                    <option value="GMO_Presence">GMO_Presence</option>
-                    <option value="Vector_Presence">Vector_Presence</option>
-                </select>
+                <div class="dropdown-toggle" id="independent-toggle">CO2_Level</div>
+                <div class="dropdown-menu" id="independent-menu">
+                    <div class="dropdown-item"><input type="radio" name="independent" id="CO2_Level" value="CO2_Level" checked><label for="CO2_Level">CO2_Level</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="Temperature_Level" value="Temperature_Level"><label for="Temperature_Level">Temperature_Level</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="Fertilizer_Dose" value="Fertilizer_Dose"><label for="Fertilizer_Dose">Fertilizer_Dose</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="GMO_Presence" value="GMO_Presence"><label for="GMO_Presence">GMO_Presence</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="Vector_Presence" value="Vector_Presence"><label for="Vector_Presence">Vector_Presence</label></div>
+                </div>
             </div>
             <div class="button-container">
                 <span class="button-label">Dependent:</span>
-                <select id="dependent-selector">
-                    <option value="Plant_Growth_Rate">Plant_Growth_Rate</option>
-                    <option value="Photosynthesis_Rate">Photosynthesis_Rate</option>
-                    <option value="Soil_Carbon_Content">Soil_Carbon_Content</option>
-                    <option value="Species_Composition">Species_Composition</option>
-                    <option value="Water_Use_Efficiency">Water_Use_Efficiency</option>
-                    <option value="Phenology">Phenology</option>
-                    <option value="Soil_Moisture_Content">Soil_Moisture_Content</option>
-                    <option value="Net_Primary_Productivity">Net_Primary_Productivity</option>
-                    <option value="Mortality_Rates">Mortality_Rates</option>
-                    <option value="Plant_Biomass">Plant_Biomass</option>
-                    <option value="Nutrient_Leaching">Nutrient_Leaching</option>
-                    <option value="Soil_Microbial_Activity">Soil_Microbial_Activity</option>
-                    <option value="Eutrophication_Levels">Eutrophication_Levels</option>
-                    <option value="Gene_Flow">Gene_Flow</option>
-                    <option value="Crop_Yield">Crop_Yield</option>
-                    <option value="Non_Target_Species_Effects">Non_Target_Species_Effects</option>
-                    <option value="Pest_Resistance">Pest_Resistance</option>
-                    <option value="Target_Population_Size">Target_Population_Size</option>
-                    <option value="Off_Target_Mutations">Off_Target_Mutations</option>
-                    <option value="Genetic_Diversity">Genetic_Diversity</option>
-                    <option value="Ecosystem_Trophic_Dynamics">Ecosystem_Trophic_Dynamics</option>
-                    <option value="Vector_Persistence">Vector_Persistence</option>
-                </select>
+                <div class="dropdown-toggle" id="dependent-toggle">Plant_Growth_Rate</div>
+                <div class="dropdown-menu" id="dependent-menu">
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Plant_Growth_Rate" value="Plant_Growth_Rate" checked><label for="Plant_Growth_Rate">Plant_Growth_Rate</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Photosynthesis_Rate" value="Photosynthesis_Rate"><label for="Photosynthesis_Rate">Photosynthesis_Rate</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Carbon_Content" value="Soil_Carbon_Content"><label for="Soil_Carbon_Content">Soil_Carbon_Content</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Species_Composition" value="Species_Composition"><label for="Species_Composition">Species_Composition</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Water_Use_Efficiency" value="Water_Use_Efficiency"><label for="Water_Use_Efficiency">Water_Use_Efficiency</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Phenology" value="Phenology"><label for="Phenology">Phenology</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Moisture_Content" value="Soil_Moisture_Content"><label for="Soil_Moisture_Content">Soil_Moisture_Content</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Net_Primary_Productivity" value="Net_Primary_Productivity"><label for="Net_Primary_Productivity">Net_Primary_Productivity</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Mortality_Rates" value="Mortality_Rates"><label for="Mortality_Rates">Mortality_Rates</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Plant_Biomass" value="Plant_Biomass"><label for="Plant_Biomass">Plant_Biomass</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Nutrient_Leaching" value="Nutrient_Leaching"><label for="Nutrient_Leaching">Nutrient_Leaching</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Microbial_Activity" value="Soil_Microbial_Activity"><label for="Soil_Microbial_Activity">Soil_Microbial_Activity</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Eutrophication_Levels" value="Eutrophication_Levels"><label for="Eutrophication_Levels">Eutrophication_Levels</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Gene_Flow" value="Gene_Flow"><label for="Gene_Flow">Gene_Flow</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Crop_Yield" value="Crop_Yield"><label for="Crop_Yield">Crop_Yield</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Non_Target_Species_Effects" value="Non_Target_Species_Effects"><label for="Non_Target_Species_Effects">Non_Target_Species_Effects</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Pest_Resistance" value="Pest_Resistance"><label for="Pest_Resistance">Pest_Resistance</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Target_Population_Size" value="Target_Population_Size"><label for="Target_Population_Size">Target_Population_Size</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Off_Target_Mutations" value="Off_Target_Mutations"><label for="Off_Target_Mutations">Off_Target_Mutations</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Genetic_Diversity" value="Genetic_Diversity"><label for="Genetic_Diversity">Genetic_Diversity</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Ecosystem_Trophic_Dynamics" value="Ecosystem_Trophic_Dynamics"><label for="Ecosystem_Trophic_Dynamics">Ecosystem_Trophic_Dynamics</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Vector_Persistence" value="Vector_Persistence"><label for="Vector_Persistence">Vector_Persistence</label></div>
+                </div>
             </div>
             <div class="button-container">
                 <span class="button-label">View:</span>
-                <select id="view-selector">
-                    <option value="scatter">Scatter Plot</option>
-                    <option value="bar">Bar Chart</option>
-                    <option value="gene_flow">Gene Flow Plot</option>
-                    <option value="mutation_heatmap">Mutation Heatmap</option>
-                    <option value="diversity_bar">Genetic Diversity Bar</option>
-                </select>
+                <div class="dropdown-toggle" id="view-toggle">Scatter Plot</div>
+                <div class="dropdown-menu" id="view-menu">
+                    <div class="dropdown-item"><input type="radio" name="view" id="scatter" value="scatter" checked><label for="scatter">Scatter Plot</label></div>
+                    <div class="dropdown-item"><input type="radio" name="view" id="bar" value="bar"><label for="bar">Bar Chart</label></div>
+                    <div class="dropdown-item"><input type="radio" name="view" id="gene_flow" value="gene_flow"><label for="gene_flow">Gene Flow Plot</label></div>
+                    <div class="dropdown-item"><input type="radio" name="view" id="mutation_heatmap" value="mutation_heatmap"><label for="mutation_heatmap">Mutation Heatmap</label></div>
+                    <div class="dropdown-item"><input type="radio" name="view" id="diversity_bar" value="diversity_bar"><label for="diversity_bar">Genetic Diversity Bar</label></div>
+                </div>
             </div>
             <div class="stats-container">
                 <div class="stats-header">
-                    <span class="button-label">Stats:</span>
-                    <button id="stats-toggle">Show Stats</button>
+                    <span class="button-label">STATS:</span>
+                    <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
                 </div>
                 <div class="stats-panel" id="stats-panel"></div>
             </div>
             <div class="button-container">
                 <span class="button-label">CSV:</span>
-                <button class="csv-button" onclick="window.open('https://raw.githubusercontent.com/aime2solve/200earths/main/200earths.csv', '_blank')">View CSV</button>
+                <div class="dropdown-toggle" id="csv-toggle" onclick="window.open('https://raw.githubusercontent.com/aime2solve/200earths/main/200earths.csv', '_blank')">View CSV</div>
             </div>
         </div>
         <div class="graph-container" id="graph-container">
@@ -506,6 +493,31 @@
                 ecotronFullList.appendChild(div);
             });
 
+            const independentMenu = document.getElementById('independent-menu');
+            independentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    document.getElementById('independent-toggle').textContent = e.target.value;
+                    updateGraph();
+                });
+            });
+
+            const dependentMenu = document.getElementById('dependent-menu');
+            dependentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    document.getElementById('dependent-toggle').textContent = e.target.value;
+                    updateViewOptions();
+                    updateGraph();
+                });
+            });
+
+            const viewMenu = document.getElementById('view-menu');
+            viewMenu.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    document.getElementById('view-toggle').textContent = document.querySelector(`label[for="${e.target.id}"]`).textContent;
+                    updateGraph();
+                });
+            });
+
             console.log('Biomes:', biomes);
             console.log('Ecotrons:', ecotrons);
             syncEcotrons();
@@ -513,7 +525,7 @@
         }
 
         function toggleDropdown(id) {
-            const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list'];
+            const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
             allMenus.forEach(menuId => {
                 if (menuId !== id) document.getElementById(menuId).classList.remove('open');
             });
@@ -582,19 +594,21 @@
 
         function updateViewOptions() {
             console.log('Updating view options');
-            const dependent = document.getElementById('dependent-selector').value;
-            const viewOptions = document.getElementById('view-selector').options;
+            const dependent = document.querySelector('#dependent-menu input:checked').value;
+            const viewMenu = document.getElementById('view-menu');
+            const viewOptions = viewMenu.querySelectorAll('.dropdown-item');
 
             Array.from(viewOptions).forEach(option => {
-                const value = option.value;
+                const input = option.querySelector('input');
+                const value = input.value;
                 if (value === 'scatter' || value === 'bar') {
-                    option.className = '';
+                    option.className = 'dropdown-item';
                 } else if (value === 'gene_flow') {
-                    option.className = dependent === 'Gene_Flow' ? '' : 'inactive';
+                    option.className = dependent === 'Gene_Flow' ? 'dropdown-item' : 'dropdown-item inactive';
                 } else if (value === 'mutation_heatmap') {
-                    option.className = dependent === 'Off_Target_Mutations' ? '' : 'inactive';
+                    option.className = dependent === 'Off_Target_Mutations' ? 'dropdown-item' : 'dropdown-item inactive';
                 } else if (value === 'diversity_bar') {
-                    option.className = dependent === 'Genetic_Diversity' ? '' : 'inactive';
+                    option.className = dependent === 'Genetic_Diversity' ? 'dropdown-item' : 'dropdown-item inactive';
                 }
             });
         }
@@ -644,9 +658,9 @@
             const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
             const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
             const selectedEcotrons = Array.from(document.getElementById('ecotron-full-list').querySelectorAll('input:checked')).map(input => input.value);
-            const independent = document.getElementById('independent-selector').value;
-            const dependent = document.getElementById('dependent-selector').value;
-            const view = document.getElementById('view-selector').value;
+            const independent = document.querySelector('#independent-menu input:checked').value;
+            const dependent = document.querySelector('#dependent-menu input:checked').value;
+            const view = document.querySelector('#view-menu input:checked').value;
 
             console.log('Selections:', { biomes, conditions, selectedEcotrons, independent, dependent, view });
 
@@ -822,14 +836,15 @@
         document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
         document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
         document.getElementById('ecotron-toggle').addEventListener('click', () => toggleDropdown('ecotron-full-list'));
+        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+        document.getElementById('view-toggle').addEventListener('click', () => toggleDropdown('view-menu'));
         document.getElementById('stats-toggle').addEventListener('click', () => {
             const statsPanel = document.getElementById('stats-panel');
             statsPanel.classList.toggle('open');
             document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
         });
-        document.getElementById('independent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
-        document.getElementById('dependent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
-        document.getElementById('view-selector').addEventListener('change', updateGraph);
+
         document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
         document.getElementById('mobile-toggle').addEventListener('click', toggleMobileSidebar);
 
