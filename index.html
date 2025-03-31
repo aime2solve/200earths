@@ -329,6 +329,7 @@
             let layout = layoutConfig(`${dependent} vs ${independent}`);
 
             if (view === 'scatter') {
+                // Plot points for each Ecotron
                 ecotrons.forEach(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
@@ -342,30 +343,33 @@
                             name: ecotron,
                             marker: {size: 12, color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
                         });
-
-                        if (x.length >= 2 && x.length === y.length) {
-                            const { slope, intercept, r2 } = linearRegression(x, y);
-                            if (!isNaN(slope) && !isNaN(intercept) && !isNaN(r2)) {
-                                const xRange = [Math.min(...x), Math.max(...x)];
-                                const yFit = xRange.map(xi => slope * xi + intercept);
-                                console.log(`Adding trendline for ${ecotron}: xRange:`, xRange, 'yFit:', yFit);
-                                traces.push({
-                                    x: xRange,
-                                    y: yFit,
-                                    mode: 'lines',
-                                    name: `${ecotron} Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}, R² = ${r2.toFixed(3)}`,
-                                    line: {color: '#FF00FF', width: 2}
-                                });
-                            } else {
-                                console.warn(`Regression invalid for ${ecotron}:`, {slope, intercept, r2});
-                            }
-                        } else {
-                            console.warn(`Skipping regression for ${ecotron}: ${x.length} points, need 2+`);
-                        }
-                    } else {
-                        console.warn(`No valid data for ${ecotron}: X length=${x.length}, Y length=${y.length}`);
                     }
                 });
+
+                // Aggregate regression across all selected Ecotrons
+                const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                console.log('Aggregate data for regression - X:', allX, 'Y:', allY);
+                if (allX.length >= 2 && allX.length === allY.length) {
+                    const { slope, intercept, r2 } = linearRegression(allX, allY);
+                    if (!isNaN(slope) && !isNaN(intercept) && !isNaN(r2)) {
+                        const xRange = [Math.min(...allX), Math.max(...allX)];
+                        const yFit = xRange.map(xi => slope * xi + intercept);
+                        console.log('Adding aggregate trendline: xRange:', xRange, 'yFit:', yFit);
+                        traces.push({
+                            x: xRange,
+                            y: yFit,
+                            mode: 'lines',
+                            name: `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}, R² = ${r2.toFixed(3)}`,
+                            line: {color: '#FF00FF', width: 2}
+                        });
+                    } else {
+                        console.warn('Aggregate regression failed:', {slope, intercept, r2});
+                    }
+                } else {
+                    console.warn('Not enough points for aggregate regression:', allX.length);
+                }
+
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
                 layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
             } else if (view === 'bar') {
