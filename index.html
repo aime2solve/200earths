@@ -16,16 +16,21 @@
             display: flex;
             flex-direction: column;
         }
-       h1 {
-    color: #00CCFF; /* Slightly indigo-leaning cyan */
+    h1 {
+    color: #0099CC; /* Darker indigo-cyan to harmonize with sidebar */
     text-align: center;
-    text-shadow: 0 0 8px #00CCFF, 0 0 15px #CC00FF; /* Reduced glow with indigo-magenta mix */
+    text-shadow: 0 0 10px #0099CC, 0 0 20px #9900CC; /* Base glow with indigo-purple */
     padding: 1vh;
-    font-family: 'Nova Square', sans-serif;
+    font-family: 'Rajdhani', sans-serif;
     font-size: calc(18px + 2vw);
     margin: 0;
     flex-shrink: 0;
-    letter-spacing: 1px; /* Subtle spacing */
+    letter-spacing: 2px; /* Wider spacing for futuristic feel */
+    animation: pulseGlow 1.5s ease-in-out infinite alternate;
+}
+@keyframes pulseGlow {
+    from { text-shadow: 0 0 10px #0099CC, 0 0 20px #9900CC; }
+    to { text-shadow: 0 0 20px #0099CC, 0 0 40px #9900CC; }
 }
         .container {
             display: flex;
