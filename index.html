@@ -13,6 +13,8 @@
             background-color: #000000;
             font-family: 'Exo 2', sans-serif;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         h1 {
             color: #00FFFF;
@@ -22,6 +24,7 @@
             font-family: 'Orbitron', sans-serif;
             font-size: calc(16px + 2vw);
             margin: 0;
+            flex-shrink: 0; /* Prevents title from shrinking */
         }
         .control-bar {
             width: 100%;
@@ -33,6 +36,7 @@
             flex-wrap: nowrap;
             box-sizing: border-box;
             gap: 15px;
+            flex-shrink: 0; /* Prevents control bar from shrinking */
         }
         .button-container {
             display: flex;
@@ -73,11 +77,12 @@
         }
         .graph-container {
             width: 90%;
-            height: calc(100vh - 140px); /* Adjusted to fit within viewport */
+            flex-grow: 1; /* Fills remaining space */
             margin: 1vh auto;
             position: relative;
             background-color: #1A1A1A;
             overflow: hidden;
+            min-height: 200px; /* Ensures visibility if window is small */
         }
         #graph {
             width: 100%;
@@ -104,6 +109,7 @@
             text-align: center;
             padding: 0.5vh;
             background-color: #1A1A1A;
+            flex-shrink: 0; /* Prevents link from shrinking */
         }
         .data-link a {
             color: #00FFFF;
@@ -132,9 +138,6 @@
             }
             select {
                 width: calc(100% - 110px);
-            }
-            .graph-container {
-                height: calc(100vh - 200px); /* Adjust for stacked controls */
             }
         }
     </style>
