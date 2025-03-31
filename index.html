@@ -27,29 +27,41 @@
             flex-shrink: 0;
             position: relative;
         }
-        .control-bar {
-            width: 100%;
-            padding: 1.5vh 1vw;
-            background-color: #1A1A1A;
+        .container {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            box-sizing: border-box;
-            gap: 15px;
-            flex-shrink: 0;
+            flex-grow: 1;
+            overflow: hidden;
         }
-        .left-controls, .right-controls {
+        .sidebar {
+            width: 300px;
+            background: rgba(26, 26, 26, 0.8);
+            border-right: 2px solid #00FFFF;
+            box-shadow: 0 0 10px #00FFFF;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            flex: 1;
-            min-width: 0;
-        }
-        .right-controls {
-            flex-direction: row;
-            justify-content: flex-end;
             gap: 15px;
+            position: fixed;
+            height: 100%;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            padding: 5px 10px;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00FFFF;
+            z-index: 1100;
         }
         .button-container {
             display: flex;
@@ -60,11 +72,11 @@
         .button-label {
             color: #FFFF00;
             font-family: 'VT323', monospace;
-            font-size: calc(12px + 0.5vw);
+            font-size: 14px;
             margin-right: 10px;
-            flex-shrink: 0;
-            width: 120px;
+            width: 100px;
             text-align: right;
+            flex-shrink: 0;
         }
         .dropdown-toggle {
             background: rgba(26, 26, 26, 0.8);
@@ -85,8 +97,8 @@
             display: none;
             position: absolute;
             top: calc(100% + 5px);
-            left: 130px;
-            width: calc(100% - 140px);
+            left: 110px;
+            width: calc(100% - 120px);
             max-height: 300px;
             overflow-y: auto;
             background: rgba(26, 26, 26, 0.8);
@@ -151,13 +163,16 @@
             position: relative;
         }
         .graph-container {
-            width: 90%;
             flex-grow: 1;
-            margin: 1vh auto;
+            margin-left: 300px;
             position: relative;
             background-color: #1A1A1A;
             overflow: hidden;
             min-height: 200px;
+            transition: margin-left 0.3s ease;
+        }
+        .graph-container.full-width {
+            margin-left: 0;
         }
         #graph {
             width: 100%;
@@ -231,33 +246,34 @@
         .data-link a:hover {
             text-shadow: 0 0 5px #00FFFF;
         }
-        @media (max-width: 1024px) {
-            .right-controls {
-                flex-direction: column;
-                width: 100%;
-            }
-            .button-container {
-                max-width: none;
-            }
-        }
         @media (max-width: 768px) {
-            .control-bar {
-                padding: 1vh 2vw;
-                flex-direction: column;
-                align-items: stretch;
+            .sidebar {
+                width: 250px;
+                transform: translateX(-100%);
             }
-            .left-controls, .right-controls {
-                width: 100%;
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+            .graph-container {
+                margin-left: 0;
+            }
+            .graph-container.full-width {
+                margin-left: 0;
             }
             .button-label {
-                width: 100px;
+                width: 80px;
+                font-size: 12px;
             }
             .dropdown-menu {
-                width: calc(100% - 120px);
-                left: 110px;
+                width: calc(100% - 90px);
+                left: 90px;
             }
             select, .dropdown-toggle, button {
-                width: calc(100% - 110px);
+                font-size: 10px;
+                padding: 4px 8px;
             }
             .stats-panel {
                 width: 80%;
@@ -269,12 +285,8 @@
             h1 {
                 font-size: calc(14px + 2vw);
             }
-            .button-label {
-                font-size: 12px;
-            }
-            .dropdown-toggle, button, select {
-                font-size: 10px;
-                padding: 4px 8px;
+            .sidebar {
+                width: 200px;
             }
         }
     </style>
@@ -283,8 +295,9 @@
 </head>
 <body>
     <h1>Comparative Biospheromics</h1>
-    <div class="control-bar">
-        <div class="left-controls">
+    <div class="container">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <div class="sidebar" id="sidebar">
             <div class="button-container">
                 <span class="button-label">Biome:</span>
                 <div class="dropdown-toggle" id="biome-toggle">Select Biomes</div>
@@ -306,8 +319,6 @@
                 <button id="ecotron-toggle">Show All</button>
                 <div class="dropdown-menu" id="ecotron-full-list"></div>
             </div>
-        </div>
-        <div class="right-controls">
             <div class="button-container">
                 <span class="button-label">Independent:</span>
                 <select id="independent-selector">
@@ -356,11 +367,11 @@
                 </select>
             </div>
         </div>
-    </div>
-    <div class="graph-container">
-        <div id="graph"></div>
-        <button class="stats-toggle" id="stats-toggle">Stats</button>
-        <div class="stats-panel" id="stats-panel"></div>
+        <div class="graph-container" id="graph-container">
+            <div id="graph"></div>
+            <button class="stats-toggle" id="stats-toggle">Stats</button>
+            <div class="stats-panel" id="stats-panel"></div>
+        </div>
     </div>
     <div class="data-link">
         <a href="https://raw.githubusercontent.com/aime2solve/200earths/refs/heads/main/200earths.csv" target="_blank">View Data (200earths.csv)</a>
@@ -494,6 +505,15 @@
         function toggleEcotronList() {
             const fullList = document.getElementById('ecotron-full-list');
             fullList.style.display = fullList.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const graphContainer = document.getElementById('graph-container');
+            sidebar.classList.toggle('open');
+            sidebar.classList.toggle('collapsed');
+            graphContainer.classList.toggle('full-width');
+            Plotly.Plots.resize(document.getElementById('graph'));
         }
 
         function updateViewOptions() {
@@ -736,10 +756,14 @@
         document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
         document.getElementById('dome-type-toggle').addEventListener('click', () => toggleDropdown('dome-type-menu'));
         document.getElementById('ecotron-toggle').addEventListener('click', toggleEcotronList);
-        document.getElementById('stats-toggle').addEventListener('click', toggleStatsPanel);
+        document.getElementById('stats-toggle').addEventListener('click', () => {
+            document.getElementById('stats-panel').classList.toggle('open');
+            document.getElementById('stats-toggle').textContent = document.getElementById('stats-panel').classList.contains('open') ? 'Hide' : 'Stats';
+        });
         document.getElementById('independent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('dependent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('view-selector').addEventListener('change', updateGraph);
+        document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
 
         window.addEventListener('resize', () => {
             Plotly.Plots.resize(document.getElementById('graph'));
