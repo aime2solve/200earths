@@ -292,7 +292,10 @@
         function linearRegression(x, y) {
             console.log('Running linear regression with x:', x, 'y:', y);
             const n = x.length;
-            if (n < 2) return { slope: NaN, intercept: NaN, r2: NaN }; // Need 2+ points
+            if (n < 2) {
+                console.warn('Not enough points for regression:', n);
+                return { slope: NaN, intercept: NaN, r2: NaN };
+            }
             const sumX = x.reduce((a, b) => a + b, 0);
             const sumY = y.reduce((a, b) => a + b, 0);
             const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
@@ -340,12 +343,12 @@
                             marker: {size: 12, color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
                         });
 
-                        if (x.length >= 2 && x.length === y.length) { // Ensure valid data
+                        if (x.length >= 2 && x.length === y.length) {
                             const { slope, intercept, r2 } = linearRegression(x, y);
-                            if (!isNaN(slope) && !isNaN(intercept)) {
+                            if (!isNaN(slope) && !isNaN(intercept) && !isNaN(r2)) {
                                 const xRange = [Math.min(...x), Math.max(...x)];
                                 const yFit = xRange.map(xi => slope * xi + intercept);
-                                console.log(`Fit for ${ecotron}: xRange:`, xRange, 'yFit:', yFit);
+                                console.log(`Adding trendline for ${ecotron}: xRange:`, xRange, 'yFit:', yFit);
                                 traces.push({
                                     x: xRange,
                                     y: yFit,
@@ -354,11 +357,13 @@
                                     line: {color: '#FF00FF', width: 2}
                                 });
                             } else {
-                                console.warn(`Regression failed for ${ecotron}: slope or intercept is NaN`);
+                                console.warn(`Regression invalid for ${ecotron}:`, {slope, intercept, r2});
                             }
                         } else {
-                            console.warn(`Not enough points for regression for ${ecotron}: ${x.length} points`);
+                            console.warn(`Skipping regression for ${ecotron}: ${x.length} points, need 2+`);
                         }
+                    } else {
+                        console.warn(`No valid data for ${ecotron}: X length=${x.length}, Y length=${y.length}`);
                     }
                 });
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
@@ -446,8 +451,9 @@
                 return;
             }
 
-            console.log('Traces:', traces);
+            console.log('Final Traces:', traces);
             if (traces.length === 0) {
+                console.error('No traces to plot');
                 Plotly.newPlot('graph', [], layoutConfig('No valid data to plot'));
                 return;
             }
