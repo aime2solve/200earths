@@ -16,16 +16,22 @@
             display: flex;
             flex-direction: column;
         }
-        h1 {
-            color: #00FFFF;
-            text-align: center;
-            text-shadow: 0 0 10px #00FFFF;
-            padding: 1vh;
-            font-family: 'Orbitron', sans-serif;
-            font-size: calc(16px + 2vw);
-            margin: 0;
-            flex-shrink: 0;
-        }
+       h1 {
+    color: #00FFFF;
+    text-align: center;
+    text-shadow: 0 0 15px #00FFFF, 0 0 30px #00FFFF, 0 0 45px #FF00FF;
+    padding: 1vh;
+    font-family: 'Orbitron', sans-serif;
+    font-size: calc(18px + 2vw);
+    margin: 0;
+    flex-shrink: 0;
+    letter-spacing: 2px;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+@keyframes glow {
+    from { text-shadow: 0 0 10px #00FFFF, 0 0 20px #00FFFF, 0 0 30px #FF00FF; }
+    to { text-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF, 0 0 60px #FF00FF; }
+}
         .container {
             display: flex;
             flex-grow: 1;
