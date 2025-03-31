@@ -290,14 +290,18 @@
         }
 
         function linearRegression(x, y) {
+            console.log('Running linear regression with x:', x, 'y:', y);
             const n = x.length;
+            if (n < 2) return { slope: NaN, intercept: NaN, r2: NaN }; // Need 2+ points
             const sumX = x.reduce((a, b) => a + b, 0);
             const sumY = y.reduce((a, b) => a + b, 0);
             const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
             const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+            const sumYY = y.map(yi => yi * yi).reduce((a, b) => a + b, 0);
             const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
             const intercept = (sumY - slope * sumX) / n;
-            const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * y.reduce((a, b) => a + b * b, 0) - sumY * sumY)), 2);
+            const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
+            console.log('Regression result:', {slope, intercept, r2});
             return { slope, intercept, r2 };
         }
 
@@ -336,17 +340,24 @@
                             marker: {size: 12, color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
                         });
 
-                        if (x.length >= 2) { // Need at least 2 points for regression
+                        if (x.length >= 2 && x.length === y.length) { // Ensure valid data
                             const { slope, intercept, r2 } = linearRegression(x, y);
-                            const xRange = [Math.min(...x), Math.max(...x)];
-                            const yFit = xRange.map(xi => slope * xi + intercept);
-                            traces.push({
-                                x: xRange,
-                                y: yFit,
-                                mode: 'lines',
-                                name: `${ecotron} Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}, R² = ${r2.toFixed(3)}`,
-                                line: {color: '#FF00FF', width: 2}
-                            });
+                            if (!isNaN(slope) && !isNaN(intercept)) {
+                                const xRange = [Math.min(...x), Math.max(...x)];
+                                const yFit = xRange.map(xi => slope * xi + intercept);
+                                console.log(`Fit for ${ecotron}: xRange:`, xRange, 'yFit:', yFit);
+                                traces.push({
+                                    x: xRange,
+                                    y: yFit,
+                                    mode: 'lines',
+                                    name: `${ecotron} Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}, R² = ${r2.toFixed(3)}`,
+                                    line: {color: '#FF00FF', width: 2}
+                                });
+                            } else {
+                                console.warn(`Regression failed for ${ecotron}: slope or intercept is NaN`);
+                            }
+                        } else {
+                            console.warn(`Not enough points for regression for ${ecotron}: ${x.length} points`);
                         }
                     }
                 });
