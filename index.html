@@ -521,42 +521,55 @@
         }
 
         function toggleDropdown(id) {
+            const velocity = 500; // Pixels per second for consistent slow speed
             const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
             allMenus.forEach(menuId => {
                 const menu = document.getElementById(menuId);
                 if (menuId !== id && menu.classList.contains('open')) {
-                    menu.style.height = menu.scrollHeight + 'px'; // Set to current height
+                    const height = menu.scrollHeight;
+                    const duration = height / velocity * 1000; // Convert to milliseconds
+                    menu.style.transition = `height ${duration}ms ease`;
+                    menu.style.height = height + 'px'; // Set to current height
                     setTimeout(() => {
                         menu.style.height = '0'; // Slide up
                         setTimeout(() => {
                             menu.classList.remove('open');
                             menu.style.display = 'none'; // Hide after animation
                             menu.style.height = ''; // Reset height
-                        }, 300); // Match transition duration
+                            menu.style.transition = ''; // Reset transition
+                        }, duration); // Match dynamic duration
                     }, 10); // Small delay to ensure height is set
                 }
             });
 
             const menu = document.getElementById(id);
             if (menu.classList.contains('open')) {
-                menu.style.height = menu.scrollHeight + 'px'; // Set to current height
+                const height = menu.scrollHeight;
+                const duration = height / velocity * 1000; // Convert to milliseconds
+                menu.style.transition = `height ${duration}ms ease`;
+                menu.style.height = height + 'px'; // Set to current height
                 setTimeout(() => {
                     menu.style.height = '0'; // Slide up
                     setTimeout(() => {
                         menu.classList.remove('open');
                         menu.style.display = 'none'; // Hide after animation
                         menu.style.height = ''; // Reset height
-                    }, 300); // Match transition duration
+                        menu.style.transition = ''; // Reset transition
+                    }, duration); // Match dynamic duration
                 }, 10); // Small delay to ensure height is set
             } else {
                 menu.style.display = 'block'; // Show immediately
+                const height = menu.scrollHeight;
+                const duration = height / velocity * 1000; // Convert to milliseconds
+                menu.style.transition = `height ${duration}ms ease`;
                 menu.style.height = '0'; // Start at 0 height
                 menu.classList.add('open');
                 setTimeout(() => {
-                    menu.style.height = menu.scrollHeight + 'px'; // Slide down to full height
+                    menu.style.height = height + 'px'; // Slide down to full height
                     setTimeout(() => {
-                        menu.style.height = 'auto'; // Set to auto after animation for responsiveness
-                    }, 300); // Match transition duration
+                        menu.style.height = 'auto'; // Set to auto after animation
+                        menu.style.transition = ''; // Reset transition
+                    }, duration); // Match dynamic duration
                 }, 10); // Small delay to ensure display is set
             }
 
@@ -866,7 +879,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             const dropdownMenus = document.querySelectorAll('.dropdown-menu');
             dropdownMenus.forEach(menu => {
-                menu.style.transition = 'height 0.3s ease';
                 menu.style.overflow = 'hidden'; // Ensure content doesn't spill during animation
             });
         });
