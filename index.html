@@ -22,7 +22,7 @@
             text-align: center;
             text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
             padding: 1vh;
-            font-family: 'Orbitron', sans-serif; /* Closest to 'Centauri' */
+            font-family: 'Orbitron', sans-serif;
             font-size: calc(18px + 2vw);
             margin: 0;
             flex-shrink: 0;
@@ -95,14 +95,14 @@
         }
         .stats-container {
             display: flex;
-            align-items: center;
+            flex-direction: column; /* Stack button and panel vertically */
             width: 100%;
             position: relative;
         }
-        .data-link {
+        .stats-header {
+            display: flex;
+            align-items: center;
             width: 100%;
-            text-align: center;
-            padding: 10px 0;
         }
         .button-label {
             color: #FFFF00;
@@ -123,7 +123,7 @@
             padding: 6px 12px;
             box-shadow: 0 0 8px #00FFFF;
             cursor: pointer;
-            width: calc(100% - 120px); /* Consistent width */
+            width: calc(100% - 120px);
         }
         .dropdown-toggle:hover, #stats-toggle:hover, .csv-button:hover {
             box-shadow: 0 0 12px #00FFFF;
@@ -180,11 +180,11 @@
             background: #1A1A1A;
         }
         option.inactive {
-            color: #006666; /* Darker cyan */
-            pointer-events: none; /* Unclickable */
+            color: #006666;
+            pointer-events: none;
         }
         .stats-panel {
-            width: calc(100% - 120px); /* Matches buttons */
+            width: calc(100% - 120px);
             max-height: 0;
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
@@ -311,7 +311,7 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Ecotrons:</span>
-                <button id="ecotron-toggle">Show All</button>
+                <div class="dropdown-toggle" id="ecotron-toggle">Show All</div> <!-- Now styled like other buttons -->
                 <div class="dropdown-menu" id="ecotron-full-list"></div>
             </div>
             <div class="button-container">
@@ -362,11 +362,14 @@
                 </select>
             </div>
             <div class="stats-container">
-                <span class="button-label">STATS:</span>
-                <button id="stats-toggle">Show Stats</button>
+                <div class="stats-header">
+                    <span class="button-label">STATS:</span>
+                    <button id="stats-toggle">Show Stats</button>
+                </div>
                 <div class="stats-panel" id="stats-panel"></div>
             </div>
-            <div class="data-link">
+            <div class="button-container">
+                <span class="button-label">CSV:</span>
                 <button class="csv-button" onclick="window.open('https://raw.githubusercontent.com/aime2solve/200earths/main/200earths.csv', '_blank')">View CSV</button>
             </div>
         </div>
@@ -406,7 +409,7 @@
             title: 'Loading 200earths.csv...',
             plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', family: 'Exo 2', sans-serif', size: 14 },
+            font: { color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14 },
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
@@ -506,7 +509,7 @@
             console.log('Biomes:', biomes);
             console.log('Ecotrons:', ecotrons);
             syncEcotrons();
-            updateViewOptions(); // Initial call
+            updateViewOptions();
         }
 
         function toggleDropdown(id) {
@@ -600,10 +603,10 @@
             return {
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', family: 'Exo 2', sans-serif', size: 14 },
+                font: { color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14 },
                 title: {
                     text: title,
-                    font: { size: 24, color: '#00FFFF', family: 'VT323', monospace' },
+                    font: { size: 24, color: '#00FFFF', family: 'VT323, monospace' },
                     x: 0.5,
                     xanchor: 'center',
                     y: 0.95,
@@ -611,7 +614,7 @@
                 },
                 xaxis: { gridcolor: '#333333', automargin: true },
                 yaxis: { gridcolor: '#333333', automargin: true },
-                showlegend: false, // No legend
+                showlegend: false,
                 margin: { l: 50, r: 50, t: 80, b: 50 },
                 autosize: true
             };
