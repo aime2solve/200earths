@@ -180,7 +180,9 @@
             padding: 0;
             overflow: hidden;
             transition: max-height 0.3s, padding 0.1s;
-            margin-left: 110px;
+            position: absolute; /* Anchor to container */
+            top: 100%; /* Below header */
+            right: 0; /* Right edge aligns with buttons */
             margin-top: 5px;
         }
         .stats-panel.open {
@@ -245,7 +247,7 @@
             }
             .stats-panel {
                 width: calc(100% - 90px);
-                margin-left: 90px;
+                right: 0; /* Maintain alignment */
             }
             .dropdown-toggle {
                 font-size: 10px;
