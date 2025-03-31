@@ -50,6 +50,19 @@
             transform: translateX(-100%);
         }
         .sidebar-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            padding: 5px 10px;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00FFFF;
+            z-index: 1100;
+        }
+        .mobile-toggle {
             display: none;
             position: fixed;
             top: 10px;
@@ -159,8 +172,26 @@
         button:hover {
             box-shadow: 0 0 12px #00FFFF;
         }
-        .dropdown-container {
-            position: relative;
+        .stats-container {
+            margin-top: 20px;
+        }
+        .stats-panel {
+            width: 100%;
+            max-height: 0;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            box-shadow: 0 0 8px #00FFFF;
+            color: #00FF00;
+            font-family: 'VT323', monospace;
+            font-size: 12px;
+            padding: 0;
+            overflow: hidden;
+            transition: max-height 0.3s, padding 0.1s;
+        }
+        .stats-panel.open {
+            max-height: 150px;
+            padding: 10px;
         }
         .graph-container {
             flex-grow: 1;
@@ -195,42 +226,6 @@
             pointer-events: none;
             z-index: 10;
         }
-        .stats-panel {
-            position: absolute;
-            top: calc(1vh + 24px + 2vw);
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            max-height: 0;
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            box-shadow: 0 0 8px #00FFFF;
-            color: #00FF00;
-            font-family: 'VT323', monospace;
-            font-size: 12px;
-            padding: 0;
-            overflow: hidden;
-            transition: max-height 0.3s, padding 0.1s;
-            z-index: 20;
-        }
-        .stats-panel.open {
-            max-height: 150px;
-            padding: 10px;
-        }
-        .stats-toggle {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            padding: 5px;
-            cursor: pointer;
-            box-shadow: 0 0 8px #00FFFF;
-            z-index: 30;
-        }
         .data-link {
             text-align: center;
             padding: 0.5vh;
@@ -254,13 +249,10 @@
             .sidebar.open {
                 transform: translateX(0);
             }
-            .sidebar-toggle {
+            .mobile-toggle {
                 display: block;
             }
             .graph-container {
-                margin-left: 0;
-            }
-            .graph-container.full-width {
                 margin-left: 0;
             }
             .button-label {
@@ -276,9 +268,7 @@
                 padding: 4px 8px;
             }
             .stats-panel {
-                width: 80%;
-                left: 10%;
-                transform: none;
+                width: 100%;
             }
         }
         @media (max-width: 480px) {
@@ -296,8 +286,9 @@
 <body>
     <h1>Comparative Biospheromics</h1>
     <div class="container">
-        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <button class="mobile-toggle" id="mobile-toggle">☰</button>
         <div class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebar-toggle">Collapse</button>
             <div class="button-container">
                 <span class="button-label">Biome:</span>
                 <div class="dropdown-toggle" id="biome-toggle">Select Biomes</div>
@@ -366,11 +357,14 @@
                     <option value="diversity_bar">Genetic Diversity Bar</option>
                 </select>
             </div>
+            <div class="button-container stats-container">
+                <span class="button-label">Stats:</span>
+                <button id="stats-toggle">Show Stats</button>
+                <div class="stats-panel" id="stats-panel"></div>
+            </div>
         </div>
         <div class="graph-container" id="graph-container">
             <div id="graph"></div>
-            <button class="stats-toggle" id="stats-toggle">Stats</button>
-            <div class="stats-panel" id="stats-panel"></div>
         </div>
     </div>
     <div class="data-link">
@@ -498,16 +492,26 @@
         }
 
         function toggleDropdown(id) {
+            const allMenus = ['biome-menu', 'dome-type-menu', 'ecotron-full-list'];
+            allMenus.forEach(menuId => {
+                if (menuId !== id) {
+                    document.getElementById(menuId).classList.remove('open');
+                }
+            });
             const menu = document.getElementById(id);
             menu.classList.toggle('open');
         }
 
-        function toggleEcotronList() {
-            const fullList = document.getElementById('ecotron-full-list');
-            fullList.style.display = fullList.style.display === 'block' ? 'none' : 'block';
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const graphContainer = document.getElementById('graph-container');
+            sidebar.classList.toggle('collapsed');
+            graphContainer.classList.toggle('full-width');
+            Plotly.Plots.resize(document.getElementById('graph'));
+            document.getElementById('sidebar-toggle').textContent = sidebar.classList.contains('collapsed') ? 'Expand' : 'Collapse';
         }
 
-        function toggleSidebar() {
+        function toggleMobileSidebar() {
             const sidebar = document.getElementById('sidebar');
             const graphContainer = document.getElementById('graph-container');
             sidebar.classList.toggle('open');
@@ -755,15 +759,17 @@
 
         document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
         document.getElementById('dome-type-toggle').addEventListener('click', () => toggleDropdown('dome-type-menu'));
-        document.getElementById('ecotron-toggle').addEventListener('click', toggleEcotronList);
+        document.getElementById('ecotron-toggle').addEventListener('click', () => toggleDropdown('ecotron-full-list'));
         document.getElementById('stats-toggle').addEventListener('click', () => {
-            document.getElementById('stats-panel').classList.toggle('open');
-            document.getElementById('stats-toggle').textContent = document.getElementById('stats-panel').classList.contains('open') ? 'Hide' : 'Stats';
+            const statsPanel = document.getElementById('stats-panel');
+            statsPanel.classList.toggle('open');
+            document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
         });
         document.getElementById('independent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('dependent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('view-selector').addEventListener('change', updateGraph);
         document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+        document.getElementById('mobile-toggle').addEventListener('click', toggleMobileSidebar);
 
         window.addEventListener('resize', () => {
             Plotly.Plots.resize(document.getElementById('graph'));
