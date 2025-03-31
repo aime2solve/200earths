@@ -44,6 +44,7 @@
             flex: 1;
             min-width: 120px;
             max-width: 20%;
+            position: relative;
         }
         .button-label {
             color: #FFFF00;
@@ -91,13 +92,12 @@
         }
         .dropdown-container {
             position: relative;
-            display: inline-block;
         }
         #ecotron-full-list {
             display: none;
             position: absolute;
-            top: 100%;
-            left: 0;
+            top: calc(100% + 5px); /* Prevents overlap */
+            left: 80px; /* Aligns under button */
             width: 200px;
             max-height: 300px;
             overflow-y: auto;
@@ -114,10 +114,12 @@
             background-color: #1A1A1A;
             overflow: hidden;
             min-height: 200px;
+            display: flex;
         }
         #graph {
             width: 100%;
             height: 100%;
+            flex-grow: 1;
         }
         #graph::before {
             content: '';
@@ -135,6 +137,33 @@
             );
             pointer-events: none;
             z-index: 10;
+        }
+        .stats-panel {
+            width: 250px;
+            background: #1A1A1A;
+            border-left: 2px solid #00FFFF;
+            color: #00FF00;
+            font-family: 'VT323', monospace;
+            font-size: 12px;
+            padding: 10px;
+            overflow-y: auto;
+            transition: width 0.3s;
+        }
+        .stats-panel.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .stats-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #1A1A1A;
+            border: 2px solid #00FFFF;
+            color: #00FFFF;
+            padding: 5px;
+            cursor: pointer;
+            z-index: 20;
         }
         .data-link {
             text-align: center;
@@ -169,6 +198,12 @@
             }
             select, button {
                 width: calc(100% - 110px);
+            }
+            .stats-panel {
+                width: 150px;
+            }
+            .stats-panel.collapsed {
+                width: 0;
             }
         }
     </style>
@@ -251,6 +286,8 @@
     </div>
     <div class="graph-container">
         <div id="graph"></div>
+        <button class="stats-toggle" id="stats-toggle">Stats</button>
+        <div class="stats-panel" id="stats-panel"></div>
     </div>
     <div class="data-link">
         <a href="https://raw.githubusercontent.com/aime2solve/200earths/refs/heads/main/200earths.csv" target="_blank">View Data (200earths.csv)</a>
@@ -336,7 +373,7 @@
                 const option = document.createElement('option');
                 option.value = ecotron;
                 option.text = ecotron;
-                option.selected = false; // Unselected by default
+                option.selected = false;
                 ecotronFullList.appendChild(option);
             });
 
@@ -347,6 +384,13 @@
         function toggleEcotronList() {
             const fullList = document.getElementById('ecotron-full-list');
             fullList.style.display = fullList.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleStatsPanel() {
+            const panel = document.getElementById('stats-panel');
+            panel.classList.toggle('collapsed');
+            const toggle = document.getElementById('stats-toggle');
+            toggle.textContent = panel.classList.contains('collapsed') ? 'Stats' : 'Hide';
         }
 
         function updateViewOptions() {
@@ -384,16 +428,7 @@
                 },
                 xaxis: {gridcolor: '#333333', automargin: true},
                 yaxis: {gridcolor: '#333333', automargin: true},
-                legend: {
-                    font: {color: '#00FF00', size: 12, family: 'VT323, monospace'},
-                    x: 0.01,
-                    y: 0.99,
-                    xanchor: 'left',
-                    yanchor: 'top',
-                    bgcolor: '#1A1A1A',
-                    bordercolor: '#00FFFF',
-                    borderwidth: 1
-                },
+                showlegend: false, // Legend moved to stats panel
                 margin: {l: 50, r: 50, t: 60, b: 50},
                 autosize: true
             };
@@ -433,7 +468,6 @@
             if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
             if (domeTypes.length > 0) filteredData = filteredData.filter(row => domeTypes.includes(row.Dome_Type));
             if (ecotronsFull.length > 0) filteredData = filteredData.filter(row => ecotronsFull.includes(row.Ecotron));
-            else filteredData = filteredData.filter(row => [...new Set(filteredData.map(r => r.Ecotron))].includes(row.Ecotron));
 
             console.log('Filtered Data (first 5 rows):', filteredData.slice(0, 5));
             let traces = [];
@@ -446,7 +480,6 @@
                     const domeType = ecotronData[0].Dome_Type;
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                     const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                    console.log(`Ecotron: ${ecotron}, X (${independent}):`, x, `Y (${dependent}):`, y);
                     if (x.length > 0 && y.length > 0) {
                         traces.push({
                             x: x,
@@ -455,22 +488,30 @@
                             name: `${ecotron}`,
                             marker: {size: 12, color: domeColors[domeType], line: {width: 2, color: '#FFFFFF'}}
                         });
-                        if (x.length >= 2) {
-                            const { slope, intercept, r2 } = linearRegression(x, y);
-                            if (!isNaN(slope) && !isNaN(intercept)) {
-                                const xRange = [Math.min(...x), Math.max(...x)];
-                                const yFit = xRange.map(xi => slope * xi + intercept);
-                                traces.push({
-                                    x: xRange,
-                                    y: yFit,
-                                    mode: 'lines',
-                                    name: `${ecotron} Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}, R² = ${r2.toFixed(3)}`,
-                                    line: {color: domeColors[domeType], width: 2}
-                                });
-                            }
-                        }
                     }
                 });
+
+                const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                console.log('Aggregate data for regression - X:', allX, 'Y:', allY);
+                let statsText = '';
+                if (allX.length >= 2 && allX.length === allY.length) {
+                    const { slope, intercept, r2 } = linearRegression(allX, allY);
+                    if (!isNaN(slope) && !isNaN(intercept)) {
+                        const xRange = [Math.min(...allX), Math.max(...allX)];
+                        const yFit = xRange.map(xi => slope * xi + intercept);
+                        traces.push({
+                            x: xRange,
+                            y: yFit,
+                            mode: 'lines',
+                            name: `Fit`,
+                            line: {color: '#FF00FF', width: 2}
+                        });
+                        statsText = `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>R² = ${r2.toFixed(3)}<br>Points: ${allX.length}`;
+                    }
+                }
+                document.getElementById('stats-panel').innerHTML = statsText;
+
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
                 layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
             } else if (view === 'bar') {
@@ -494,10 +535,12 @@
                 });
                 layout.xaxis.title = 'Ecotron';
                 layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
+                document.getElementById('stats-panel').innerHTML = '';
             } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
                 if (url) {
                     Plotly.newPlot('graph', [], layoutConfig(`Gene Flow data at: ${url}`));
+                    document.getElementById('stats-panel').innerHTML = '';
                     return;
                 }
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -519,10 +562,12 @@
                 });
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Gene Flow (%)';
+                document.getElementById('stats-panel').innerHTML = '';
             } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
                 if (url) {
                     Plotly.newPlot('graph', [], layoutConfig(`Mutation data at: ${url}`));
+                    document.getElementById('stats-panel').innerHTML = '';
                     return;
                 }
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -539,10 +584,12 @@
                 });
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Ecotron';
+                document.getElementById('stats-panel').innerHTML = '';
             } else if (view === 'diversity_bar' && dependent === 'Genetic_Diversity') {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
                 if (url) {
                     Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
+                    document.getElementById('stats-panel').innerHTML = '';
                     return;
                 }
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -564,8 +611,10 @@
                 });
                 layout.xaxis.title = 'Ecotron';
                 layout.yaxis.title = 'Genetic Diversity (index)';
+                document.getElementById('stats-panel').innerHTML = '';
             } else {
                 Plotly.newPlot('graph', [], layoutConfig('View not applicable'));
+                document.getElementById('stats-panel').innerHTML = '';
                 return;
             }
 
@@ -573,6 +622,7 @@
             if (traces.length === 0) {
                 console.error('No traces to plot');
                 Plotly.newPlot('graph', [], layoutConfig('No valid data to plot'));
+                document.getElementById('stats-panel').innerHTML = '';
                 return;
             }
             Plotly.newPlot('graph', traces, layout, {responsive: true})
@@ -581,6 +631,7 @@
         }
 
         document.getElementById('ecotron-toggle').addEventListener('click', toggleEcotronList);
+        document.getElementById('stats-toggle').addEventListener('click', toggleStatsPanel);
         document.getElementById('biome-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('dome-type-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('ecotron-full-list').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
