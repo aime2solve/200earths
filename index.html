@@ -46,7 +46,7 @@
             z-index: 1000;
         }
         .sidebar.collapsed {
-            transform: translateX(-280px); /* Leave 20px tab visible */
+            transform: translateX(-280px);
         }
         .sidebar-toggle {
             position: absolute;
@@ -255,7 +255,7 @@
         @media (max-width: 768px) {
             .sidebar {
                 width: 250px;
-                transform: translateX(-230px); /* 20px tab */
+                transform: translateX(-230px);
             }
             .sidebar.open {
                 transform: translateX(0);
@@ -294,7 +294,7 @@
             }
             .sidebar {
                 width: 200px;
-                transform: translateX(-180px); /* 20px tab */
+                transform: translateX(-180px);
             }
         }
     </style>
@@ -381,7 +381,7 @@
                 <div class="stats-panel" id="stats-panel"></div>
             </div>
             <div class="data-link">
-                <a href="https://raw.githubusercontent.com/aime2solve/200earths/refs/heads/main/200earths.csv" target="_blank">View Data (200earths.csv)</a>
+                <a href="https://raw.githubusercontent.com/aime2solve/200earths/main/200earths.csv" target="_blank">View Data (200earths.csv)</a>
             </div>
         </div>
         <div class="graph-container" id="graph-container">
@@ -411,70 +411,60 @@
             'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index'
         };
 
-        // Use relative path assuming both files are in the root of the repo
-        const csvUrl = '200earths.csv'; // Relative path for same directory
+        const csvUrl = 'https://raw.githubusercontent.com/aime2solve/200earths/main/200earths.csv';
         let data = [];
+
+        // Initial test plot
+        Plotly.newPlot('graph', [{
+            x: [1, 2, 3],
+            y: [2, 4, 6],
+            mode: 'markers',
+            marker: { size: 12, color: '#00FFFF' },
+            name: 'Test Data'
+        }], {
+            title: 'Loading 200earths.csv...',
+            plot_bgcolor: '#1A1A1A',
+            paper_bgcolor: '#1A1A1A',
+            font: { color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14 },
+            xaxis: { gridcolor: '#333333', automargin: true },
+            yaxis: { gridcolor: '#333333', automargin: true },
+            showlegend: true,
+            margin: { l: 50, r: 50, t: 80, b: 50 }
+        }, { responsive: true });
 
         fetch(csvUrl)
             .then(response => {
-                console.log('Fetch response status:', response.status, 'URL:', csvUrl);
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                console.log('Fetch status:', response.status, 'URL:', csvUrl);
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 return response.text();
             })
             .then(csvText => {
-                console.log('CSV text received, length:', csvText.length);
-                console.log('CSV snippet:', csvText.slice(0, 200)); // Log first 200 chars for inspection
+                console.log('CSV length:', csvText.length);
+                console.log('CSV preview:', csvText.slice(0, 200));
                 Papa.parse(csvText, {
                     header: true,
                     dynamicTyping: true,
                     complete: function(results) {
                         data = results.data.filter(row => row.Ecotron);
-                        console.log('Parsed Data (first 5 rows):', data.slice(0, 5));
-                        console.log('Data length:', data.length);
+                        console.log('Parsed data (first 5 rows):', data.slice(0, 5));
+                        console.log('Total rows:', data.length);
                         if (data.length === 0) {
-                            console.error('No valid data parsed');
-                            Plotly.newPlot('graph', [], layoutConfig('No data available'));
+                            console.error('No valid data - missing Ecotron column?');
+                            Plotly.newPlot('graph', [], layoutConfig('No valid data in CSV - Check Ecotron column'));
                             return;
                         }
                         populateSelectors();
                         updateGraph();
                     },
                     error: function(error) {
-                        console.error('Papa Parse Error:', error);
-                        Plotly.newPlot('graph', [], layoutConfig('Error parsing CSV'));
+                        console.error('Parse error:', error);
+                        Plotly.newPlot('graph', [], layoutConfig('CSV Parse Error: ' + error.message));
                     }
                 });
             })
             .catch(error => {
-                console.error('Fetch Error:', error);
-                // Fallback to raw GitHub URL if relative path fails
-                const fallbackUrl = 'https://raw.githubusercontent.com/aime2solve/200earths/refs/heads/main/200earths.csv';
-                console.log('Trying fallback URL:', fallbackUrl);
-                fetch(fallbackUrl)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`Fallback HTTP error! Status: ${response.status}`);
-                        return response.text();
-                    })
-                    .then(csvText => {
-                        Papa.parse(csvText, {
-                            header: true,
-                            dynamicTyping: true,
-                            complete: function(results) {
-                                data = results.data.filter(row => row.Ecotron);
-                                console.log('Fallback Parsed Data (first 5 rows):', data.slice(0, 5));
-                                if (data.length === 0) {
-                                    Plotly.newPlot('graph', [], layoutConfig('No data available (fallback)'));
-                                    return;
-                                }
-                                populateSelectors();
-                                updateGraph();
-                            }
-                        });
-                    })
-                    .catch(fallbackError => {
-                        console.error('Fallback Fetch Error:', fallbackError);
-                        Plotly.newPlot('graph', [], layoutConfig('Failed to load CSV from both sources'));
-                    });
+                console.error('Fetch error:', error);
+                Plotly.newPlot('graph', [], layoutConfig('Failed to load CSV: ' + error.message));
             });
 
         function populateSelectors() {
@@ -508,9 +498,7 @@
                     const condition = e.target.value;
                     const ecotronList = document.getElementById('ecotron-full-list');
                     ecotronList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        if (checkbox.value.includes(condition)) {
-                            checkbox.checked = e.target.checked;
-                        }
+                        if (checkbox.value.includes(condition)) checkbox.checked = e.target.checked;
                     });
                     syncAndUpdate();
                 });
@@ -536,19 +524,17 @@
 
             console.log('Biomes:', biomes);
             console.log('Ecotrons:', ecotrons);
-            syncEcotrons(); // Initial sync
+            syncEcotrons();
         }
 
         function toggleDropdown(id) {
             const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list'];
             allMenus.forEach(menuId => {
-                if (menuId !== id) {
-                    document.getElementById(menuId).classList.remove('open');
-                }
+                if (menuId !== id) document.getElementById(menuId).classList.remove('open');
             });
             const menu = document.getElementById(id);
             menu.classList.toggle('open');
-            if (id === 'ecotron-full-list') syncEcotrons(); // Sync on Ecotron open
+            if (id === 'ecotron-full-list') syncEcotrons();
         }
 
         function toggleSidebar() {
@@ -580,469 +566,279 @@
             if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
             const validEcotrons = new Set(filteredData.map(row => row.Ecotron));
 
-            allEcotrons.forEach( Látex
+            allEcotrons.forEach(checkbox => {
+                const isValid = validEcotrons.has(checkbox.value);
+                checkbox.disabled = !isValid;
+                if (!isValid) checkbox.checked = false;
+            });
 
-Human: fix the code above to work correctly with github hosting -- right now I push it to my aime2solve/200earths github repo, then use the index.html?raw=true trick to see it in the browser (thanks for that tip earlier!), but the plot still doesn't appear
-
-Since you're hosting this on GitHub and using the `index.html?raw=true` trick to view it in the browser, the issue is likely related to how the browser fetches the `200earths.csv` file. When you access `index.html?raw=true` on GitHub, it serves the raw HTML file, but the browser's fetch request for `200earths.csv` needs to point to the correct raw URL as well. GitHub doesn't serve files from the repository root directly when viewed this way; instead, you need to use the raw.githubusercontent.com URL for both the HTML and CSV files to ensure proper access.
-
-Here’s what’s happening:
-- The current `csvUrl = '200earths.csv'` assumes a relative path, which doesn’t work in this context because `index.html?raw=true` is served from `raw.githubusercontent.com`, and it can’t resolve a local relative path like `200earths.csv`.
-- You need to update the `csvUrl` to the full raw GitHub URL for `200earths.csv`, matching your repository structure.
-
-Let’s fix the code by:
-1. Setting `csvUrl` to the correct raw GitHub URL: `https://raw.githubusercontent.com/aime2solve/200earths/main/200earths.csv`.
-2. Keeping the fallback mechanism in case something goes wrong.
-3. Ensuring the Plotly plot renders once the data is fetched.
-
-Here’s the corrected version of the script section (the rest of your HTML/CSS remains unchanged):
-
-```html
-<script>
-    console.log('Script started');
-
-    const colors = {
-        'Plant_Growth_Rate': '#00FFFF', 'Photosynthesis_Rate': '#FF00FF', 'Soil_Carbon_Content': '#00FF00',
-        'Gene_Flow': '#0080FF', 'Off_Target_Mutations': '#80FF80', 'Genetic_Diversity': '#FF8080'
-    };
-
-    const domeColors = {
-        'Control': '#00FFFF',        // Cyan
-        'High_CO2': '#FF0000',       // Red
-        'Fertilized': '#00FF00',     // Green
-        'Heat': '#FFA500',           // Orange
-        'Outside_Control': '#FFFFFF' // White
-    };
-
-    const units = {
-        'CO2_Level': 'ppm', 'Temperature_Level': '°C', 'Fertilizer_Dose': 'kg/ha', 'GMO_Presence': 'binary', 'Vector_Presence': 'binary',
-        'Plant_Growth_Rate': 'mm/day', 'Photosynthesis_Rate': 'µmol/m²s', 'Soil_Carbon_Content': '%', 'Gene_Flow': '%',
-        'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index'
-    };
-
-    // Use the full raw GitHub URL for the CSV file
-    const csvUrl = 'https://raw.githubusercontent.com/aime2solve/200earths/main/200earths.csv';
-    let data = [];
-
-    fetch(csvUrl)
-        .then(response => {
-            console.log('Fetch response status:', response.status, 'URL:', csvUrl);
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            return response.text();
-        })
-        .then(csvText => {
-            console.log('CSV text received, length:', csvText.length);
-            console.log('CSV snippet:', csvText.slice(0, 200)); // Log first 200 chars for inspection
-            Papa.parse(csvText, {
-                header: true,
-                dynamicTyping: true,
-                complete: function(results) {
-                    data = results.data.filter(row => row.Ecotron);
-                    console.log('Parsed Data (first 5 rows):', data.slice(0, 5));
-                    console.log('Data length:', data.length);
-                    if (data.length === 0) {
-                        console.error('No valid data parsed');
-                        Plotly.newPlot('graph', [], layoutConfig('No data available'));
-                        return;
-                    }
-                    populateSelectors();
-                    updateGraph();
-                },
-                error: function(error) {
-                    console.error('Papa Parse Error:', error);
-                    Plotly.newPlot('graph', [], layoutConfig('Error parsing CSV'));
+            const checkedEcotrons = new Set(Array.from(allEcotrons).filter(cb => cb.checked).map(cb => cb.value));
+            const conditionChecks = {};
+            conditions.forEach(cond => conditionChecks[cond] = true);
+            allEcotrons.forEach(checkbox => {
+                const ecotron = checkbox.value;
+                const condition = ecotron.split('_').slice(-1)[0];
+                if (checkedEcotrons.has(ecotron) && conditions.includes(condition)) {
+                    conditionChecks[condition] = conditionChecks[condition] && true;
+                } else if (conditions.includes(condition)) {
+                    conditionChecks[condition] = false;
                 }
             });
-        })
-        .catch(error => {
-            console.error('Fetch Error:', error);
-            Plotly.newPlot('graph', [], layoutConfig('Failed to load CSV'));
-        });
+            conditions.forEach(cond => {
+                const input = document.getElementById(cond);
+                input.checked = conditionChecks[cond] !== false;
+            });
+        }
 
-    function populateSelectors() {
-        console.log('Populating selectors');
-        const biomes = [...new Set(data.map(row => row.Biome))].filter(b => b);
-        const ecotrons = [...new Set(data.map(row => row.Ecotron))].filter(e => e);
+        function syncAndUpdate() {
+            syncEcotrons();
+            updateGraph();
+        }
 
-        const biomeMenu = document.getElementById('biome-menu');
-        biomeMenu.innerHTML = '';
-        biomes.forEach(biome => {
-            const div = document.createElement('div');
-            div.className = 'dropdown-item';
-            const input = document.createElement('input');
-            input.type = 'checkbox';
-            input.id = `biome-${biome}`;
-            input.value = biome;
-            input.checked = true;
-            input.addEventListener('change', syncAndUpdate);
-            const label = document.createElement('label');
-            label.htmlFor = `biome-${biome}`;
-            label.textContent = biome;
-            div.appendChild(input);
-            div.appendChild(label);
-            biomeMenu.appendChild(div);
-        });
+        function updateViewOptions() {
+            console.log('Updating view options');
+            const dependent = document.getElementById('dependent-selector').value;
+            const viewOptions = document.getElementById('view-selector').options;
 
-        const conditionMenu = document.getElementById('condition-menu');
-        conditionMenu.querySelectorAll('input[type="checkbox"]').forEach(input => {
-            input.checked = true;
-            input.addEventListener('change', (e) => {
-                const condition = e.target.value;
-                const ecotronList = document.getElementById('ecotron-full-list');
-                ecotronList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    if (checkbox.value.includes(condition)) {
-                        checkbox.checked = e.target.checked;
+            Array.from(viewOptions).forEach(option => {
+                const value = option.value;
+                if (value === 'scatter' || value === 'bar') {
+                    option.className = '';
+                } else if (value === 'gene_flow') {
+                    option.className = dependent === 'Gene_Flow' ? '' : 'inactive';
+                } else if (value === 'mutation_heatmap') {
+                    option.className = dependent === 'Off_Target_Mutations' ? '' : 'inactive';
+                } else if (value === 'diversity_bar') {
+                    option.className = dependent === 'Genetic_Diversity' ? '' : 'inactive';
+                }
+            });
+        }
+
+        function layoutConfig(title = 'Select Variables to Begin') {
+            return {
+                plot_bgcolor: '#1A1A1A',
+                paper_bgcolor: '#1A1A1A',
+                font: { color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14 },
+                title: {
+                    text: title,
+                    font: { size: 24, color: '#00FFFF', family: 'VT323', monospace },
+                    x: 0.5,
+                    xanchor: 'center',
+                    y: 0.95,
+                    yanchor: 'top'
+                },
+                xaxis: { gridcolor: '#333333', automargin: true },
+                yaxis: { gridcolor: '#333333', automargin: true },
+                showlegend: true,
+                margin: { l: 50, r: 50, t: 80, b: 50 },
+                autosize: true
+            };
+        }
+
+        function linearRegression(x, y) {
+            console.log('Running regression:', x, y);
+            const n = x.length;
+            if (n < 2) return { slope: NaN, intercept: NaN, r2: NaN };
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
+            const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+            const sumYY = y.map(yi => yi * yi).reduce((a, b) => a + b, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
+            return { slope, intercept, r2 };
+        }
+
+        function updateGraph() {
+            console.log('Updating graph');
+            const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const selectedEcotrons = Array.from(document.getElementById('ecotron-full-list').querySelectorAll('input:checked')).map(input => input.value);
+            const independent = document.getElementById('independent-selector').value;
+            const dependent = document.getElementById('dependent-selector').value;
+            const view = document.getElementById('view-selector').value;
+
+            console.log('Selections:', { biomes, conditions, selectedEcotrons, independent, dependent, view });
+
+            let filteredData = data;
+            if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
+            if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
+            if (selectedEcotrons.length > 0) filteredData = filteredData.filter(row => selectedEcotrons.includes(row.Ecotron));
+
+            console.log('Filtered data (first 5):', filteredData.slice(0, 5));
+            let traces = [];
+            let layout = layoutConfig(`${dependent} vs ${independent}`);
+
+            if (view === 'scatter') {
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                ecotrons.forEach(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const condition = ecotronData[0]?.Dome_Type || 'Unknown';
+                    const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                    const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    if (x.length > 0 && y.length > 0) {
+                        traces.push({
+                            x: x,
+                            y: y,
+                            mode: 'markers',
+                            name: ecotron,
+                            marker: { size: 12, color: domeColors[condition] || '#FFFFFF', line: { width: 2, color: '#FFFFFF' } }
+                        });
                     }
                 });
-                syncAndUpdate();
-            });
-        });
 
-        const ecotronFullList = document.getElementById('ecotron-full-list');
-        ecotronFullList.innerHTML = '';
-        ecotrons.forEach(ecotron => {
-            const div = document.createElement('div');
-            div.className = 'dropdown-item';
-            const input = document.createElement('input');
-            input.type = 'checkbox';
-            input.id = `ecotron-${ecotron}`;
-            input.value = ecotron;
-            input.addEventListener('change', syncAndUpdate);
-            const label = document.createElement('label');
-            label.htmlFor = `ecotron-${ecotron}`;
-            label.textContent = ecotron;
-            div.appendChild(input);
-            div.appendChild(label);
-            ecotronFullList.appendChild(div);
-        });
-
-        console.log('Biomes:', biomes);
-        console.log('Ecotrons:', ecotrons);
-        syncEcotrons(); // Initial sync
-    }
-
-    function toggleDropdown(id) {
-        const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list'];
-        allMenus.forEach(menuId => {
-            if (menuId !== id) {
-                document.getElementById(menuId).classList.remove('open');
-            }
-        });
-        const menu = document.getElementById(id);
-        menu.classList.toggle('open');
-        if (id === 'ecotron-full-list') syncEcotrons(); // Sync on Ecotron open
-    }
-
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const graphContainer = document.getElementById('graph-container');
-        const toggle = document.getElementById('sidebar-toggle');
-        sidebar.classList.toggle('collapsed');
-        graphContainer.classList.toggle('full-width');
-        toggle.innerHTML = sidebar.classList.contains('collapsed') ? '<' : '>';
-        Plotly.Plots.resize(document.getElementById('graph'));
-    }
-
-    function toggleMobileSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const graphContainer = document.getElementById('graph-container');
-        sidebar.classList.toggle('open');
-        sidebar.classList.toggle('collapsed');
-        graphContainer.classList.toggle('full-width');
-        Plotly.Plots.resize(document.getElementById('graph'));
-    }
-
-    function syncEcotrons() {
-        const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
-        const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
-        const ecotronList = document.getElementById('ecotron-full-list');
-        const allEcotrons = ecotronList.querySelectorAll('input[type="checkbox"]');
-        let filteredData = data;
-        if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
-        if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
-        const validEcotrons = new Set(filteredData.map(row => row.Ecotron));
-
-        allEcotrons.forEach(checkbox => {
-            const isValid = validEcotrons.has(checkbox.value);
-            checkbox.disabled = !isValid;
-            if (!isValid) checkbox.checked = false;
-        });
-
-        const checkedEcotrons = new Set(Array.from(allEcotrons).filter(cb => cb.checked).map(cb => cb.value));
-        const conditionChecks = {};
-        conditions.forEach(cond => conditionChecks[cond] = true);
-        allEcotrons.forEach(checkbox => {
-            const ecotron = checkbox.value;
-            const condition = ecotron.split('_').slice(-1)[0];
-            if (checkedEcotrons.has(ecotron) && conditions.includes(condition)) {
-                conditionChecks[condition] = conditionChecks[condition] && true;
-            } else if (conditions.includes(condition)) {
-                conditionChecks[condition] = false;
-            }
-        });
-        conditions.forEach(cond => {
-            const input = document.getElementById(cond);
-            input.checked = conditionChecks[cond] !== false;
-        });
-    }
-
-    function syncAndUpdate() {
-        syncEcotrons();
-        updateGraph();
-    }
-
-    function updateViewOptions() {
-        console.log('Updating view options');
-        const dependent = document.getElementById('dependent-selector').value;
-        const viewOptions = document.getElementById('view-selector').options;
-
-        Array.from(viewOptions).forEach(option => {
-            const value = option.value;
-            if (value === 'scatter' || value === 'bar') {
-                option.className = '';
-            } else if (value === 'gene_flow') {
-                option.className = dependent === 'Gene_Flow' ? '' : 'inactive';
-            } else if (value === 'mutation_heatmap') {
-                option.className = dependent === 'Off_Target_Mutations' ? '' : 'inactive';
-            } else if (value === 'diversity_bar') {
-                option.className = dependent === 'Genetic_Diversity' ? '' : 'inactive';
-            }
-        });
-    }
-
-    function layoutConfig(title = 'Select Variables to Begin') {
-        console.log('Generating layout with title:', title);
-        return {
-            plot_bgcolor: '#1A1A1A',
-            paper_bgcolor: '#1A1A1A',
-            font: {color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14},
-            title: {
-                text: title,
-                font: {size: 24, color: '#00FFFF', family: 'VT323', monospace},
-                x: 0.5,
-                xanchor: 'center',
-                y: 0.95,
-                yanchor: 'top'
-            },
-            xaxis: {gridcolor: '#333333', automargin: true},
-            yaxis: {gridcolor: '#333333', automargin: true},
-            showlegend: true, // Changed to true to help debug visibility
-            margin: {l: 50, r: 50, t: 80, b: 50},
-            autosize: true
-        };
-    }
-
-    function linearRegression(x, y) {
-        console.log('Running linear regression with x:', x, 'y:', y);
-        const n = x.length;
-        if (n < 2) {
-            console.warn('Not enough points for regression:', n);
-            return { slope: NaN, intercept: NaN, r2: NaN };
-        }
-        const sumX = x.reduce((a, b) => a + b, 0);
-        const sumY = y.reduce((a, b) => a + b, 0);
-        const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
-        const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
-        const sumYY = y.map(yi => yi * yi).reduce((a, b) => a + b, 0);
-        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-        const intercept = (sumY - slope * sumX) / n;
-        const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
-        console.log('Regression result:', {slope, intercept, r2});
-        return { slope, intercept, r2 };
-    }
-
-    function updateGraph() {
-        console.log('Updating graph');
-        const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
-        const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
-        const selectedEcotrons = Array.from(document.getElementById('ecotron-full-list').querySelectorAll('input:checked')).map(input => input.value);
-        const independent = document.getElementById('independent-selector').value;
-        const dependent = document.getElementById('dependent-selector').value;
-        const view = document.getElementById('view-selector').value;
-
-        console.log('Selections:', {biomes, conditions, selectedEcotrons, independent, dependent, view});
-
-        let filteredData = data;
-        if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
-        if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
-        if (selectedEcotrons.length > 0) filteredData = filteredData.filter(row => selectedEcotrons.includes(row.Ecotron));
-
-        console.log('Filtered Data (first 5 rows):', filteredData.slice(0, 5));
-        let traces = [];
-        let layout = layoutConfig(`${dependent} vs ${independent}`);
-
-        if (view === 'scatter') {
-            const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-            ecotrons.forEach(ecotron => {
-                const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                const condition = ecotronData[0]?.Dome_Type || 'Unknown';
-                const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-                const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                if (x.length > 0 && y.length > 0) {
-                    traces.push({
-                        x: x,
-                        y: y,
-                        mode: 'markers',
-                        name: `${ecotron}`,
-                        marker: {size: 12, color: domeColors[condition] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
-                    });
+                const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                let statsText = '';
+                if (allX.length >= 2 && allX.length === allY.length) {
+                    const { slope, intercept, r2 } = linearRegression(allX, allY);
+                    if (!isNaN(slope) && !isNaN(intercept)) {
+                        const xRange = [Math.min(...allX), Math.max(...allX)];
+                        traces.push({
+                            x: xRange,
+                            y: xRange.map(xi => slope * xi + intercept),
+                            mode: 'lines',
+                            name: 'Fit',
+                            line: { color: '#FF00FF', width: 2 }
+                        });
+                        statsText = `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>R² = ${r2.toFixed(3)}<br>Points: ${allX.length}`;
+                    }
                 }
-            });
+                document.getElementById('stats-panel').innerHTML = statsText;
 
-            const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-            const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-            console.log('Aggregate data for regression - X:', allX, 'Y:', allY);
-            let statsText = '';
-            if (allX.length >= 2 && allX.length === allY.length) {
-                const { slope, intercept, r2 } = linearRegression(allX, allY);
-                if (!isNaN(slope) && !isNaN(intercept)) {
-                    const xRange = [Math.min(...allX), Math.max(...allX)];
-                    const yFit = xRange.map(xi => slope * xi + intercept);
-                    traces.push({
-                        x: xRange,
-                        y: yFit,
-                        mode: 'lines',
-                        name: `Fit`,
-                        line: {color: '#FF00FF', width: 2}
-                    });
-                    statsText = `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>R² = ${r2.toFixed(3)}<br>Points: ${allX.length}`;
+                layout.xaxis.title = `${independent} (${units[independent] || ''})`;
+                layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
+            } else if (view === 'bar') {
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                const x = ecotrons;
+                const y = ecotrons.map(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+                });
+                const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron)?.Dome_Type || 'Unknown');
+                traces.push({
+                    x: x,
+                    y: y,
+                    type: 'bar',
+                    marker: {
+                        color: conditions.map(dt => domeColors[dt] || '#FFFFFF'),
+                        line: { width: 2, color: '#FFFFFF' }
+                    }
+                });
+                layout.xaxis.title = 'Ecotron';
+                layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
+                document.getElementById('stats-panel').innerHTML = '';
+            } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
+                const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
+                if (url) {
+                    Plotly.newPlot('graph', [], layoutConfig(`Gene Flow data at: ${url}`));
+                    document.getElementById('stats-panel').innerHTML = '';
+                    return;
                 }
-            }
-            document.getElementById('stats-panel').innerHTML = statsText;
-
-            layout.xaxis.title = `${independent} (${units[independent] || ''})`;
-            layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
-        } else if (view === 'bar') {
-            const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-            const x = ecotrons;
-            const y = ecotrons.map(ecotron => {
-                const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
-            });
-            const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron)?.Dome_Type || 'Unknown');
-            console.log('Bar Chart Data:', {x, y});
-            traces.push({
-                x: x,
-                y: y,
-                type: 'bar',
-                marker: {
-                    color: conditions.map(dt => domeColors[dt] || '#FFFFFF'),
-                    line: {width: 2, color: '#FFFFFF'}
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                ecotrons.forEach(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const condition = ecotronData[0]?.Dome_Type || 'Unknown';
+                    const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                    const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    if (x.length > 0 && y.length > 0) {
+                        traces.push({
+                            x: x,
+                            y: y,
+                            mode: 'lines+markers',
+                            name: ecotron,
+                            line: { color: domeColors[condition] || '#FFFFFF', width: 2 },
+                            marker: { size: 8, color: domeColors[condition] || '#FFFFFF' }
+                        });
+                    }
+                });
+                layout.xaxis.title = `${independent} (${units[independent] || ''})`;
+                layout.yaxis.title = 'Gene Flow (%)';
+                document.getElementById('stats-panel').innerHTML = '';
+            } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
+                const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
+                if (url) {
+                    Plotly.newPlot('graph', [], layoutConfig(`Mutation data at: ${url}`));
+                    document.getElementById('stats-panel').innerHTML = '';
+                    return;
                 }
-            });
-            layout.xaxis.title = 'Ecotron';
-            layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
-            document.getElementById('stats-panel').innerHTML = '';
-        } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
-            const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
-            if (url) {
-                Plotly.newPlot('graph', [], layoutConfig(`Gene Flow data at: ${url}`));
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                const z = ecotrons.map(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    return ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : 0);
+                });
+                traces.push({
+                    z: z,
+                    x: filteredData.map(row => row[independent]).slice(0, z[0].length),
+                    y: ecotrons,
+                    type: 'heatmap',
+                    colorscale: 'Viridis'
+                });
+                layout.xaxis.title = `${independent} (${units[independent] || ''})`;
+                layout.yaxis.title = 'Ecotron';
+                document.getElementById('stats-panel').innerHTML = '';
+            } else if (view === 'diversity_bar' && dependent === 'Genetic_Diversity') {
+                const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
+                if (url) {
+                    Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
+                    document.getElementById('stats-panel').innerHTML = '';
+                    return;
+                }
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                const x = ecotrons;
+                const y = ecotrons.map(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+                });
+                const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron)?.Dome_Type || 'Unknown');
+                traces.push({
+                    x: x,
+                    y: y,
+                    type: 'bar',
+                    marker: {
+                        color: conditions.map(dt => domeColors[dt] || '#FFFFFF'),
+                        line: { width: 2, color: '#FFFFFF' }
+                    }
+                });
+                layout.xaxis.title = 'Ecotron';
+                layout.yaxis.title = 'Genetic Diversity (index)';
+                document.getElementById('stats-panel').innerHTML = '';
+            } else {
+                Plotly.newPlot('graph', [], layoutConfig('View not applicable'));
                 document.getElementById('stats-panel').innerHTML = '';
                 return;
             }
-            const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-            ecotrons.forEach(ecotron => {
-                const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                const condition = ecotronData[0]?.Dome_Type || 'Unknown';
-                const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-                const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                if (x.length > 0 && y.length > 0) {
-                    traces.push({
-                        x: x,
-                        y: y,
-                        mode: 'lines+markers',
-                        name: ecotron,
-                        line: {color: domeColors[condition] || '#FFFFFF', width: 2},
-                        marker: {size: 8, color: domeColors[condition] || '#FFFFFF'}
-                    });
-                }
-            });
-            layout.xaxis.title = `${independent} (${units[independent] || ''})`;
-            layout.yaxis.title = 'Gene Flow (%)';
-            document.getElementById('stats-panel').innerHTML = '';
-        } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
-            const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
-            if (url) {
-                Plotly.newPlot('graph', [], layoutConfig(`Mutation data at: ${url}`));
-                document.getElementById('stats-panel').innerHTML = '';
+
+            console.log('Traces:', traces);
+            if (traces.length === 0) {
+                Plotly.newPlot('graph', [], layoutConfig('No data to plot after filtering'));
                 return;
             }
-            const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-            const z = ecotrons.map(ecotron => {
-                const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                return ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : 0);
-            });
-            traces.push({
-                z: z,
-                x: filteredData.map(row => row[independent]).slice(0, z[0].length),
-                y: ecotrons,
-                type: 'heatmap',
-                colorscale: 'Viridis'
-            });
-            layout.xaxis.title = `${independent} (${units[independent] || ''})`;
-            layout.yaxis.title = 'Ecotron';
-            document.getElementById('stats-panel').innerHTML = '';
-        } else if (view === 'diversity_bar' && dependent === 'Genetic_Diversity') {
-            const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
-            if (url) {
-                Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
-                document.getElementById('stats-panel').innerHTML = '';
-                return;
-            }
-            const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-            const x = ecotrons;
-            const y = ecotrons.map(ecotron => {
-                const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
-            });
-            const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron)?.Dome_Type || 'Unknown');
-            traces.push({
-                x: x,
-                y: y,
-                type: 'bar',
-                marker: {
-                    color: conditions.map(dt => domeColors[dt] || '#FFFFFF'),
-                    line: {width: 2, color: '#FFFFFF'}
-                }
-            });
-            layout.xaxis.title = 'Ecotron';
-            layout.yaxis.title = 'Genetic Diversity (index)';
-            document.getElementById('stats-panel').innerHTML = '';
-        } else {
-            Plotly.newPlot('graph', [], layoutConfig('View not applicable'));
-            document.getElementById('stats-panel').innerHTML = '';
-            return;
+            Plotly.newPlot('graph', traces, layout, { responsive: true })
+                .then(() => console.log('Plot rendered'))
+                .catch(err => console.error('Plotly error:', err));
         }
 
-        console.log('Final Traces:', traces);
-        if (traces.length === 0) {
-            console.error('No traces to plot');
-            Plotly.newPlot('graph', [], layoutConfig('No valid data to plot'));
-            document.getElementById('stats-panel').innerHTML = '';
-            return;
-        }
-        Plotly.newPlot('graph', traces, layout, {responsive: true})
-            .then(() => console.log('Plot rendered successfully'))
-            .catch(err => console.error('Plotly Error:', err));
-    }
+        document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
+        document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
+        document.getElementById('ecotron-toggle').addEventListener('click', () => toggleDropdown('ecotron-full-list'));
+        document.getElementById('stats-toggle').addEventListener('click', () => {
+            const statsPanel = document.getElementById('stats-panel');
+            statsPanel.classList.toggle('open');
+            document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
+        });
+        document.getElementById('independent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
+        document.getElementById('dependent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
+        document.getElementById('view-selector').addEventListener('change', updateGraph);
+        document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+        document.getElementById('mobile-toggle').addEventListener('click', toggleMobileSidebar);
 
-    document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
-    document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
-    document.getElementById('ecotron-toggle').addEventListener('click', () => toggleDropdown('ecotron-full-list'));
-    document.getElementById('stats-toggle').addEventListener('click', () => {
-        const statsPanel = document.getElementById('stats-panel');
-        statsPanel.classList.toggle('open');
-        document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
-    });
-    document.getElementById('independent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
-    document.getElementById('dependent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
-    document.getElementById('view-selector').addEventListener('change', updateGraph);
-    document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
-    document.getElementById('mobile-toggle').addEventListener('click', toggleMobileSidebar);
-
-    window.addEventListener('resize', () => {
-        Plotly.Plots.resize(document.getElementById('graph'));
-    });
-</script>
+        window.addEventListener('resize', () => {
+            Plotly.Plots.resize(document.getElementById('graph'));
+        });
+    </script>
+</body>
+</html>
