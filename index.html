@@ -25,7 +25,6 @@
             font-size: calc(16px + 2vw);
             margin: 0;
             flex-shrink: 0;
-            position: relative;
         }
         .container {
             display: flex;
@@ -47,17 +46,22 @@
             z-index: 1000;
         }
         .sidebar.collapsed {
-            transform: translateX(-100%);
+            transform: translateX(-280px); /* Leave 20px tab visible */
         }
         .sidebar-toggle {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 50%;
+            right: -20px;
+            width: 20px;
+            height: 40px;
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
-            border-radius: 10px;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
             color: #00FFFF;
-            padding: 5px 10px;
+            font-size: 12px;
+            line-height: 36px;
+            text-align: center;
             cursor: pointer;
             box-shadow: 0 0 8px #00FFFF;
             z-index: 1100;
@@ -81,6 +85,14 @@
             align-items: center;
             width: 100%;
             position: relative;
+        }
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            position: relative;
+            margin-top: 20px;
         }
         .button-label {
             color: #FFFF00;
@@ -172,11 +184,8 @@
         button:hover {
             box-shadow: 0 0 12px #00FFFF;
         }
-        .stats-container {
-            margin-top: 20px;
-        }
         .stats-panel {
-            width: 100%;
+            width: calc(100% - 120px);
             max-height: 0;
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
@@ -188,6 +197,8 @@
             padding: 0;
             overflow: hidden;
             transition: max-height 0.3s, padding 0.1s;
+            margin-left: 110px;
+            margin-top: 5px;
         }
         .stats-panel.open {
             max-height: 150px;
@@ -244,7 +255,7 @@
         @media (max-width: 768px) {
             .sidebar {
                 width: 250px;
-                transform: translateX(-100%);
+                transform: translateX(-230px); /* 20px tab */
             }
             .sidebar.open {
                 transform: translateX(0);
@@ -263,12 +274,13 @@
                 width: calc(100% - 90px);
                 left: 90px;
             }
+            .stats-panel {
+                width: calc(100% - 90px);
+                margin-left: 90px;
+            }
             select, .dropdown-toggle, button {
                 font-size: 10px;
                 padding: 4px 8px;
-            }
-            .stats-panel {
-                width: 100%;
             }
         }
         @media (max-width: 480px) {
@@ -277,6 +289,7 @@
             }
             .sidebar {
                 width: 200px;
+                transform: translateX(-180px); /* 20px tab */
             }
         }
     </style>
@@ -288,16 +301,16 @@
     <div class="container">
         <button class="mobile-toggle" id="mobile-toggle">☰</button>
         <div class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebar-toggle">Collapse</button>
+            <button class="sidebar-toggle" id="sidebar-toggle">&gt;</button>
             <div class="button-container">
                 <span class="button-label">Biome:</span>
                 <div class="dropdown-toggle" id="biome-toggle">Select Biomes</div>
                 <div class="dropdown-menu" id="biome-menu"></div>
             </div>
             <div class="button-container">
-                <span class="button-label">Dome Type:</span>
-                <div class="dropdown-toggle" id="dome-type-toggle">Select Dome Types</div>
-                <div class="dropdown-menu" id="dome-type-menu">
+                <span class="button-label">Exp. Condition:</span>
+                <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
+                <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item"><input type="checkbox" id="Control" value="Control"><label for="Control">Control</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2">High_CO2</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="Fertilized" value="Fertilized"><label for="Fertilized">Fertilized</label></div>
@@ -305,7 +318,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control">Outside_Control</label></div>
                 </div>
             </div>
-            <div class="button-container dropdown-container">
+            <div class="button-container">
                 <span class="button-label">Ecotrons:</span>
                 <button id="ecotron-toggle">Show All</button>
                 <div class="dropdown-menu" id="ecotron-full-list"></div>
@@ -357,7 +370,7 @@
                     <option value="diversity_bar">Genetic Diversity Bar</option>
                 </select>
             </div>
-            <div class="button-container stats-container">
+            <div class="stats-container">
                 <span class="button-label">Stats:</span>
                 <button id="stats-toggle">Show Stats</button>
                 <div class="stats-panel" id="stats-panel"></div>
@@ -445,7 +458,7 @@
                 input.id = `biome-${biome}`;
                 input.value = biome;
                 input.checked = true;
-                input.addEventListener('change', updateGraph);
+                input.addEventListener('change', syncAndUpdate);
                 const label = document.createElement('label');
                 label.htmlFor = `biome-${biome}`;
                 label.textContent = biome;
@@ -454,18 +467,18 @@
                 biomeMenu.appendChild(div);
             });
 
-            const domeTypeMenu = document.getElementById('dome-type-menu');
-            domeTypeMenu.querySelectorAll('input[type="checkbox"]').forEach(input => {
+            const conditionMenu = document.getElementById('condition-menu');
+            conditionMenu.querySelectorAll('input[type="checkbox"]').forEach(input => {
                 input.checked = true;
                 input.addEventListener('change', (e) => {
-                    const domeType = e.target.value;
+                    const condition = e.target.value;
                     const ecotronList = document.getElementById('ecotron-full-list');
                     ecotronList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        if (checkbox.value.includes(domeType)) {
+                        if (checkbox.value.includes(condition)) {
                             checkbox.checked = e.target.checked;
                         }
                     });
-                    updateGraph();
+                    syncAndUpdate();
                 });
             });
 
@@ -478,7 +491,7 @@
                 input.type = 'checkbox';
                 input.id = `ecotron-${ecotron}`;
                 input.value = ecotron;
-                input.addEventListener('change', updateGraph);
+                input.addEventListener('change', syncAndUpdate);
                 const label = document.createElement('label');
                 label.htmlFor = `ecotron-${ecotron}`;
                 label.textContent = ecotron;
@@ -489,10 +502,11 @@
 
             console.log('Biomes:', biomes);
             console.log('Ecotrons:', ecotrons);
+            syncEcotrons(); // Initial sync
         }
 
         function toggleDropdown(id) {
-            const allMenus = ['biome-menu', 'dome-type-menu', 'ecotron-full-list'];
+            const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list'];
             allMenus.forEach(menuId => {
                 if (menuId !== id) {
                     document.getElementById(menuId).classList.remove('open');
@@ -500,15 +514,17 @@
             });
             const menu = document.getElementById(id);
             menu.classList.toggle('open');
+            if (id === 'ecotron-full-list') syncEcotrons(); // Sync on Ecotron open
         }
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const graphContainer = document.getElementById('graph-container');
+            const toggle = document.getElementById('sidebar-toggle');
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
+            toggle.innerHTML = sidebar.classList.contains('collapsed') ? '&lt;' : '&gt;';
             Plotly.Plots.resize(document.getElementById('graph'));
-            document.getElementById('sidebar-toggle').textContent = sidebar.classList.contains('collapsed') ? 'Expand' : 'Collapse';
         }
 
         function toggleMobileSidebar() {
@@ -518,6 +534,45 @@
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
             Plotly.Plots.resize(document.getElementById('graph'));
+        }
+
+        function syncEcotrons() {
+            const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const ecotronList = document.getElementById('ecotron-full-list');
+            const allEcotrons = ecotronList.querySelectorAll('input[type="checkbox"]');
+            let filteredData = data;
+            if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
+            if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
+            const validEcotrons = new Set(filteredData.map(row => row.Ecotron));
+
+            allEcotrons.forEach(checkbox => {
+                const isValid = validEcotrons.has(checkbox.value);
+                checkbox.disabled = !isValid;
+                if (!isValid) checkbox.checked = false;
+            });
+
+            const checkedEcotrons = new Set(Array.from(allEcotrons).filter(cb => cb.checked).map(cb => cb.value));
+            const conditionChecks = {};
+            conditions.forEach(cond => conditionChecks[cond] = true);
+            allEcotrons.forEach(checkbox => {
+                const ecotron = checkbox.value;
+                const condition = ecotron.split('_').slice(-1)[0];
+                if (checkedEcotrons.has(ecotron) && conditions.includes(condition)) {
+                    conditionChecks[condition] = conditionChecks[condition] && true;
+                } else if (conditions.includes(condition)) {
+                    conditionChecks[condition] = false;
+                }
+            });
+            conditions.forEach(cond => {
+                const input = document.getElementById(cond);
+                input.checked = conditionChecks[cond] !== false;
+            });
+        }
+
+        function syncAndUpdate() {
+            syncEcotrons();
+            updateGraph();
         }
 
         function updateViewOptions() {
@@ -547,7 +602,7 @@
                 font: {color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14},
                 title: {
                     text: title,
-                    font: {size: 24, color: '#00FFFF', family: 'VT323, monospace'},
+                    font: {size: 24, color: '#00FFFF', family: 'VT323', monospace},
                     x: 0.5,
                     xanchor: 'center',
                     y: 0.95,
@@ -583,17 +638,17 @@
         function updateGraph() {
             console.log('Updating graph');
             const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
-            const domeTypes = Array.from(document.getElementById('dome-type-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
             const selectedEcotrons = Array.from(document.getElementById('ecotron-full-list').querySelectorAll('input:checked')).map(input => input.value);
             const independent = document.getElementById('independent-selector').value;
             const dependent = document.getElementById('dependent-selector').value;
             const view = document.getElementById('view-selector').value;
 
-            console.log('Selections:', {biomes, domeTypes, selectedEcotrons, independent, dependent, view});
+            console.log('Selections:', {biomes, conditions, selectedEcotrons, independent, dependent, view});
 
             let filteredData = data;
             if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
-            if (domeTypes.length > 0) filteredData = filteredData.filter(row => domeTypes.includes(row.Dome_Type));
+            if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
             if (selectedEcotrons.length > 0) filteredData = filteredData.filter(row => selectedEcotrons.includes(row.Ecotron));
 
             console.log('Filtered Data (first 5 rows):', filteredData.slice(0, 5));
@@ -604,7 +659,7 @@
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 ecotrons.forEach(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                    const domeType = ecotronData[0].Dome_Type;
+                    const condition = ecotronData[0].Dome_Type;
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                     const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     if (x.length > 0 && y.length > 0) {
@@ -613,7 +668,7 @@
                             y: y,
                             mode: 'markers',
                             name: `${ecotron}`,
-                            marker: {size: 12, color: domeColors[domeType], line: {width: 2, color: '#FFFFFF'}}
+                            marker: {size: 12, color: domeColors[condition], line: {width: 2, color: '#FFFFFF'}}
                         });
                     }
                 });
@@ -649,14 +704,14 @@
                     const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
                 });
-                const domeTypes = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron).Dome_Type);
+                const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron).Dome_Type);
                 console.log('Bar Chart Data:', {x, y});
                 traces.push({
                     x: x,
                     y: y,
                     type: 'bar',
                     marker: {
-                        color: domeTypes.map(dt => domeColors[dt]),
+                        color: conditions.map(dt => domeColors[dt]),
                         line: {width: 2, color: '#FFFFFF'}
                     }
                 });
@@ -673,7 +728,7 @@
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 ecotrons.forEach(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-                    const domeType = ecotronData[0].Dome_Type;
+                    const condition = ecotronData[0].Dome_Type;
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                     const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     if (x.length > 0 && y.length > 0) {
@@ -682,8 +737,8 @@
                             y: y,
                             mode: 'lines+markers',
                             name: ecotron,
-                            line: {color: domeColors[domeType], width: 2},
-                            marker: {size: 8, color: domeColors[domeType]}
+                            line: {color: domeColors[condition], width: 2},
+                            marker: {size: 8, color: domeColors[condition]}
                         });
                     }
                 });
@@ -726,13 +781,13 @@
                     const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
                 });
-                const domeTypes = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron).Dome_Type);
+                const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron).Dome_Type);
                 traces.push({
                     x: x,
                     y: y,
                     type: 'bar',
                     marker: {
-                        color: domeTypes.map(dt => domeColors[dt]),
+                        color: conditions.map(dt => domeColors[dt]),
                         line: {width: 2, color: '#FFFFFF'}
                     }
                 });
@@ -758,7 +813,7 @@
         }
 
         document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
-        document.getElementById('dome-type-toggle').addEventListener('click', () => toggleDropdown('dome-type-menu'));
+        document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
         document.getElementById('ecotron-toggle').addEventListener('click', () => toggleDropdown('ecotron-full-list'));
         document.getElementById('stats-toggle').addEventListener('click', () => {
             const statsPanel = document.getElementById('stats-panel');
