@@ -29,54 +29,75 @@
         }
         .control-bar {
             width: 100%;
-            padding: 1vh 1vw;
+            padding: 1.5vh 1vw; /* Larger padding */
             background-color: #1A1A1A;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            flex-wrap: nowrap;
+            flex-wrap: wrap; /* Wrap for smaller screens */
             box-sizing: border-box;
-            gap: 10px;
+            gap: 15px; /* Increased gap */
             flex-shrink: 0;
         }
         .button-container {
             display: flex;
             align-items: center;
             flex: 1;
-            min-width: 120px;
-            max-width: 20%;
+            min-width: 150px; /* Increased min-width */
+            max-width: 22%;
             position: relative;
         }
         .button-label {
             color: #FFFF00;
             font-family: 'VT323', monospace;
-            font-size: calc(10px + 0.5vw);
-            margin-right: 8px;
+            font-size: calc(12px + 0.5vw);
+            margin-right: 10px;
             flex-shrink: 0;
         }
-        select {
-            background: rgba(26, 26, 26, 0.8); /* Slightly transparent */
+        .dropdown-toggle {
+            background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
-            border-radius: 10px; /* Rounded corners */
+            border-radius: 10px;
             color: #00FFFF;
             font-family: 'Exo 2', sans-serif;
             font-size: 12px;
-            padding: 5px;
-            flex-grow: 1;
-            box-shadow: 0 0 8px #00FFFF; /* Neon glow */
+            padding: 6px 12px;
+            box-shadow: 0 0 8px #00FFFF;
             cursor: pointer;
-            outline: none;
-            max-width: 100%;
+            width: 100%;
         }
-        select:hover {
+        .dropdown-toggle:hover {
             box-shadow: 0 0 12px #00FFFF;
         }
-        option {
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            box-shadow: 0 0 8px #00FFFF;
+            z-index: 1000;
+            padding: 10px;
             color: #00FFFF;
-            background: #1A1A1A;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 12px;
         }
-        option.inactive {
-            color: rgba(0, 255, 255, 0.5);
+        .dropdown-menu.open {
+            display: block;
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .dropdown-item input[type="checkbox"] {
+            margin-right: 10px;
+            accent-color: #00FFFF;
         }
         button {
             background: rgba(26, 26, 26, 0.8);
@@ -85,7 +106,7 @@
             color: #00FFFF;
             font-family: 'VT323', monospace;
             font-size: 12px;
-            padding: 5px 10px;
+            padding: 6px 12px;
             cursor: pointer;
             box-shadow: 0 0 8px #00FFFF;
         }
@@ -99,8 +120,8 @@
             display: none;
             position: absolute;
             top: calc(100% + 5px);
-            left: 80px;
-            width: 250px;
+            left: 0;
+            width: 100%;
             max-height: 400px;
             overflow-y: auto;
             background: rgba(26, 26, 26, 0.8);
@@ -154,7 +175,7 @@
         }
         .stats-panel {
             position: absolute;
-            top: 40px; /* Below title */
+            top: calc(1vh + 24px + 2vw); /* Below title, matches h1 */
             left: 50%;
             transform: translateX(-50%);
             width: 300px;
@@ -172,7 +193,7 @@
             z-index: 20;
         }
         .stats-panel.open {
-            max-height: 150px; /* Adjust as needed */
+            max-height: 150px;
             padding: 10px;
         }
         .stats-toggle {
@@ -197,16 +218,19 @@
         .data-link a {
             color: #00FFFF;
             font-family: 'VT323', monospace;
-            font-size: calc(10px + 0.5vw);
+            font-size: calc(12px + 0.5vw);
             text-decoration: none;
         }
         .data-link a:hover {
             text-shadow: 0 0 5px #00FFFF;
         }
+        @media (max-width: 1024px) {
+            .button-container {
+                max-width: 30%;
+            }
+        }
         @media (max-width: 768px) {
             .control-bar {
-                flex-direction: column;
-                align-items: flex-start;
                 padding: 1vh 2vw;
             }
             .button-container {
@@ -215,21 +239,33 @@
                 margin: 5px 0;
             }
             .button-label {
-                width: 100px;
+                width: 120px;
                 text-align: right;
                 margin-right: 10px;
             }
-            select, button {
-                width: calc(100% - 110px);
+            .dropdown-toggle, button {
+                width: calc(100% - 130px);
             }
             #ecotron-full-list {
-                width: calc(100% - 120px);
-                left: 110px;
+                width: calc(100% - 20px);
+                left: 10px;
             }
             .stats-panel {
                 width: 80%;
                 left: 10%;
                 transform: none;
+            }
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: calc(14px + 2vw);
+            }
+            .button-label {
+                font-size: 12px;
+            }
+            .dropdown-toggle, button {
+                font-size: 10px;
+                padding: 4px 8px;
             }
         }
     </style>
@@ -241,26 +277,24 @@
     <div class="control-bar">
         <div class="button-container">
             <span class="button-label">Biome:</span>
-            <select id="biome-selector" multiple>
-                <!-- Populated dynamically -->
-            </select>
+            <div class="dropdown-toggle" id="biome-toggle">Select Biomes</div>
+            <div class="dropdown-menu" id="biome-menu"></div>
         </div>
         <div class="button-container">
             <span class="button-label">Dome Type:</span>
-            <select id="dome-type-selector" multiple>
-                <option value="Control">Control</option>
-                <option value="High_CO2">High_CO2</option>
-                <option value="Fertilized">Fertilized</option>
-                <option value="Heat">Heat</option>
-                <option value="Outside_Control">Outside_Control</option>
-            </select>
+            <div class="dropdown-toggle" id="dome-type-toggle">Select Dome Types</div>
+            <div class="dropdown-menu" id="dome-type-menu">
+                <div class="dropdown-item"><input type="checkbox" id="Control" value="Control"><label for="Control">Control</label></div>
+                <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2">High_CO2</label></div>
+                <div class="dropdown-item"><input type="checkbox" id="Fertilized" value="Fertilized"><label for="Fertilized">Fertilized</label></div>
+                <div class="dropdown-item"><input type="checkbox" id="Heat" value="Heat"><label for="Heat">Heat</label></div>
+                <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control">Outside_Control</label></div>
+            </div>
         </div>
         <div class="button-container dropdown-container">
             <span class="button-label">Ecotrons:</span>
             <button id="ecotron-toggle">Show All</button>
-            <div id="ecotron-full-list">
-                <!-- Populated dynamically -->
-            </div>
+            <div id="ecotron-full-list"></div>
         </div>
         <div class="button-container">
             <span class="button-label">Independent:</span>
@@ -384,14 +418,23 @@
             const biomes = [...new Set(data.map(row => row.Biome))].filter(b => b);
             const ecotrons = [...new Set(data.map(row => row.Ecotron))].filter(e => e);
 
-            const biomeSelector = document.getElementById('biome-selector');
-            biomeSelector.innerHTML = '';
+            const biomeMenu = document.getElementById('biome-menu');
+            biomeMenu.innerHTML = '';
             biomes.forEach(biome => {
-                const option = document.createElement('option');
-                option.value = biome;
-                option.text = biome;
-                option.selected = true;
-                biomeSelector.appendChild(option);
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = `biome-${biome}`;
+                input.value = biome;
+                input.checked = true;
+                input.addEventListener('change', updateEcotronListAndGraph);
+                const label = document.createElement('label');
+                label.htmlFor = `biome-${biome}`;
+                label.textContent = biome;
+                div.appendChild(input);
+                div.appendChild(label);
+                biomeMenu.appendChild(div);
             });
 
             const ecotronFullList = document.getElementById('ecotron-full-list');
@@ -420,23 +463,34 @@
             console.log('Ecotrons:', ecotrons);
         }
 
+        function toggleDropdown(id) {
+            const menu = document.getElementById(id);
+            menu.classList.toggle('open');
+        }
+
         function toggleEcotronList() {
             const fullList = document.getElementById('ecotron-full-list');
             const isVisible = fullList.style.display === 'block';
             fullList.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) updateEcotronSelection();
+        }
 
-            if (!isVisible) {
-                const biomes = Array.from(document.getElementById('biome-selector').selectedOptions).map(opt => opt.value);
-                const domeTypes = Array.from(document.getElementById('dome-type-selector').selectedOptions).map(opt => opt.value);
-                let filteredData = data;
-                if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
-                if (domeTypes.length > 0) filteredData = filteredData.filter(row => domeTypes.includes(row.Dome_Type));
-                const firstMatch = filteredData[0]?.Ecotron;
-                if (firstMatch) {
-                    selectedEcotron = firstMatch;
-                    document.getElementById(`radio-${firstMatch}`).checked = true;
-                    updateGraph();
-                }
+        function updateEcotronListAndGraph() {
+            updateEcotronSelection();
+            updateGraph();
+        }
+
+        function updateEcotronSelection() {
+            const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const domeTypes = Array.from(document.getElementById('dome-type-menu').querySelectorAll('input:checked')).map(input => input.value);
+            let filteredData = data;
+            if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
+            if (domeTypes.length > 0) filteredData = filteredData.filter(row => domeTypes.includes(row.Dome_Type));
+            const firstMatch = filteredData[0]?.Ecotron;
+            if (firstMatch) {
+                selectedEcotron = firstMatch;
+                const radio = document.getElementById(`radio-${firstMatch}`);
+                if (radio) radio.checked = true;
             }
         }
 
@@ -475,15 +529,15 @@
                 title: {
                     text: title,
                     font: {size: 24, color: '#00FFFF', family: 'VT323, monospace'},
-                    x: 0.05,
-                    xanchor: 'left',
+                    x: 0.5,
+                    xanchor: 'center',
                     y: 0.95,
                     yanchor: 'top'
                 },
                 xaxis: {gridcolor: '#333333', automargin: true},
                 yaxis: {gridcolor: '#333333', automargin: true},
                 showlegend: false,
-                margin: {l: 50, r: 50, t: 80, b: 50}, /* Increased top margin for stats panel */
+                margin: {l: 50, r: 50, t: 80, b: 50},
                 autosize: true
             };
         }
@@ -509,8 +563,8 @@
 
         function updateGraph() {
             console.log('Updating graph');
-            const biomes = Array.from(document.getElementById('biome-selector').selectedOptions).map(opt => opt.value);
-            const domeTypes = Array.from(document.getElementById('dome-type-selector').selectedOptions).map(opt => opt.value);
+            const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const domeTypes = Array.from(document.getElementById('dome-type-menu').querySelectorAll('input:checked')).map(input => input.value);
             const independent = document.getElementById('independent-selector').value;
             const dependent = document.getElementById('dependent-selector').value;
             const view = document.getElementById('view-selector').value;
@@ -683,10 +737,10 @@
                 .catch(err => console.error('Plotly Error:', err));
         }
 
+        document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
+        document.getElementById('dome-type-toggle').addEventListener('click', () => toggleDropdown('dome-type-menu'));
         document.getElementById('ecotron-toggle').addEventListener('click', toggleEcotronList);
         document.getElementById('stats-toggle').addEventListener('click', toggleStatsPanel);
-        document.getElementById('biome-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
-        document.getElementById('dome-type-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('independent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('dependent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('view-selector').addEventListener('change', updateGraph);
