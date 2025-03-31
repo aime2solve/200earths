@@ -35,21 +35,21 @@
             align-items: center;
             flex-wrap: nowrap;
             box-sizing: border-box;
-            gap: 15px;
+            gap: 10px;
             flex-shrink: 0;
         }
         .button-container {
             display: flex;
             align-items: center;
             flex: 1;
-            min-width: 150px;
-            max-width: 25%;
+            min-width: 120px;
+            max-width: 20%;
         }
         .button-label {
             color: #FFFF00;
             font-family: 'VT323', monospace;
             font-size: calc(10px + 0.5vw);
-            margin-right: 10px;
+            margin-right: 8px;
             flex-shrink: 0;
         }
         select {
@@ -74,6 +74,37 @@
         }
         option.inactive {
             color: rgba(0, 255, 255, 0.5);
+        }
+        button {
+            background: #1A1A1A;
+            border: 2px solid #00FFFF;
+            border-radius: 5px;
+            color: #00FFFF;
+            font-family: 'VT323', monospace;
+            font-size: 12px;
+            padding: 5px 10px;
+            cursor: pointer;
+            box-shadow: 0 0 4px #00FFFF;
+        }
+        button:hover {
+            box-shadow: 0 0 6px #00FFFF;
+        }
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+        #ecotron-full-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #1A1A1A;
+            border: 2px solid #00FFFF;
+            border-radius: 5px;
+            z-index: 1000;
         }
         .graph-container {
             width: 90%;
@@ -136,7 +167,7 @@
                 text-align: right;
                 margin-right: 10px;
             }
-            select {
+            select, button {
                 width: calc(100% - 110px);
             }
         }
@@ -148,8 +179,25 @@
     <h1>Comparative Biospheromics</h1>
     <div class="control-bar">
         <div class="button-container">
+            <span class="button-label">Biome:</span>
+            <select id="biome-selector" multiple>
+                <!-- Populated dynamically -->
+            </select>
+        </div>
+        <div class="button-container">
+            <span class="button-label">Dome Type:</span>
+            <select id="dome-type-selector" multiple>
+                <option value="Control">Control</option>
+                <option value="High_CO2">High_CO2</option>
+                <option value="Fertilized">Fertilized</option>
+                <option value="Heat">Heat</option>
+                <option value="Outside_Control">Outside_Control</option>
+            </select>
+        </div>
+        <div class="button-container dropdown-container">
             <span class="button-label">Ecotrons:</span>
-            <select id="ecotron-selector" multiple>
+            <button id="ecotron-toggle">Show All</button>
+            <select id="ecotron-full-list" multiple>
                 <!-- Populated dynamically -->
             </select>
         </div>
@@ -216,6 +264,14 @@
             'Gene_Flow': '#0080FF', 'Off_Target_Mutations': '#80FF80', 'Genetic_Diversity': '#FF8080'
         };
 
+        const domeColors = {
+            'Control': '#00FFFF',        // Cyan
+            'High_CO2': '#FF0000',       // Red
+            'Fertilized': '#00FF00',     // Green
+            'Heat': '#FFA500',           // Orange
+            'Outside_Control': '#FFFFFF' // White
+        };
+
         const units = {
             'CO2_Level': 'ppm', 'Temperature_Level': '°C', 'Fertilizer_Dose': 'kg/ha', 'GMO_Presence': 'binary', 'Vector_Presence': 'binary',
             'Plant_Growth_Rate': 'mm/day', 'Photosynthesis_Rate': 'µmol/m²s', 'Soil_Carbon_Content': '%', 'Gene_Flow': '%',
@@ -245,7 +301,7 @@
                             Plotly.newPlot('graph', [], layoutConfig('No data available'));
                             return;
                         }
-                        populateEcotronSelector();
+                        populateSelectors();
                         updateGraph();
                     },
                     error: function(error) {
@@ -259,19 +315,38 @@
                 Plotly.newPlot('graph', [], layoutConfig('Failed to load CSV'));
             });
 
-        function populateEcotronSelector() {
-            console.log('Populating Ecotron selector');
+        function populateSelectors() {
+            console.log('Populating selectors');
+            const biomes = [...new Set(data.map(row => row.Biome))].filter(b => b);
             const ecotrons = [...new Set(data.map(row => row.Ecotron))].filter(e => e);
-            const selector = document.getElementById('ecotron-selector');
-            selector.innerHTML = '';
+
+            const biomeSelector = document.getElementById('biome-selector');
+            biomeSelector.innerHTML = '';
+            biomes.forEach(biome => {
+                const option = document.createElement('option');
+                option.value = biome;
+                option.text = biome;
+                option.selected = true;
+                biomeSelector.appendChild(option);
+            });
+
+            const ecotronFullList = document.getElementById('ecotron-full-list');
+            ecotronFullList.innerHTML = '';
             ecotrons.forEach(ecotron => {
                 const option = document.createElement('option');
                 option.value = ecotron;
                 option.text = ecotron;
-                option.selected = true;
-                selector.appendChild(option);
+                option.selected = false; // Unselected by default
+                ecotronFullList.appendChild(option);
             });
-            console.log('Ecotron Options:', ecotrons);
+
+            console.log('Biomes:', biomes);
+            console.log('Ecotrons:', ecotrons);
+        }
+
+        function toggleEcotronList() {
+            const fullList = document.getElementById('ecotron-full-list');
+            fullList.style.display = fullList.style.display === 'block' ? 'none' : 'block';
         }
 
         function updateViewOptions() {
@@ -319,7 +394,8 @@
                     bordercolor: '#00FFFF',
                     borderwidth: 1
                 },
-                margin: {l: 50, r: 50, t: 60, b: 50}
+                margin: {l: 50, r: 50, t: 60, b: 50},
+                autosize: true
             };
         }
 
@@ -344,27 +420,30 @@
 
         function updateGraph() {
             console.log('Updating graph');
-            const ecotrons = Array.from(document.getElementById('ecotron-selector').selectedOptions).map(opt => opt.value);
+            const biomes = Array.from(document.getElementById('biome-selector').selectedOptions).map(opt => opt.value);
+            const domeTypes = Array.from(document.getElementById('dome-type-selector').selectedOptions).map(opt => opt.value);
+            const ecotronsFull = Array.from(document.getElementById('ecotron-full-list').selectedOptions).map(opt => opt.value);
             const independent = document.getElementById('independent-selector').value;
             const dependent = document.getElementById('dependent-selector').value;
             const view = document.getElementById('view-selector').value;
 
-            console.log('Selections:', {ecotrons, independent, dependent, view});
+            console.log('Selections:', {biomes, domeTypes, ecotronsFull, independent, dependent, view});
 
-            if (!data.length || !ecotrons.length || !independent || !dependent) {
-                console.log('Missing selections or data');
-                Plotly.newPlot('graph', [], layoutConfig('No data or selections'));
-                return;
-            }
+            let filteredData = data;
+            if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
+            if (domeTypes.length > 0) filteredData = filteredData.filter(row => domeTypes.includes(row.Dome_Type));
+            if (ecotronsFull.length > 0) filteredData = filteredData.filter(row => ecotronsFull.includes(row.Ecotron));
+            else filteredData = filteredData.filter(row => [...new Set(filteredData.map(r => r.Ecotron))].includes(row.Ecotron));
 
-            const filteredData = data.filter(row => ecotrons.includes(row.Ecotron));
             console.log('Filtered Data (first 5 rows):', filteredData.slice(0, 5));
             let traces = [];
             let layout = layoutConfig(`${dependent} vs ${independent}`);
 
             if (view === 'scatter') {
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 ecotrons.forEach(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const domeType = ecotronData[0].Dome_Type;
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                     const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     console.log(`Ecotron: ${ecotron}, X (${independent}):`, x, `Y (${dependent}):`, y);
@@ -373,50 +452,45 @@
                             x: x,
                             y: y,
                             mode: 'markers',
-                            name: ecotron,
-                            marker: {size: 12, color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
+                            name: `${ecotron}`,
+                            marker: {size: 12, color: domeColors[domeType], line: {width: 2, color: '#FFFFFF'}}
                         });
+                        if (x.length >= 2) {
+                            const { slope, intercept, r2 } = linearRegression(x, y);
+                            if (!isNaN(slope) && !isNaN(intercept)) {
+                                const xRange = [Math.min(...x), Math.max(...x)];
+                                const yFit = xRange.map(xi => slope * xi + intercept);
+                                traces.push({
+                                    x: xRange,
+                                    y: yFit,
+                                    mode: 'lines',
+                                    name: `${ecotron} Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}, R² = ${r2.toFixed(3)}`,
+                                    line: {color: domeColors[domeType], width: 2}
+                                });
+                            }
+                        }
                     }
                 });
-
-                const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-                const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                console.log('Aggregate data for regression - X:', allX, 'Y:', allY);
-                if (allX.length >= 2 && allX.length === allY.length) {
-                    const { slope, intercept, r2 } = linearRegression(allX, allY);
-                    if (!isNaN(slope) && !isNaN(intercept) && !isNaN(r2)) {
-                        const xRange = [Math.min(...allX), Math.max(...allX)];
-                        const yFit = xRange.map(xi => slope * xi + intercept);
-                        console.log('Adding aggregate trendline: xRange:', xRange, 'yFit:', yFit);
-                        traces.push({
-                            x: xRange,
-                            y: yFit,
-                            mode: 'lines',
-                            name: `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}, R² = ${r2.toFixed(3)}`,
-                            line: {color: '#FF00FF', width: 2}
-                        });
-                    } else {
-                        console.warn('Aggregate regression failed:', {slope, intercept, r2});
-                    }
-                } else {
-                    console.warn('Not enough points for aggregate regression:', allX.length);
-                }
-
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
                 layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
             } else if (view === 'bar') {
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 const x = ecotrons;
                 const y = ecotrons.map(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
                     const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
                 });
+                const domeTypes = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron).Dome_Type);
                 console.log('Bar Chart Data:', {x, y});
                 traces.push({
                     x: x,
                     y: y,
                     type: 'bar',
-                    marker: {color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
+                    marker: {
+                        color: domeTypes.map(dt => domeColors[dt]),
+                        line: {width: 2, color: '#FFFFFF'}
+                    }
                 });
                 layout.xaxis.title = 'Ecotron';
                 layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
@@ -426,8 +500,10 @@
                     Plotly.newPlot('graph', [], layoutConfig(`Gene Flow data at: ${url}`));
                     return;
                 }
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 ecotrons.forEach(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const domeType = ecotronData[0].Dome_Type;
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                     const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     if (x.length > 0 && y.length > 0) {
@@ -436,8 +512,8 @@
                             y: y,
                             mode: 'lines+markers',
                             name: ecotron,
-                            line: {color: colors[dependent], width: 2},
-                            marker: {size: 8}
+                            line: {color: domeColors[domeType], width: 2},
+                            marker: {size: 8, color: domeColors[domeType]}
                         });
                     }
                 });
@@ -449,6 +525,7 @@
                     Plotly.newPlot('graph', [], layoutConfig(`Mutation data at: ${url}`));
                     return;
                 }
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 const z = ecotrons.map(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
                     return ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : 0);
@@ -468,17 +545,22 @@
                     Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
                     return;
                 }
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 const x = ecotrons;
                 const y = ecotrons.map(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
                     const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                     return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
                 });
+                const domeTypes = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron).Dome_Type);
                 traces.push({
                     x: x,
                     y: y,
                     type: 'bar',
-                    marker: {color: colors[dependent] || '#FFFFFF', line: {width: 2, color: '#FFFFFF'}}
+                    marker: {
+                        color: domeTypes.map(dt => domeColors[dt]),
+                        line: {width: 2, color: '#FFFFFF'}
+                    }
                 });
                 layout.xaxis.title = 'Ecotron';
                 layout.yaxis.title = 'Genetic Diversity (index)';
@@ -493,15 +575,22 @@
                 Plotly.newPlot('graph', [], layoutConfig('No valid data to plot'));
                 return;
             }
-            Plotly.newPlot('graph', traces, layout)
+            Plotly.newPlot('graph', traces, layout, {responsive: true})
                 .then(() => console.log('Plot rendered successfully'))
                 .catch(err => console.error('Plotly Error:', err));
         }
 
-        document.getElementById('ecotron-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
+        document.getElementById('ecotron-toggle').addEventListener('click', toggleEcotronList);
+        document.getElementById('biome-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
+        document.getElementById('dome-type-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
+        document.getElementById('ecotron-full-list').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('independent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('dependent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('view-selector').addEventListener('change', updateGraph);
+
+        window.addEventListener('resize', () => {
+            Plotly.Plots.resize(document.getElementById('graph'));
+        });
     </script>
 </body>
 </html>
