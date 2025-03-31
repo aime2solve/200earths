@@ -96,15 +96,28 @@
         #ecotron-full-list {
             display: none;
             position: absolute;
-            top: calc(100% + 5px); /* Prevents overlap */
-            left: 80px; /* Aligns under button */
-            width: 200px;
-            max-height: 300px;
+            top: calc(100% + 5px);
+            left: 80px;
+            width: 250px;
+            max-height: 400px;
             overflow-y: auto;
             background: #1A1A1A;
             border: 2px solid #00FFFF;
             border-radius: 5px;
             z-index: 1000;
+            padding: 10px;
+            color: #00FFFF;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 12px;
+        }
+        .ecotron-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .ecotron-item input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #00FFFF;
         }
         .graph-container {
             width: 90%;
@@ -199,6 +212,10 @@
             select, button {
                 width: calc(100% - 110px);
             }
+            #ecotron-full-list {
+                width: calc(100% - 120px);
+                left: 110px;
+            }
             .stats-panel {
                 width: 150px;
             }
@@ -232,9 +249,9 @@
         <div class="button-container dropdown-container">
             <span class="button-label">Ecotrons:</span>
             <button id="ecotron-toggle">Show All</button>
-            <select id="ecotron-full-list" multiple>
+            <div id="ecotron-full-list">
                 <!-- Populated dynamically -->
-            </select>
+            </div>
         </div>
         <div class="button-container">
             <span class="button-label">Independent:</span>
@@ -317,6 +334,7 @@
 
         const csvUrl = 'https://raw.githubusercontent.com/aime2solve/200earths/refs/heads/main/200earths.csv';
         let data = [];
+        let selectedEcotron = null;
 
         fetch(csvUrl)
             .then(response => {
@@ -370,11 +388,23 @@
             const ecotronFullList = document.getElementById('ecotron-full-list');
             ecotronFullList.innerHTML = '';
             ecotrons.forEach(ecotron => {
-                const option = document.createElement('option');
-                option.value = ecotron;
-                option.text = ecotron;
-                option.selected = false;
-                ecotronFullList.appendChild(option);
+                const div = document.createElement('div');
+                div.className = 'ecotron-item';
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'ecotron-radio';
+                input.value = ecotron;
+                input.id = `radio-${ecotron}`;
+                input.addEventListener('change', () => {
+                    selectedEcotron = ecotron;
+                    updateGraph();
+                });
+                const label = document.createElement('label');
+                label.htmlFor = `radio-${ecotron}`;
+                label.textContent = ecotron;
+                div.appendChild(input);
+                div.appendChild(label);
+                ecotronFullList.appendChild(div);
             });
 
             console.log('Biomes:', biomes);
@@ -383,7 +413,22 @@
 
         function toggleEcotronList() {
             const fullList = document.getElementById('ecotron-full-list');
-            fullList.style.display = fullList.style.display === 'block' ? 'none' : 'block';
+            const isVisible = fullList.style.display === 'block';
+            fullList.style.display = isVisible ? 'none' : 'block';
+
+            if (!isVisible) {
+                const biomes = Array.from(document.getElementById('biome-selector').selectedOptions).map(opt => opt.value);
+                const domeTypes = Array.from(document.getElementById('dome-type-selector').selectedOptions).map(opt => opt.value);
+                let filteredData = data;
+                if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
+                if (domeTypes.length > 0) filteredData = filteredData.filter(row => domeTypes.includes(row.Dome_Type));
+                const firstMatch = filteredData[0]?.Ecotron;
+                if (firstMatch) {
+                    selectedEcotron = firstMatch;
+                    document.getElementById(`radio-${firstMatch}`).checked = true;
+                    updateGraph();
+                }
+            }
         }
 
         function toggleStatsPanel() {
@@ -428,7 +473,7 @@
                 },
                 xaxis: {gridcolor: '#333333', automargin: true},
                 yaxis: {gridcolor: '#333333', automargin: true},
-                showlegend: false, // Legend moved to stats panel
+                showlegend: false,
                 margin: {l: 50, r: 50, t: 60, b: 50},
                 autosize: true
             };
@@ -457,17 +502,16 @@
             console.log('Updating graph');
             const biomes = Array.from(document.getElementById('biome-selector').selectedOptions).map(opt => opt.value);
             const domeTypes = Array.from(document.getElementById('dome-type-selector').selectedOptions).map(opt => opt.value);
-            const ecotronsFull = Array.from(document.getElementById('ecotron-full-list').selectedOptions).map(opt => opt.value);
             const independent = document.getElementById('independent-selector').value;
             const dependent = document.getElementById('dependent-selector').value;
             const view = document.getElementById('view-selector').value;
 
-            console.log('Selections:', {biomes, domeTypes, ecotronsFull, independent, dependent, view});
+            console.log('Selections:', {biomes, domeTypes, selectedEcotron, independent, dependent, view});
 
             let filteredData = data;
             if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
             if (domeTypes.length > 0) filteredData = filteredData.filter(row => domeTypes.includes(row.Dome_Type));
-            if (ecotronsFull.length > 0) filteredData = filteredData.filter(row => ecotronsFull.includes(row.Ecotron));
+            if (selectedEcotron) filteredData = filteredData.filter(row => row.Ecotron === selectedEcotron);
 
             console.log('Filtered Data (first 5 rows):', filteredData.slice(0, 5));
             let traces = [];
@@ -634,7 +678,6 @@
         document.getElementById('stats-toggle').addEventListener('click', toggleStatsPanel);
         document.getElementById('biome-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('dome-type-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
-        document.getElementById('ecotron-full-list').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('independent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('dependent-selector').addEventListener('change', () => { updateViewOptions(); updateGraph(); });
         document.getElementById('view-selector').addEventListener('change', updateGraph);
