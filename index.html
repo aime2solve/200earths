@@ -130,29 +130,25 @@
             box-shadow: 0 0 12px #00FFFF;
         }
         .dropdown-menu {
+            display: none; /* Hidden by default */
             position: absolute;
             top: calc(100% + 5px);
             left: 110px;
             width: calc(100% - 120px);
-            max-height: 0; /* Start closed */
+            max-height: 300px;
             overflow-y: auto;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             box-shadow: 0 0 8px #00FFFF;
             z-index: 1000;
-            padding: 0; /* No padding when closed */
+            padding: 10px;
             color: #00FFFF;
             font-family: 'Exo 2', sans-serif;
             font-size: 12px;
-            transition: max-height 0.3s ease, padding 0.1s ease; /* Animate height and padding */
         }
         .dropdown-menu.open {
-            max-height: 300px; /* Open state */
-            padding: 10px; /* Add padding when open */
-        }
-        #ecotron-full-list, #independent-menu, #dependent-menu, #view-menu {
-            /* No separate max-height here; use .dropdown-menu.open */
+            display: block; /* Visible when open */
         }
         .dropdown-item {
             display: flex;
@@ -527,10 +523,43 @@
         function toggleDropdown(id) {
             const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
             allMenus.forEach(menuId => {
-                if (menuId !== id) document.getElementById(menuId).classList.remove('open');
+                const menu = document.getElementById(menuId);
+                if (menuId !== id && menu.classList.contains('open')) {
+                    menu.style.height = menu.scrollHeight + 'px'; // Set to current height
+                    setTimeout(() => {
+                        menu.style.height = '0'; // Slide up
+                        setTimeout(() => {
+                            menu.classList.remove('open');
+                            menu.style.display = 'none'; // Hide after animation
+                            menu.style.height = ''; // Reset height
+                        }, 300); // Match transition duration
+                    }, 10); // Small delay to ensure height is set
+                }
             });
+
             const menu = document.getElementById(id);
-            menu.classList.toggle('open');
+            if (menu.classList.contains('open')) {
+                menu.style.height = menu.scrollHeight + 'px'; // Set to current height
+                setTimeout(() => {
+                    menu.style.height = '0'; // Slide up
+                    setTimeout(() => {
+                        menu.classList.remove('open');
+                        menu.style.display = 'none'; // Hide after animation
+                        menu.style.height = ''; // Reset height
+                    }, 300); // Match transition duration
+                }, 10); // Small delay to ensure height is set
+            } else {
+                menu.style.display = 'block'; // Show immediately
+                menu.style.height = '0'; // Start at 0 height
+                menu.classList.add('open');
+                setTimeout(() => {
+                    menu.style.height = menu.scrollHeight + 'px'; // Slide down to full height
+                    setTimeout(() => {
+                        menu.style.height = 'auto'; // Set to auto after animation for responsiveness
+                    }, 300); // Match transition duration
+                }, 10); // Small delay to ensure display is set
+            }
+
             if (id === 'ecotron-full-list') syncEcotrons();
         }
 
@@ -832,6 +861,15 @@
                 .then(() => console.log('Plot rendered successfully'))
                 .catch(err => console.error('Plotly error:', err));
         }
+
+        // Add transition style dynamically to all dropdown menus
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+            dropdownMenus.forEach(menu => {
+                menu.style.transition = 'height 0.3s ease';
+                menu.style.overflow = 'hidden'; // Ensure content doesn't spill during animation
+            });
+        });
 
         document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
         document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
