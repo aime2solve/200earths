@@ -21,6 +21,7 @@
             padding: 1vh;
             font-family: 'Orbitron', sans-serif;
             font-size: calc(16px + 2vw);
+            margin: 0;
         }
         .control-bar {
             width: 100%;
@@ -72,10 +73,11 @@
         }
         .graph-container {
             width: 90%;
-            height: 75vh;
-            margin: 2vh auto;
+            height: calc(100vh - 140px); /* Adjusted to fit within viewport */
+            margin: 1vh auto;
             position: relative;
             background-color: #1A1A1A;
+            overflow: hidden;
         }
         #graph {
             width: 100%;
@@ -98,6 +100,20 @@
             pointer-events: none;
             z-index: 10;
         }
+        .data-link {
+            text-align: center;
+            padding: 0.5vh;
+            background-color: #1A1A1A;
+        }
+        .data-link a {
+            color: #00FFFF;
+            font-family: 'VT323', monospace;
+            font-size: calc(10px + 0.5vw);
+            text-decoration: none;
+        }
+        .data-link a:hover {
+            text-shadow: 0 0 5px #00FFFF;
+        }
         @media (max-width: 768px) {
             .control-bar {
                 flex-direction: column;
@@ -116,6 +132,9 @@
             }
             select {
                 width: calc(100% - 110px);
+            }
+            .graph-container {
+                height: calc(100vh - 200px); /* Adjust for stacked controls */
             }
         }
     </style>
@@ -181,6 +200,9 @@
     </div>
     <div class="graph-container">
         <div id="graph"></div>
+    </div>
+    <div class="data-link">
+        <a href="https://raw.githubusercontent.com/aime2solve/200earths/refs/heads/main/200earths.csv" target="_blank">View Data (200earths.csv)</a>
     </div>
 
     <script>
@@ -284,8 +306,17 @@
                 },
                 xaxis: {gridcolor: '#333333', automargin: true},
                 yaxis: {gridcolor: '#333333', automargin: true},
-                legend: {font: {color: '#00FF00', size: 12, family: 'VT323, monospace'}, x: 0.01, y: 0.99, xanchor: 'left', yanchor: 'top'},
-                margin: {l: 40, r: 40, t: 60, b: 40}
+                legend: {
+                    font: {color: '#00FF00', size: 12, family: 'VT323, monospace'},
+                    x: 0.01,
+                    y: 0.99,
+                    xanchor: 'left',
+                    yanchor: 'top',
+                    bgcolor: '#1A1A1A',
+                    bordercolor: '#00FFFF',
+                    borderwidth: 1
+                },
+                margin: {l: 50, r: 50, t: 60, b: 50}
             };
         }
 
@@ -329,7 +360,6 @@
             let layout = layoutConfig(`${dependent} vs ${independent}`);
 
             if (view === 'scatter') {
-                // Plot points for each Ecotron
                 ecotrons.forEach(ecotron => {
                     const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
@@ -346,7 +376,6 @@
                     }
                 });
 
-                // Aggregate regression across all selected Ecotrons
                 const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                 const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                 console.log('Aggregate data for regression - X:', allX, 'Y:', allY);
