@@ -445,15 +445,17 @@
                     header: true,
                     dynamicTyping: true,
                     complete: function(results) {
-                        data = results.data.filter(row => row.Ecotron);
-                        console.log('Parsed data (first 5 rows):', data.slice(0, 5));
-                        console.log('Total rows:', data.length);
+                        console.log('Parse complete, raw data:', results.data.slice(0, 5));
+                        data = results.data.filter(row => row.Ecotron && typeof row.Ecotron === 'string');
+                        console.log('Filtered data (first 5 rows):', data.slice(0, 5));
+                        console.log('Total rows after filter:', data.length);
                         if (data.length === 0) {
-                            console.error('No valid data - missing Ecotron column?');
+                            console.error('No valid data - missing or invalid Ecotron column');
                             Plotly.newPlot('graph', [], layoutConfig('No valid data in CSV - Check Ecotron column'));
                             return;
                         }
                         populateSelectors();
+                        console.log('Calling updateGraph after parse');
                         updateGraph();
                     },
                     error: function(error) {
@@ -636,9 +638,12 @@
         }
 
         function linearRegression(x, y) {
-            console.log('Running regression:', x, y);
+            console.log('Running regression - X:', x, 'Y:', y);
             const n = x.length;
-            if (n < 2) return { slope: NaN, intercept: NaN, r2: NaN };
+            if (n < 2) {
+                console.warn('Not enough points for regression:', n);
+                return { slope: NaN, intercept: NaN, r2: NaN };
+            }
             const sumX = x.reduce((a, b) => a + b, 0);
             const sumY = y.reduce((a, b) => a + b, 0);
             const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
@@ -647,6 +652,7 @@
             const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
             const intercept = (sumY - slope * sumX) / n;
             const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
+            console.log('Regression result:', { slope, intercept, r2 });
             return { slope, intercept, r2 };
         }
 
@@ -677,6 +683,7 @@
                     const condition = ecotronData[0]?.Dome_Type || 'Unknown';
                     const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                     const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    console.log(`Ecotron ${ecotron}: X=${x}, Y=${y}`);
                     if (x.length > 0 && y.length > 0) {
                         traces.push({
                             x: x,
@@ -690,6 +697,7 @@
 
                 const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                 const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                console.log('All data for regression - X:', allX, 'Y:', allY);
                 let statsText = '';
                 if (allX.length >= 2 && allX.length === allY.length) {
                     const { slope, intercept, r2 } = linearRegression(allX, allY);
@@ -703,8 +711,13 @@
                             line: { color: '#FF00FF', width: 2 }
                         });
                         statsText = `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>R² = ${r2.toFixed(3)}<br>Points: ${allX.length}`;
+                    } else {
+                        statsText = 'Regression failed - insufficient valid data';
                     }
+                } else {
+                    statsText = 'Not enough data points for regression (need at least 2)';
                 }
+                console.log('Stats text:', statsText);
                 document.getElementById('stats-panel').innerHTML = statsText;
 
                 layout.xaxis.title = `${independent} (${units[independent] || ''})`;
@@ -812,13 +825,14 @@
                 return;
             }
 
-            console.log('Traces:', traces);
+            console.log('Traces to plot:', traces);
             if (traces.length === 0) {
+                console.warn('No traces generated');
                 Plotly.newPlot('graph', [], layoutConfig('No data to plot after filtering'));
                 return;
             }
             Plotly.newPlot('graph', traces, layout, { responsive: true })
-                .then(() => console.log('Plot rendered'))
+                .then(() => console.log('Plot rendered successfully'))
                 .catch(err => console.error('Plotly error:', err));
         }
 
