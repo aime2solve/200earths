@@ -13,14 +13,14 @@
             width: 100%;
             background-color: #000000;
             font-family: 'Exo 2', sans-serif;
-            overflow-x: hidden; /* Prevent horizontal scroll */
-            overflow-y: hidden; /* No vertical scroll by default */
+            overflow-x: hidden;
+            overflow-y: hidden;
         }
         h1 {
             color: #00FFFF;
             text-align: center;
             text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
-            padding: 3vh;
+            padding: 2vh; /* Reduced from 3vh */
             font-family: 'Orbitron', sans-serif;
             font-size: calc(18px + 2vw);
             margin: 0;
@@ -34,10 +34,9 @@
         }
         .container {
             display: flex;
-            flex-grow: 1;
-            margin-top: 5vh;
-            height: calc(100vh - 5vh - 3vh); /* Fit within viewport */
-            overflow: hidden; /* No scroll by default */
+            margin-top: 2vh; /* Reduced from 5vh */
+            height: calc(100vh - 2vh - 2vh); /* Adjusted for header */
+            overflow: hidden;
         }
         .sidebar {
             width: 300px;
@@ -45,12 +44,12 @@
             border-right: 2px solid #00FFFF;
             box-shadow: 0 0 10px #00FFFF;
             padding: 15px;
-            padding-top: 30px;
+            padding-top: 20px; /* Reduced from 30px */
             display: flex;
             flex-direction: column;
             gap: 15px;
             position: fixed;
-            top: 15vh;
+            top: 4vh; /* Adjusted to match container */
             bottom: 0;
             height: auto;
             transition: transform 0.3s ease;
@@ -139,7 +138,7 @@
             top: calc(100% + 5px);
             left: 110px;
             width: calc(100% - 120px);
-            max-height: 500px;
+            max-height: 400px; /* Reduced from 500px */
             overflow-y: auto;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
@@ -154,7 +153,7 @@
         }
         .dropdown-menu.open {
             display: block;
-            max-height: 500px;
+            max-height: 400px;
         }
         .dropdown-item {
             display: flex;
@@ -173,7 +172,7 @@
         .stats-panel {
             display: none;
             width: calc(100% - 120px);
-            max-height: 200px;
+            max-height: 150px; /* Reduced from 200px */
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
@@ -189,7 +188,7 @@
         }
         .stats-panel.open {
             display: block;
-            max-height: 200px;
+            max-height: 150px;
         }
         .stats-panel.collapsed {
             border: none;
@@ -205,16 +204,16 @@
             position: relative;
             background-color: #1A1A1A;
             overflow: hidden;
-            height: 100%; /* Full height of container */
+            height: 100%; /* Full container height */
             transition: margin-left 0.3s ease;
         }
         .graph-container.full-width {
             margin-left: 0;
         }
         #graph {
-            width: 90%;
-            height: 90%;
-            margin: 5% auto;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            margin: 0; /* Remove margins */
         }
         #graph::before {
             content: '';
@@ -239,7 +238,7 @@
             .container {
                 flex-direction: column;
                 margin-top: 2vh;
-                height: auto; /* Allow content to dictate height */
+                height: auto;
             }
             .sidebar {
                 width: 100%;
@@ -282,47 +281,49 @@
                 width: calc(100% - 90px);
             }
             #graph {
-                width: 90%;
-                height: 90%;
-                margin: 5% auto;
+                width: 100%;
+                height: 100%;
+                margin: 0;
             }
         }
 
-        /* Mobile Landscape Adjustments (ONLY here allow scroll) */
+        /* Mobile Landscape Adjustments */
         @media (max-width: 768px) and (orientation: landscape) {
             body {
-                overflow-y: auto; /* Enable vertical scroll */
+                overflow-y: auto;
             }
             .container {
-                overflow-y: auto; /* Enable scroll */
-                height: auto; /* Allow content to expand */
+                overflow-y: auto;
+                height: auto;
             }
             h1 {
-                font-size: calc(12px + 1vw); /* Shrink title */
+                font-size: calc(12px + 1vw);
                 padding: 1vh;
             }
             .graph-container {
-                min-height: 40vh; /* Smaller chart height */
+                min-height: 40vh;
             }
             #graph {
-                height: 100%; /* Fit chart to container */
+                height: 100%;
             }
         }
 
-        /* Ensure No Scroll on Larger Screens */
+        /* Ensure Fit on Larger Screens */
         @media (min-width: 769px) {
             body {
-                overflow-y: hidden; /* Explicitly disable scroll */
+                overflow-y: hidden;
             }
             .container {
-                height: calc(100vh - 5vh - 3vh); /* Full fit */
-                overflow: hidden; /* No scroll */
+                height: calc(100vh - 2vh - 2vh); /* Match adjusted header */
+                overflow: hidden;
             }
             .graph-container {
-                height: 100%; /* Full height within container */
+                height: 100%;
             }
             #graph {
-                height: 90%; /* Fit within container */
+                height: 100%;
+                width: 100%;
+                margin: 0;
             }
         }
 
@@ -443,11 +444,11 @@
         console.log('Script started');
 
         const conditionColors = {
-            'Inside_Control': '#008888', // Dark Cyan
-            'High_CO2': '#FF5555',       // Red
-            'Fertilizer': '#55FF55',     // Green
-            'Heat': '#FFAA55',           // Orange
-            'Outside_Control': '#00CCCC' // Light Cyan
+            'Inside_Control': '#008888',
+            'High_CO2': '#FF5555',
+            'Fertilizer': '#55FF55',
+            'Heat': '#FFAA55',
+            'Outside_Control': '#00CCCC'
         };
 
         const units = {
@@ -474,7 +475,7 @@
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
-            margin: { l: 60, r: 60, t: 140, b: 60 }
+            margin: { l: 50, r: 50, t: 100, b: 50 } /* Reduced margins */
         }, { responsive: true });
 
         fetch(csvUrl)
@@ -707,8 +708,8 @@
         function adjustTextSizes() {
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
-            const titleSize = Math.min(28, Math.max(14, width / 35));
-            const axisSize = Math.min(18, Math.max(10, width / 50));
+            const titleSize = Math.min(24, Math.max(12, width / 40)); /* Reduced max size */
+            const axisSize = Math.min(16, Math.max(10, width / 50));
             return { titleSize, axisSize };
         }
 
@@ -725,10 +726,9 @@
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
-                    y: 0.98,
+                    y: 0.95, /* Lowered from 0.98 */
                     yanchor: 'top',
-                    pad: { t: 30 },
-                    textShadow: '0 0 8px #00FFFF'
+                    pad: { t: 10 } /* Reduced from 30 */
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -743,8 +743,7 @@
                     tickfont: { size: axisSize, family: 'Lato, sans-serif' }
                 },
                 showlegend: false,
-                margin: { l: 60, r: 60, t: 140, b: 60 },
-                autosize: true
+                margin: { l: 50, r: 50, t: 100, b: 50 } /* Reduced margins */
             };
         }
 
