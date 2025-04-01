@@ -62,7 +62,8 @@
             font-weight: 700;
             color: #00FFFF;
             text-align: center;
-            text-shadow: 0 0 5px #00FFFF;
+            text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
+            animation: pulseGlow 1.5s ease-in-out infinite alternate;
             margin-bottom: 10px;
         }
         .sidebar-toggle {
@@ -516,7 +517,7 @@
                 input.id = `biome-${biome}`;
                 input.value = biome;
                 input.checked = true;
-                input.addEventListener('change', syncAndUpdate);
+                input.addEventListener('change', updateGraph);  // Simplified to just update graph
                 const label = document.createElement('label');
                 label.htmlFor = `biome-${biome}`;
                 label.textContent = biome;
@@ -529,12 +530,8 @@
             conditionMenu.querySelectorAll('input[type="checkbox"]').forEach(input => {
                 input.checked = true;
                 input.addEventListener('change', (e) => {
-                    const condition = e.target.value;
-                    const ecotronList = document.getElementById('ecotron-full-list');
-                    ecotronList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        if (checkbox.value.includes(condition)) checkbox.checked = e.target.checked;
-                    });
-                    syncAndUpdate();
+                    // Only update graph, no syncing with ecotrons
+                    updateGraph();
                 });
             });
 
@@ -547,7 +544,8 @@
                 input.type = 'checkbox';
                 input.id = `ecotron-${ecotron}`;
                 input.value = ecotron;
-                input.addEventListener('change', syncAndUpdate);
+                input.checked = true;  // Default all ecotrons on
+                input.addEventListener('change', updateGraph);
                 const condition = ecotron.split('_').slice(-1)[0];
                 const label = document.createElement('label');
                 label.htmlFor = `ecotron-${ecotron}`;
@@ -585,12 +583,10 @@
 
             console.log('Biomes:', biomes);
             console.log('Ecotrons:', ecotrons);
-            syncEcotrons();
             updateViewOptions();
         }
 
         function toggleDropdown(id) {
-            const duration = 500;
             const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
             allMenus.forEach(menuId => {
                 const menu = document.getElementById(menuId);
@@ -608,8 +604,6 @@
                 menu.style.display = 'block';
                 menu.classList.add('open');
             }
-
-            if (id === 'ecotron-full-list') syncEcotrons();
         }
 
         function toggleSidebar() {
@@ -631,45 +625,6 @@
             graphContainer.classList.toggle('full-width');
             Plotly.Plots.resize(document.getElementById('graph'));
             adjustTextSizes();
-        }
-
-        function syncEcotrons() {
-            const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
-            const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
-            const ecotronList = document.getElementById('ecotron-full-list');
-            const allEcotrons = ecotronList.querySelectorAll('input[type="checkbox"]');
-            let filteredData = data;
-            if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
-            if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
-            const validEcotrons = new Set(filteredData.map(row => row.Ecotron));
-
-            allEcotrons.forEach(checkbox => {
-                const isValid = validEcotrons.has(checkbox.value);
-                checkbox.disabled = !isValid;
-                if (!isValid) checkbox.checked = false;
-            });
-
-            const checkedEcotrons = new Set(Array.from(allEcotrons).filter(cb => cb.checked).map(cb => cb.value));
-            const conditionChecks = {};
-            conditions.forEach(cond => conditionChecks[cond] = true);
-            allEcotrons.forEach(checkbox => {
-                const ecotron = checkbox.value;
-                const condition = ecotron.split('_').slice(-1)[0];
-                if (checkedEcotrons.has(ecotron) && conditions.includes(condition)) {
-                    conditionChecks[condition] = conditionChecks[condition] && true;
-                } else if (conditions.includes(condition)) {
-                    conditionChecks[condition] = false;
-                }
-            });
-            conditions.forEach(cond => {
-                const input = document.getElementById(cond);
-                input.checked = conditionChecks[cond] !== false;
-            });
-        }
-
-        function syncAndUpdate() {
-            syncEcotrons();
-            updateGraph();
         }
 
         function updateViewOptions() {
