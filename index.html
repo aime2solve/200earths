@@ -36,41 +36,43 @@
             display: flex;
             margin-top: 5vh;
             height: calc(100vh - 5vh - 3vh);
+            width: 100vw;
             overflow: hidden;
         }
         .sidebar {
-            width: 300px;
+            width: 20vw; /* Scales with viewport */
+            max-width: 300px; /* Cap for larger screens */
             background: rgba(26, 26, 26, 0.8);
             border-right: 2px solid #00FFFF;
             box-shadow: 0 0 10px #00FFFF;
-            padding: 15px;
-            padding-top: 30px;
+            padding: 1vw;
+            padding-top: 2vw;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 1vw;
             position: fixed;
-            top: 15vh;
+            top: 8vh; /* Adjusted for header */
             bottom: 0;
             height: auto;
             transition: transform 0.3s ease;
             z-index: 1000;
         }
         .sidebar.collapsed {
-            transform: translateX(-280px);
+            transform: translateX(-95%);
         }
         .sidebar-toggle {
             position: absolute;
-            top: 10px;
-            right: -20px;
-            width: 20px;
-            height: 40px;
+            top: 0.5vw;
+            right: -1.5vw;
+            width: 1.5vw;
+            height: 3vw;
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
             border-left: none;
             border-radius: 0 10px 10px 0;
             color: #00FFFF;
-            font-size: 12px;
-            line-height: 36px;
+            font-size: 1vw;
+            line-height: 3vw;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 0 8px #00FFFF;
@@ -79,13 +81,13 @@
         .mobile-toggle {
             display: none;
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 0.5vw;
+            left: 0.5vw;
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             color: #00FFFF;
-            padding: 5px 10px;
+            padding: 0.5vw 1vw;
             cursor: pointer;
             box-shadow: 0 0 8px #00FFFF;
             z-index: 1100;
@@ -110,9 +112,9 @@
         .button-label {
             color: #FFFF00;
             font-family: 'VT323', monospace;
-            font-size: 20px;
-            margin-right: 10px;
-            width: 100px;
+            font-size: calc(12px + 1vw); /* Scales with viewport */
+            margin-right: 0.5vw;
+            width: 35%;
             text-align: right;
             flex-shrink: 0;
         }
@@ -122,11 +124,11 @@
             border-radius: 10px;
             color: #00FFFF;
             font-family: 'Exo 2', sans-serif;
-            font-size: 16px;
-            padding: 6px 12px;
+            font-size: calc(10px + 0.8vw); /* Scales with viewport */
+            padding: 0.5vw 1vw;
             box-shadow: 0 0 8px #00FFFF;
             cursor: pointer;
-            width: calc(100% - 120px);
+            width: 65%;
             text-align: left;
         }
         .dropdown-toggle:hover {
@@ -135,35 +137,36 @@
         .dropdown-menu {
             display: none;
             position: absolute;
-            top: calc(100% + 5px);
-            left: 110px;
-            width: calc(100% - 120px);
-            max-height: 500px;
+            top: calc(100% + 0.3vw);
+            left: 35%;
+            width: 65%;
+            max-height: 50vh;
             overflow-y: auto;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             box-shadow: 0 0 8px #00FFFF;
             z-index: 1000;
-            padding: 10px;
+            padding: 0.5vw;
             color: #00FFFF;
             font-family: 'Exo 2', sans-serif;
-            font-size: 16px;
+            font-size: calc(10px + 0.8vw);
             transition: max-height 0.5s ease;
         }
         .dropdown-menu.open {
             display: block;
-            max-height: 500px;
+            max-height: 50vh;
         }
         .dropdown-item {
             display: flex;
             align-items: center;
-            margin-bottom: 5px;
+            margin-bottom: 0.3vw;
         }
         .dropdown-item input[type="radio"],
         .dropdown-item input[type="checkbox"] {
-            margin-right: 10px;
+            margin-right: 0.5vw;
             accent-color: #00FFFF;
+            transform: scale(1.2); /* Slightly larger for visibility */
         }
         .dropdown-item.inactive {
             color: #006666;
@@ -171,49 +174,52 @@
         }
         .stats-panel {
             display: none;
-            width: calc(100% - 120px);
-            max-height: 200px;
+            width: 65%;
+            max-height: 20vh;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             box-shadow: 0 0 8px #00FFFF;
             color: #00FF00;
             font-family: 'VT323', monospace;
-            font-size: 18px;
-            padding: 10px;
+            font-size: calc(12px + 0.8vw); /* Scales with viewport */
+            padding: 0.5vw;
             overflow: hidden;
             transition: max-height 0.5s ease;
             margin-left: auto;
-            margin-top: 5px;
+            margin-top: 0.3vw;
         }
         .stats-panel.open {
             display: block;
-            max-height: 200px;
+            max-height: 20vh;
         }
         .stats-panel.collapsed {
             border: none;
         }
         .stats-checkbox {
-            margin-top: 10px;
+            margin-top: 0.5vw;
             display: flex;
             align-items: center;
         }
         .graph-container {
             flex-grow: 1;
-            margin-left: 300px;
+            margin-left: 20vw; /* Matches sidebar width */
+            max-margin-left: 300px; /* Cap for larger screens */
             position: relative;
             background-color: #1A1A1A;
             overflow: hidden;
             height: 100%;
+            width: calc(100vw - 20vw); /* Scales with viewport */
             transition: margin-left 0.3s ease;
         }
         .graph-container.full-width {
             margin-left: 0;
+            width: 100vw;
         }
         #graph {
-            width: calc(100% - 40px); /* Further reduced width */
-            height: calc(100% - 60px); /* Further reduced height */
-            margin: 15px 0 20px 20px; /* Increased padding */
+            width: 92%; /* Relative to container */
+            height: 85%; /* Relative to container */
+            margin: 2% 2% 4% 4%; /* Responsive margins: top, right, bottom, left */
             position: absolute;
             top: 0;
             left: 0;
@@ -250,7 +256,7 @@
                 bottom: auto;
                 height: auto;
                 transform: translateX(-100%);
-                padding-top: 15px;
+                padding-top: 2vw;
             }
             .sidebar.open {
                 transform: translateX(0);
@@ -268,20 +274,18 @@
                 min-height: 50vh;
             }
             .button-label {
-                width: 80px;
-                font-size: 18px;
-            }
-            .dropdown-menu {
-                width: calc(100% - 90px);
-                left: 90px;
-            }
-            .stats-panel {
-                width: calc(100% - 90px);
+                width: 30%;
+                font-size: calc(10px + 1vw);
             }
             .dropdown-toggle {
-                font-size: 14px;
-                padding: 4px 8px;
-                width: calc(100% - 90px);
+                width: 70%;
+            }
+            .dropdown-menu {
+                width: 70%;
+                left: 30%;
+            }
+            .stats-panel {
+                width: 70%;
             }
             #graph {
                 width: 100%;
@@ -312,7 +316,7 @@
             }
         }
 
-        /* Ensure Fit on Larger Screens */
+        /* Larger Screens */
         @media (min-width: 769px) {
             body {
                 overflow-y: hidden;
@@ -323,21 +327,6 @@
             }
             .graph-container {
                 height: 100%;
-            }
-            #graph {
-                width: calc(100% - 40px);
-                height: calc(100% - 60px);
-                margin: 15px 0 20px 20px;
-            }
-        }
-
-        @media (max-width: 480px) and (orientation: portrait) {
-            h1 {
-                font-size: calc(14px + 2vw);
-            }
-            .sidebar {
-                width: 100%;
-                transform: translateX(-100%);
             }
         }
     </style>
@@ -469,17 +458,17 @@
             x: [1, 2, 3],
             y: [2, 4, 6],
             mode: 'markers',
-            marker: { size: 8, color: '#00FFFF' }, /* Smaller initial markers */
+            marker: { size: '0.8vw', color: '#00FFFF' }, /* Responsive size */
             name: 'Test Data'
         }], {
             title: 'Loading 200earths.csv...',
             plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 12 },
+            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: '1vw' },
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
-            margin: { l: 60, r: 40, t: 70, b: 50 } /* Even tighter */
+            margin: { l: '5vw', r: '3vw', t: '8vh', b: '6vh' } /* Responsive margins */
         }, { responsive: true });
 
         fetch(csvUrl)
@@ -606,7 +595,6 @@
         }
 
         function toggleDropdown(id) {
-            const duration = 500;
             const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
             allMenus.forEach(menuId => {
                 const menu = document.getElementById(menuId);
@@ -712,20 +700,22 @@
         function adjustTextSizes() {
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
-            const titleSize = Math.min(18, Math.max(10, width / 50)); /* Even smaller */
-            const axisSize = Math.min(12, Math.max(8, width / 60)); /* Even smaller */
-            return { titleSize, axisSize };
+            const height = graphContainer.offsetHeight;
+            const titleSize = Math.min(18, Math.max(10, width / 50));
+            const axisSize = Math.min(12, Math.max(8, width / 60));
+            const markerSize = Math.min(10, Math.max(6, width / 100));
+            return { titleSize, axisSize, markerSize };
         }
 
         function layoutConfig(title = 'Select Variables to Begin') {
             const cleanTitle = title.replace(/_/g, ' ');
             const { titleSize, axisSize } = adjustTextSizes();
             const addStats = document.getElementById('add-stats-to-chart')?.checked;
-            const titleText = addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 18px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle;
+            const titleText = addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: calc(12px + 0.8vw);">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle;
             return {
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 12 },
+                font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: '1vw' },
                 title: {
                     text: titleText,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
@@ -733,7 +723,7 @@
                     xanchor: 'center',
                     y: 0.95,
                     yanchor: 'top',
-                    pad: { t: 5 }
+                    pad: { t: '1vh' }
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -746,10 +736,10 @@
                     automargin: true, 
                     titlefont: { size: axisSize, family: 'Lato, sans-serif' },
                     tickfont: { size: axisSize, family: 'Lato, sans-serif' },
-                    standoff: 15
+                    standoff: '1vw'
                 },
                 showlegend: false,
-                margin: { l: 60, r: 40, t: 70, b: 50 } /* Shrunk further */
+                margin: { l: '5vw', r: '3vw', t: '8vh', b: '6vh' }
             };
         }
 
@@ -791,6 +781,7 @@
             console.log('Filtered data (first 5):', filteredData.slice(0, 5));
             let traces = [];
             let layout = layoutConfig(`${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}`);
+            const { markerSize } = adjustTextSizes();
 
             if (view === 'scatter') {
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -806,7 +797,7 @@
                             y: y,
                             mode: 'markers',
                             name: ecotron,
-                            marker: { size: 8, color: conditionColors[condition] || '#FFFFFF', line: { width: 1, color: '#FFFFFF' } } /* Smaller markers */
+                            marker: { size: markerSize, color: conditionColors[condition] || '#FFFFFF', line: { width: '0.1vw', color: '#FFFFFF' } }
                         });
                     }
                 });
@@ -824,7 +815,7 @@
                             y: xRange.map(xi => slope * xi + intercept),
                             mode: 'lines',
                             name: 'Best Fit',
-                            line: { color: '#FF00FF', width: 1 } /* Thinner line */
+                            line: { color: '#FF00FF', width: '0.2vw' }
                         });
                         statsText = `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>R² = ${r2.toFixed(3)}<br>Points: ${allX.length}`;
                     } else {
@@ -853,7 +844,7 @@
                     type: 'bar',
                     marker: {
                         color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
-                        line: { width: 1, color: '#FFFFFF' } /* Thinner line */
+                        line: { width: '0.1vw', color: '#FFFFFF' }
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
@@ -878,8 +869,8 @@
                             y: y,
                             mode: 'lines+markers',
                             name: ecotron,
-                            line: { color: conditionColors[condition] || '#FFFFFF', width: 1 }, /* Thinner line */
-                            marker: { size: 6, color: conditionColors[condition] || '#FFFFFF' } /* Smaller markers */
+                            line: { color: conditionColors[condition] || '#FFFFFF', width: '0.2vw' },
+                            marker: { size: markerSize * 0.8, color: conditionColors[condition] || '#FFFFFF' }
                         });
                     }
                 });
@@ -929,7 +920,7 @@
                     type: 'bar',
                     marker: {
                         color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
-                        line: { width: 1, color: '#FFFFFF' } /* Thinner line */
+                        line: { width: '0.1vw', color: '#FFFFFF' }
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
@@ -988,6 +979,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             adjustTextSizes();
+            updateGraph();
         });
     </script>
 </body>
