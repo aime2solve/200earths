@@ -211,9 +211,9 @@
             margin-left: 0;
         }
         #graph {
-            width: calc(100% - 20px); /* Shrink width to fit */
-            height: calc(100% - 40px); /* Shrink height more to fit */
-            margin: 10px 0 20px 10px; /* Top, bottom, left padding */
+            width: calc(100% - 40px); /* Further reduced width */
+            height: calc(100% - 60px); /* Further reduced height */
+            margin: 15px 0 20px 20px; /* Increased padding */
             position: absolute;
             top: 0;
             left: 0;
@@ -325,9 +325,9 @@
                 height: 100%;
             }
             #graph {
-                width: calc(100% - 20px);
-                height: calc(100% - 40px);
-                margin: 10px 0 20px 10px;
+                width: calc(100% - 40px);
+                height: calc(100% - 60px);
+                margin: 15px 0 20px 20px;
             }
         }
 
@@ -407,7 +407,7 @@
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Off_Target_Mutations" value="Off_Target_Mutations"><label for="Off_Target_Mutations">Off Target Mutations</label></div>
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Genetic_Diversity" value="Genetic_Diversity"><label for="Genetic_Diversity">Genetic Diversity</label></div>
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Ecosystem_Trophic_Dynamics" value="Ecosystem_Trophic_Dynamics"><label for="Ecosystem_Trophic_Dynamics">Ecosystem Trophic Dynamics</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Vector_Persistence" value="Vector_Presence"><label for="Vector_Persistence">Vector Persistence</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Vector_Persistence" value="Vector_Persistence"><label for="Vector_Persistence">Vector Persistence</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -469,17 +469,17 @@
             x: [1, 2, 3],
             y: [2, 4, 6],
             mode: 'markers',
-            marker: { size: 12, color: '#00FFFF' },
+            marker: { size: 8, color: '#00FFFF' }, /* Smaller initial markers */
             name: 'Test Data'
         }], {
             title: 'Loading 200earths.csv...',
             plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
+            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 12 },
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
-            margin: { l: 70, r: 50, t: 80, b: 60 } /* Tighter margins */
+            margin: { l: 60, r: 40, t: 70, b: 50 } /* Even tighter */
         }, { responsive: true });
 
         fetch(csvUrl)
@@ -712,8 +712,8 @@
         function adjustTextSizes() {
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
-            const titleSize = Math.min(20, Math.max(12, width / 45)); /* Smaller max */
-            const axisSize = Math.min(14, Math.max(10, width / 55)); /* Smaller max */
+            const titleSize = Math.min(18, Math.max(10, width / 50)); /* Even smaller */
+            const axisSize = Math.min(12, Math.max(8, width / 60)); /* Even smaller */
             return { titleSize, axisSize };
         }
 
@@ -725,7 +725,7 @@
             return {
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 12 }, /* Reduced base size */
+                font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 12 },
                 title: {
                     text: titleText,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
@@ -733,7 +733,7 @@
                     xanchor: 'center',
                     y: 0.95,
                     yanchor: 'top',
-                    pad: { t: 5 } /* Tighter padding */
+                    pad: { t: 5 }
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -746,10 +746,10 @@
                     automargin: true, 
                     titlefont: { size: axisSize, family: 'Lato, sans-serif' },
                     tickfont: { size: axisSize, family: 'Lato, sans-serif' },
-                    standoff: 15 /* Increased for sidebar clearance */
+                    standoff: 15
                 },
                 showlegend: false,
-                margin: { l: 70, r: 50, t: 80, b: 60 } /* Tighter fit */
+                margin: { l: 60, r: 40, t: 70, b: 50 } /* Shrunk further */
             };
         }
 
@@ -806,7 +806,7 @@
                             y: y,
                             mode: 'markers',
                             name: ecotron,
-                            marker: { size: 10, color: conditionColors[condition] || '#FFFFFF', line: { width: 2, color: '#FFFFFF' } } /* Smaller markers */
+                            marker: { size: 8, color: conditionColors[condition] || '#FFFFFF', line: { width: 1, color: '#FFFFFF' } } /* Smaller markers */
                         });
                     }
                 });
@@ -824,7 +824,7 @@
                             y: xRange.map(xi => slope * xi + intercept),
                             mode: 'lines',
                             name: 'Best Fit',
-                            line: { color: '#FF00FF', width: 2 }
+                            line: { color: '#FF00FF', width: 1 } /* Thinner line */
                         });
                         statsText = `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>R² = ${r2.toFixed(3)}<br>Points: ${allX.length}`;
                     } else {
@@ -853,7 +853,7 @@
                     type: 'bar',
                     marker: {
                         color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
-                        line: { width: 2, color: '#FFFFFF' }
+                        line: { width: 1, color: '#FFFFFF' } /* Thinner line */
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
@@ -878,8 +878,8 @@
                             y: y,
                             mode: 'lines+markers',
                             name: ecotron,
-                            line: { color: conditionColors[condition] || '#FFFFFF', width: 2 },
-                            marker: { size: 8, color: conditionColors[condition] || '#FFFFFF' }
+                            line: { color: conditionColors[condition] || '#FFFFFF', width: 1 }, /* Thinner line */
+                            marker: { size: 6, color: conditionColors[condition] || '#FFFFFF' } /* Smaller markers */
                         });
                     }
                 });
@@ -929,7 +929,7 @@
                     type: 'bar',
                     marker: {
                         color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
-                        line: { width: 2, color: '#FFFFFF' }
+                        line: { width: 1, color: '#FFFFFF' } /* Thinner line */
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
