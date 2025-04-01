@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body, html {
             margin: 0;
@@ -57,7 +57,7 @@
         }
         .sidebar-toggle {
             position: absolute;
-            top: 50%;
+            top: 10px; /* Moved to top */
             right: -20px;
             width: 20px;
             height: 40px;
@@ -135,7 +135,7 @@
             top: calc(100% + 5px);
             left: 110px;
             width: calc(100% - 120px);
-            max-height: 300px;
+            max-height: 500px;
             overflow-y: auto;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
@@ -146,11 +146,11 @@
             color: #00FFFF;
             font-family: 'Exo 2', sans-serif;
             font-size: 12px;
-            transition: max-height 0.5s ease; /* Fixed duration for consistent speed */
+            transition: max-height 0.5s ease;
         }
         .dropdown-menu.open {
             display: block;
-            max-height: 500px; /* Increased to ensure full visibility of longer menus */
+            max-height: 500px;
         }
         .dropdown-item {
             display: flex;
@@ -167,24 +167,33 @@
             pointer-events: none;
         }
         .stats-panel {
+            display: none;
             width: calc(100% - 120px);
-            max-height: 0;
-            background: rgba(26, 26, 26, 0.8);
+            max-height: 200px; /* Adjusted for checkbox */
+            background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             box-shadow: 0 0 8px #00FFFF;
             color: #00FF00;
             font-family: 'VT323', monospace;
             font-size: 12px;
-            padding: 0;
+            padding: 10px;
             overflow: hidden;
-            transition: max-height 0.3s, padding 0.1s;
+            transition: max-height 0.5s ease;
             margin-left: auto;
             margin-top: 5px;
         }
         .stats-panel.open {
-            max-height: 150px;
-            padding: 10px;
+            display: block;
+            max-height: 200px;
+        }
+        .stats-panel.collapsed {
+            border: none; /* Hide cyan line when collapsed */
+        }
+        .stats-checkbox {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
         }
         .graph-container {
             flex-grow: 1;
@@ -284,11 +293,11 @@
                 <span class="button-label">Exp. Condition:</span>
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="Control" value="Control"><label for="Control">Control</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2">High CO2</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="Fertilized" value="Fertilized"><label for="Fertilized">Fertilized</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="Heat" value="Heat"><label for="Heat">Heat</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control">Outside Control</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Control" value="Control"><label for="Control" style="color: #00FFFF;">Control</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2" style="color: #FF5555;">High CO2</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Fertilized" value="Fertilized"><label for="Fertilized" style="color: #55FF55;">Fertilized</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Heat" value="Heat"><label for="Heat" style="color: #FFAA55;">Heat</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control" style="color: #FFFFFF;">Outside Control</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -351,7 +360,13 @@
                     <span class="button-label">STATS:</span>
                     <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
                 </div>
-                <div class="stats-panel" id="stats-panel"></div>
+                <div class="stats-panel" id="stats-panel">
+                    <div id="stats-content"></div>
+                    <div class="stats-checkbox">
+                        <input type="checkbox" id="add-stats-to-chart" value="add-stats">
+                        <label for="add-stats-to-chart">Add Stats to Chart</label>
+                    </div>
+                </div>
             </div>
             <div class="button-container">
                 <span class="button-label">CSV:</span>
@@ -366,13 +381,12 @@
     <script>
         console.log('Script started');
 
-        const colors = {
-            'Plant_Growth_Rate': '#00FFFF', 'Photosynthesis_Rate': '#FF00FF', 'Soil_Carbon_Content': '#00FF00',
-            'Gene_Flow': '#0080FF', 'Off_Target_Mutations': '#80FF80', 'Genetic_Diversity': '#FF8080'
-        };
-
-        const domeColors = {
-            'Control': '#00FFFF', 'High_CO2': '#FF0000', 'Fertilized': '#00FF00', 'Heat': '#FFA500', 'Outside_Control': '#FFFFFF'
+        const conditionColors = {
+            'Control': '#00FFFF',       // Cyan
+            'High_CO2': '#FF5555',      // Red
+            'Fertilized': '#55FF55',    // Green
+            'Heat': '#FFAA55',          // Orange
+            'Outside_Control': '#FFFFFF' // White
         };
 
         const units = {
@@ -383,6 +397,7 @@
 
         const csvUrl = 'https://aime2solve.github.io/200earths/200earths.csv';
         let data = [];
+        let statsText = '';
 
         Plotly.newPlot('graph', [{
             x: [1, 2, 3],
@@ -394,7 +409,7 @@
             title: 'Loading 200earths.csv...',
             plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14 },
+            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
@@ -483,9 +498,11 @@
                 input.id = `ecotron-${ecotron}`;
                 input.value = ecotron;
                 input.addEventListener('change', syncAndUpdate);
+                const condition = ecotron.split('_').slice(-1)[0];
                 const label = document.createElement('label');
                 label.htmlFor = `ecotron-${ecotron}`;
                 label.textContent = ecotron;
+                label.style.color = conditionColors[condition] || '#FFFFFF';
                 div.appendChild(input);
                 div.appendChild(label);
                 ecotronFullList.appendChild(div);
@@ -523,7 +540,7 @@
         }
 
         function toggleDropdown(id) {
-            const duration = 500; // Fixed duration in milliseconds for consistent speed
+            const duration = 500;
             const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
             allMenus.forEach(menuId => {
                 const menu = document.getElementById(menuId);
@@ -553,7 +570,7 @@
             graphContainer.classList.toggle('full-width');
             toggle.innerHTML = sidebar.classList.contains('collapsed') ? '<' : '>';
             Plotly.Plots.resize(document.getElementById('graph'));
-            adjustTitleSize();
+            adjustTextSizes();
         }
 
         function toggleMobileSidebar() {
@@ -563,7 +580,7 @@
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
             Plotly.Plots.resize(document.getElementById('graph'));
-            adjustTitleSize();
+            adjustTextSizes();
         }
 
         function syncEcotrons() {
@@ -626,31 +643,46 @@
             });
         }
 
-        function adjustTitleSize() {
+        function adjustTextSizes() {
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
-            let fontSize = Math.min(24, Math.max(12, width / 40)); // Scale between 12px and 24px
-            return fontSize;
+            const titleSize = Math.min(24, Math.max(12, width / 40));
+            const axisSize = Math.min(14, Math.max(8, width / 60));
+            return { titleSize, axisSize };
         }
 
         function layoutConfig(title = 'Select Variables to Begin') {
             const cleanTitle = title.replace(/_/g, ' ');
+            const { titleSize, axisSize } = adjustTextSizes();
+            const addStats = document.getElementById('add-stats-to-chart')?.checked;
             return {
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14 },
+                font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
                 title: {
-                    text: cleanTitle,
-                    font: { size: adjustTitleSize(), color: '#00FFFF', family: 'VT323, monospace' },
+                    text: addStats ? `${cleanTitle}<br><span style="font-size: ${titleSize * 0.8}px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
+                    font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
                     y: 0.95,
-                    yanchor: 'top'
+                    yanchor: 'top',
+                    pad: { t: 10 },
+                    textShadow: '0 0 5px #00FFFF' // Subtle glow
                 },
-                xaxis: { gridcolor: '#333333', automargin: true },
-                yaxis: { gridcolor: '#333333', automargin: true },
+                xaxis: { 
+                    gridcolor: '#333333', 
+                    automargin: true, 
+                    titlefont: { size: axisSize, family: 'Lato, sans-serif' },
+                    tickfont: { size: axisSize, family: 'Lato, sans-serif' }
+                },
+                yaxis: { 
+                    gridcolor: '#333333', 
+                    automargin: true, 
+                    titlefont: { size: axisSize, family: 'Lato, sans-serif' },
+                    tickfont: { size: axisSize, family: 'Lato, sans-serif' }
+                },
                 showlegend: false,
-                margin: { l: 50, r: 50, t: 80, b: 50 },
+                margin: { l: 50, r: 50, t: 100, b: 50 }, // Increased top margin for stats
                 autosize: true
             };
         }
@@ -708,7 +740,7 @@
                             y: y,
                             mode: 'markers',
                             name: ecotron,
-                            marker: { size: 12, color: domeColors[condition] || '#FFFFFF', line: { width: 2, color: '#FFFFFF' } }
+                            marker: { size: 12, color: conditionColors[condition] || '#FFFFFF', line: { width: 2, color: '#FFFFFF' } }
                         });
                     }
                 });
@@ -716,7 +748,7 @@
                 const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
                 const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                 console.log('All data for regression - X:', allX, 'Y:', allY);
-                let statsText = '';
+                statsText = '';
                 if (allX.length >= 2 && allX.length === allY.length) {
                     const { slope, intercept, r2 } = linearRegression(allX, allY);
                     if (!isNaN(slope) && !isNaN(intercept)) {
@@ -736,7 +768,7 @@
                     statsText = 'Not enough data points for regression (need at least 2)';
                 }
                 console.log('Stats text:', statsText);
-                document.getElementById('stats-panel').innerHTML = statsText;
+                document.getElementById('stats-content').innerHTML = statsText;
 
                 layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
                 layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
@@ -754,18 +786,18 @@
                     y: y,
                     type: 'bar',
                     marker: {
-                        color: conditions.map(dt => domeColors[dt] || '#FFFFFF'),
+                        color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
                         line: { width: 2, color: '#FFFFFF' }
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
                 layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
-                document.getElementById('stats-panel').innerHTML = '';
+                document.getElementById('stats-content').innerHTML = '';
             } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
                 if (url) {
                     Plotly.newPlot('graph', [], layoutConfig(`Gene Flow data at: ${url}`));
-                    document.getElementById('stats-panel').innerHTML = '';
+                    document.getElementById('stats-content').innerHTML = '';
                     return;
                 }
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -780,19 +812,19 @@
                             y: y,
                             mode: 'lines+markers',
                             name: ecotron,
-                            line: { color: domeColors[condition] || '#FFFFFF', width: 2 },
-                            marker: { size: 8, color: domeColors[condition] || '#FFFFFF' }
+                            line: { color: conditionColors[condition] || '#FFFFFF', width: 2 },
+                            marker: { size: 8, color: conditionColors[condition] || '#FFFFFF' }
                         });
                     }
                 });
                 layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Gene Flow (%)';
-                document.getElementById('stats-panel').innerHTML = '';
+                document.getElementById('stats-content').innerHTML = '';
             } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
                 if (url) {
                     Plotly.newPlot('graph', [], layoutConfig(`Mutation data at: ${url}`));
-                    document.getElementById('stats-panel').innerHTML = '';
+                    document.getElementById('stats-content').innerHTML = '';
                     return;
                 }
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -809,12 +841,12 @@
                 });
                 layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Ecotron';
-                document.getElementById('stats-panel').innerHTML = '';
+                document.getElementById('stats-content').innerHTML = '';
             } else if (view === 'diversity_bar' && dependent === 'Genetic_Diversity') {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
                 if (url) {
                     Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
-                    document.getElementById('stats-panel').innerHTML = '';
+                    document.getElementById('stats-content').innerHTML = '';
                     return;
                 }
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -830,16 +862,16 @@
                     y: y,
                     type: 'bar',
                     marker: {
-                        color: conditions.map(dt => domeColors[dt] || '#FFFFFF'),
+                        color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
                         line: { width: 2, color: '#FFFFFF' }
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
                 layout.yaxis.title = 'Genetic Diversity (index)';
-                document.getElementById('stats-panel').innerHTML = '';
+                document.getElementById('stats-content').innerHTML = '';
             } else {
                 Plotly.newPlot('graph', [], layoutConfig('View not applicable for this variable'));
-                document.getElementById('stats-panel').innerHTML = '';
+                document.getElementById('stats-content').innerHTML = '';
                 return;
             }
 
@@ -862,22 +894,34 @@
         document.getElementById('view-toggle').addEventListener('click', () => toggleDropdown('view-menu'));
         document.getElementById('stats-toggle').addEventListener('click', () => {
             const statsPanel = document.getElementById('stats-panel');
-            statsPanel.classList.toggle('open');
-            document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
+            if (statsPanel.classList.contains('open')) {
+                statsPanel.classList.remove('open');
+                statsPanel.classList.add('collapsed');
+                statsPanel.style.display = 'none';
+                document.getElementById('stats-toggle').textContent = 'Show Stats';
+            } else {
+                statsPanel.classList.remove('collapsed');
+                statsPanel.classList.add('open');
+                statsPanel.style.display = 'block';
+                document.getElementById('stats-toggle').textContent = 'Hide Stats';
+            }
         });
 
         document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
         document.getElementById('mobile-toggle').addEventListener('click', toggleMobileSidebar);
 
-        window.addEventListener('resize', () => {
-            Plotly.Plots.resize(document.getElementById('graph'));
-            adjustTitleSize();
-            updateGraph(); // Re-render to adjust title
+        document.getElementById('add-stats-to-chart')?.addEventListener('change', () => {
+            updateGraph();
         });
 
-        // Initial title size adjustment
+        window.addEventListener('resize', () => {
+            Plotly.Plots.resize(document.getElementById('graph'));
+            adjustTextSizes();
+            updateGraph();
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
-            adjustTitleSize();
+            adjustTextSizes();
         });
     </script>
 </body>
