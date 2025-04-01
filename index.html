@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body, html {
             margin: 0;
@@ -13,14 +13,15 @@
             width: 100%;
             background-color: #000000;
             font-family: 'Exo 2', sans-serif;
-            overflow-x: hidden;
-            overflow-y: hidden;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         h1 {
             color: #00FFFF;
             text-align: center;
             text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
-            padding: 3vh;
+            padding: 3vh; /* Increased for breathing room */
             font-family: 'Orbitron', sans-serif;
             font-size: calc(18px + 2vw);
             margin: 0;
@@ -34,45 +35,40 @@
         }
         .container {
             display: flex;
-            margin-top: 5vh;
-            height: calc(100vh - 5vh - 3vh);
-            width: 100vw;
+            flex-grow: 1;
             overflow: hidden;
         }
         .sidebar {
-            width: 20vw; /* Scales with viewport */
-            max-width: 300px; /* Cap for larger screens */
+            width: 300px;
             background: rgba(26, 26, 26, 0.8);
             border-right: 2px solid #00FFFF;
             box-shadow: 0 0 10px #00FFFF;
-            padding: 1vw;
-            padding-top: 2vw;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 1vw;
+            gap: 15px;
             position: fixed;
-            top: 8vh; /* Adjusted for header */
-            bottom: 0;
-            height: auto;
+            top: 10vh; /* Lowered slightly */
+            height: 90%; /* Adjusted to fit */
             transition: transform 0.3s ease;
             z-index: 1000;
         }
         .sidebar.collapsed {
-            transform: translateX(-95%);
+            transform: translateX(-280px);
         }
         .sidebar-toggle {
             position: absolute;
-            top: 0.5vw;
-            right: -1.5vw;
-            width: 1.5vw;
-            height: 3vw;
+            top: 10px;
+            right: -20px;
+            width: 20px;
+            height: 40px;
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
             border-left: none;
             border-radius: 0 10px 10px 0;
             color: #00FFFF;
-            font-size: 1vw;
-            line-height: 3vw;
+            font-size: 12px;
+            line-height: 36px;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 0 8px #00FFFF;
@@ -81,13 +77,13 @@
         .mobile-toggle {
             display: none;
             position: fixed;
-            top: 0.5vw;
-            left: 0.5vw;
+            top: 10px;
+            left: 10px;
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             color: #00FFFF;
-            padding: 0.5vw 1vw;
+            padding: 5px 10px;
             cursor: pointer;
             box-shadow: 0 0 8px #00FFFF;
             z-index: 1100;
@@ -112,9 +108,9 @@
         .button-label {
             color: #FFFF00;
             font-family: 'VT323', monospace;
-            font-size: calc(12px + 1vw); /* Scales with viewport */
-            margin-right: 0.5vw;
-            width: 35%;
+            font-size: 14px;
+            margin-right: 10px;
+            width: 100px;
             text-align: right;
             flex-shrink: 0;
         }
@@ -124,11 +120,11 @@
             border-radius: 10px;
             color: #00FFFF;
             font-family: 'Exo 2', sans-serif;
-            font-size: calc(10px + 0.8vw); /* Scales with viewport */
-            padding: 0.5vw 1vw;
+            font-size: 12px;
+            padding: 6px 12px;
             box-shadow: 0 0 8px #00FFFF;
             cursor: pointer;
-            width: 65%;
+            width: calc(100% - 120px);
             text-align: left;
         }
         .dropdown-toggle:hover {
@@ -137,36 +133,35 @@
         .dropdown-menu {
             display: none;
             position: absolute;
-            top: calc(100% + 0.3vw);
-            left: 35%;
-            width: 65%;
-            max-height: 50vh;
+            top: calc(100% + 5px);
+            left: 110px;
+            width: calc(100% - 120px);
+            max-height: 500px;
             overflow-y: auto;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             box-shadow: 0 0 8px #00FFFF;
             z-index: 1000;
-            padding: 0.5vw;
+            padding: 10px;
             color: #00FFFF;
             font-family: 'Exo 2', sans-serif;
-            font-size: calc(10px + 0.8vw);
+            font-size: 12px;
             transition: max-height 0.5s ease;
         }
         .dropdown-menu.open {
             display: block;
-            max-height: 50vh;
+            max-height: 500px;
         }
         .dropdown-item {
             display: flex;
             align-items: center;
-            margin-bottom: 0.3vw;
+            margin-bottom: 5px;
         }
         .dropdown-item input[type="radio"],
         .dropdown-item input[type="checkbox"] {
-            margin-right: 0.5vw;
+            margin-right: 10px;
             accent-color: #00FFFF;
-            transform: scale(1.2); /* Slightly larger for visibility */
         }
         .dropdown-item.inactive {
             color: #006666;
@@ -174,55 +169,50 @@
         }
         .stats-panel {
             display: none;
-            width: 65%;
-            max-height: 20vh;
+            width: calc(100% - 120px);
+            max-height: 200px;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             box-shadow: 0 0 8px #00FFFF;
             color: #00FF00;
             font-family: 'VT323', monospace;
-            font-size: calc(12px + 0.8vw); /* Scales with viewport */
-            padding: 0.5vw;
+            font-size: 12px;
+            padding: 10px;
             overflow: hidden;
             transition: max-height 0.5s ease;
             margin-left: auto;
-            margin-top: 0.3vw;
+            margin-top: 5px;
         }
         .stats-panel.open {
             display: block;
-            max-height: 20vh;
+            max-height: 200px;
         }
         .stats-panel.collapsed {
             border: none;
         }
         .stats-checkbox {
-            margin-top: 0.5vw;
+            margin-top: 10px;
             display: flex;
             align-items: center;
         }
         .graph-container {
             flex-grow: 1;
-            margin-left: 20vw; /* Matches sidebar width */
-            max-margin-left: 300px; /* Cap for larger screens */
+            margin-left: 300px;
             position: relative;
             background-color: #1A1A1A;
             overflow: hidden;
-            height: 100%;
-            width: calc(100vw - 20vw); /* Scales with viewport */
+            min-height: 200px;
+            height: 85%; /* Reduced slightly */
             transition: margin-left 0.3s ease;
         }
         .graph-container.full-width {
             margin-left: 0;
-            width: 100vw;
         }
         #graph {
-            width: 92%; /* Relative to container */
-            height: 85%; /* Relative to container */
-            margin: 2% 2% 4% 4%; /* Responsive margins: top, right, bottom, left */
-            position: absolute;
-            top: 0;
-            left: 0;
+            width: 90%;
+            height: 90%;
+            margin: 5% auto;
         }
         #graph::before {
             content: '';
@@ -241,92 +231,49 @@
             pointer-events: none;
             z-index: 10;
         }
-
-        /* Mobile Adjustments (up to 768px) */
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                margin-top: 2vh;
-                height: auto;
-            }
             .sidebar {
-                width: 100%;
-                position: relative;
-                top: 0;
-                bottom: auto;
-                height: auto;
-                transform: translateX(-100%);
-                padding-top: 2vw;
+                width: 250px;
+                transform: translateX(-230px);
             }
             .sidebar.open {
                 transform: translateX(0);
-            }
-            .sidebar.collapsed {
-                transform: translateX(-100%);
             }
             .mobile-toggle {
                 display: block;
             }
             .graph-container {
                 margin-left: 0;
-                width: 100%;
-                height: auto;
-                min-height: 50vh;
             }
             .button-label {
-                width: 30%;
-                font-size: calc(10px + 1vw);
-            }
-            .dropdown-toggle {
-                width: 70%;
+                width: 80px;
+                font-size: 12px;
             }
             .dropdown-menu {
-                width: 70%;
-                left: 30%;
+                width: calc(100% - 90px);
+                left: 90px;
             }
             .stats-panel {
-                width: 70%;
+                width: calc(100% - 90px);
+            }
+            .dropdown-toggle {
+                font-size: 10px;
+                padding: 4px 8px;
+                width: calc(100% - 90px);
             }
             #graph {
-                width: 100%;
-                height: 100%;
-                margin: 0;
+                width: 90%;
+                height: 90%;
+                margin: 5% auto;
             }
         }
-
-        /* Mobile Landscape Adjustments */
-        @media (max-width: 768px) and (orientation: landscape) {
-            body {
-                overflow-y: auto;
-            }
-            .container {
-                overflow-y: auto;
-                height: auto;
-            }
+        @media (max-width: 480px) {
             h1 {
-                font-size: calc(12px + 1vw);
-                padding: 1vh;
+                font-size: calc(14px + 2vw);
             }
-            .graph-container {
-                min-height: 40vh;
-            }
-            #graph {
-                height: 100%;
-                margin: 0;
-            }
-        }
-
-        /* Larger Screens */
-        @media (min-width: 769px) {
-            body {
-                overflow-y: hidden;
-            }
-            .container {
-                height: calc(100vh - 5vh - 3vh);
-                overflow: hidden;
-            }
-            .graph-container {
-                height: 100%;
+            .sidebar {
+                width: 200px;
+                transform: translateX(-180px);
             }
         }
     </style>
@@ -437,11 +384,11 @@
         console.log('Script started');
 
         const conditionColors = {
-            'Inside_Control': '#008888',
-            'High_CO2': '#FF5555',
-            'Fertilizer': '#55FF55',
-            'Heat': '#FFAA55',
-            'Outside_Control': '#00CCCC'
+            'Inside_Control': '#008888', // Dark Cyan
+            'High_CO2': '#FF5555',       // Red
+            'Fertilizer': '#55FF55',     // Green
+            'Heat': '#FFAA55',           // Orange
+            'Outside_Control': '#00CCCC' // Light Cyan
         };
 
         const units = {
@@ -458,17 +405,17 @@
             x: [1, 2, 3],
             y: [2, 4, 6],
             mode: 'markers',
-            marker: { size: '0.8vw', color: '#00FFFF' }, /* Responsive size */
+            marker: { size: 12, color: '#00FFFF' },
             name: 'Test Data'
         }], {
             title: 'Loading 200earths.csv...',
             plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: '1vw' },
+            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
-            margin: { l: '5vw', r: '3vw', t: '8vh', b: '6vh' } /* Responsive margins */
+            margin: { l: 50, r: 50, t: 120, b: 50 }
         }, { responsive: true });
 
         fetch(csvUrl)
@@ -595,6 +542,7 @@
         }
 
         function toggleDropdown(id) {
+            const duration = 500;
             const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
             allMenus.forEach(menuId => {
                 const menu = document.getElementById(menuId);
@@ -700,30 +648,28 @@
         function adjustTextSizes() {
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
-            const height = graphContainer.offsetHeight;
-            const titleSize = Math.min(18, Math.max(10, width / 50));
-            const axisSize = Math.min(12, Math.max(8, width / 60));
-            const markerSize = Math.min(10, Math.max(6, width / 100));
-            return { titleSize, axisSize, markerSize };
+            const titleSize = Math.min(24, Math.max(12, width / 40));
+            const axisSize = Math.min(18, Math.max(10, width / 50)); // Increased base size
+            return { titleSize, axisSize };
         }
 
         function layoutConfig(title = 'Select Variables to Begin') {
             const cleanTitle = title.replace(/_/g, ' ');
             const { titleSize, axisSize } = adjustTextSizes();
             const addStats = document.getElementById('add-stats-to-chart')?.checked;
-            const titleText = addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: calc(12px + 0.8vw);">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle;
             return {
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: '1vw' },
+                font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
                 title: {
-                    text: titleText,
+                    text: addStats ? `${cleanTitle}<br><span style="font-size: ${titleSize * 0.8}px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
-                    y: 0.95,
+                    y: 0.97, // Raised slightly
                     yanchor: 'top',
-                    pad: { t: '1vh' }
+                    pad: { t: 20 }, // Increased padding for stats
+                    textShadow: '0 0 5px #00FFFF'
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -735,11 +681,11 @@
                     gridcolor: '#333333', 
                     automargin: true, 
                     titlefont: { size: axisSize, family: 'Lato, sans-serif' },
-                    tickfont: { size: axisSize, family: 'Lato, sans-serif' },
-                    standoff: '1vw'
+                    tickfont: { size: axisSize, family: 'Lato, sans-serif' }
                 },
                 showlegend: false,
-                margin: { l: '5vw', r: '3vw', t: '8vh', b: '6vh' }
+                margin: { l: 60, r: 60, t: 120, b: 60 }, // Adjusted margins
+                autosize: true
             };
         }
 
@@ -781,7 +727,6 @@
             console.log('Filtered data (first 5):', filteredData.slice(0, 5));
             let traces = [];
             let layout = layoutConfig(`${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}`);
-            const { markerSize } = adjustTextSizes();
 
             if (view === 'scatter') {
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -797,7 +742,7 @@
                             y: y,
                             mode: 'markers',
                             name: ecotron,
-                            marker: { size: markerSize, color: conditionColors[condition] || '#FFFFFF', line: { width: '0.1vw', color: '#FFFFFF' } }
+                            marker: { size: 12, color: conditionColors[condition] || '#FFFFFF', line: { width: 2, color: '#FFFFFF' } }
                         });
                     }
                 });
@@ -815,7 +760,7 @@
                             y: xRange.map(xi => slope * xi + intercept),
                             mode: 'lines',
                             name: 'Best Fit',
-                            line: { color: '#FF00FF', width: '0.2vw' }
+                            line: { color: '#FF00FF', width: 2 }
                         });
                         statsText = `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>R² = ${r2.toFixed(3)}<br>Points: ${allX.length}`;
                     } else {
@@ -844,7 +789,7 @@
                     type: 'bar',
                     marker: {
                         color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
-                        line: { width: '0.1vw', color: '#FFFFFF' }
+                        line: { width: 2, color: '#FFFFFF' }
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
@@ -869,8 +814,8 @@
                             y: y,
                             mode: 'lines+markers',
                             name: ecotron,
-                            line: { color: conditionColors[condition] || '#FFFFFF', width: '0.2vw' },
-                            marker: { size: markerSize * 0.8, color: conditionColors[condition] || '#FFFFFF' }
+                            line: { color: conditionColors[condition] || '#FFFFFF', width: 2 },
+                            marker: { size: 8, color: conditionColors[condition] || '#FFFFFF' }
                         });
                     }
                 });
@@ -920,7 +865,7 @@
                     type: 'bar',
                     marker: {
                         color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
-                        line: { width: '0.1vw', color: '#FFFFFF' }
+                        line: { width: 2, color: '#FFFFFF' }
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
@@ -979,7 +924,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             adjustTextSizes();
-            updateGraph();
         });
     </script>
 </body>
