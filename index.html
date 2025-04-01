@@ -21,7 +21,7 @@
             color: #00FFFF;
             text-align: center;
             text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
-            padding: 1vh;
+            padding: 3vh; /* Increased for breathing room */
             font-family: 'Orbitron', sans-serif;
             font-size: calc(18px + 2vw);
             margin: 0;
@@ -48,7 +48,8 @@
             flex-direction: column;
             gap: 15px;
             position: fixed;
-            height: 100%;
+            top: 10vh; /* Lowered slightly */
+            height: 90%; /* Adjusted to fit */
             transition: transform 0.3s ease;
             z-index: 1000;
         }
@@ -57,7 +58,7 @@
         }
         .sidebar-toggle {
             position: absolute;
-            top: 10px; /* Moved to top */
+            top: 10px;
             right: -20px;
             width: 20px;
             height: 40px;
@@ -169,7 +170,7 @@
         .stats-panel {
             display: none;
             width: calc(100% - 120px);
-            max-height: 200px; /* Adjusted for checkbox */
+            max-height: 200px;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
@@ -188,7 +189,7 @@
             max-height: 200px;
         }
         .stats-panel.collapsed {
-            border: none; /* Hide cyan line when collapsed */
+            border: none;
         }
         .stats-checkbox {
             margin-top: 10px;
@@ -202,6 +203,7 @@
             background-color: #1A1A1A;
             overflow: hidden;
             min-height: 200px;
+            height: 85%; /* Reduced slightly */
             transition: margin-left 0.3s ease;
         }
         .graph-container.full-width {
@@ -293,11 +295,11 @@
                 <span class="button-label">Exp. Condition:</span>
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="Control" value="Control"><label for="Control" style="color: #00FFFF;">Control</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Inside_Control" value="Inside_Control"><label for="Inside_Control" style="color: #008888;">Inside Control</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2" style="color: #FF5555;">High CO2</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="Fertilized" value="Fertilized"><label for="Fertilized" style="color: #55FF55;">Fertilized</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Fertilizer" value="Fertilizer"><label for="Fertilizer" style="color: #55FF55;">Fertilizer</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="Heat" value="Heat"><label for="Heat" style="color: #FFAA55;">Heat</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control" style="color: #FFFFFF;">Outside Control</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control" style="color: #00CCCC;">Outside Control</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -357,7 +359,7 @@
             </div>
             <div class="stats-container">
                 <div class="stats-header">
-                    <span class="button-label">STATS:</span>
+                    <span class="button-label">Stats:</span>
                     <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
                 </div>
                 <div class="stats-panel" id="stats-panel">
@@ -382,11 +384,11 @@
         console.log('Script started');
 
         const conditionColors = {
-            'Control': '#00FFFF',       // Cyan
-            'High_CO2': '#FF5555',      // Red
-            'Fertilized': '#55FF55',    // Green
-            'Heat': '#FFAA55',          // Orange
-            'Outside_Control': '#FFFFFF' // White
+            'Inside_Control': '#008888', // Dark Cyan
+            'High_CO2': '#FF5555',       // Red
+            'Fertilizer': '#55FF55',     // Green
+            'Heat': '#FFAA55',           // Orange
+            'Outside_Control': '#00CCCC' // Light Cyan
         };
 
         const units = {
@@ -413,7 +415,7 @@
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
-            margin: { l: 50, r: 50, t: 80, b: 50 }
+            margin: { l: 50, r: 50, t: 120, b: 50 }
         }, { responsive: true });
 
         fetch(csvUrl)
@@ -647,7 +649,7 @@
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
             const titleSize = Math.min(24, Math.max(12, width / 40));
-            const axisSize = Math.min(14, Math.max(8, width / 60));
+            const axisSize = Math.min(18, Math.max(10, width / 50)); // Increased base size
             return { titleSize, axisSize };
         }
 
@@ -664,10 +666,10 @@
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
-                    y: 0.95,
+                    y: 0.97, // Raised slightly
                     yanchor: 'top',
-                    pad: { t: 10 },
-                    textShadow: '0 0 5px #00FFFF' // Subtle glow
+                    pad: { t: 20 }, // Increased padding for stats
+                    textShadow: '0 0 5px #00FFFF'
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -682,7 +684,7 @@
                     tickfont: { size: axisSize, family: 'Lato, sans-serif' }
                 },
                 showlegend: false,
-                margin: { l: 50, r: 50, t: 100, b: 50 }, // Increased top margin for stats
+                margin: { l: 60, r: 60, t: 120, b: 60 }, // Adjusted margins
                 autosize: true
             };
         }
