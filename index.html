@@ -20,7 +20,7 @@
             color: #00FFFF;
             text-align: center;
             text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
-            padding: 2vh; /* Reduced from 3vh */
+            padding: 3vh; /* Original padding */
             font-family: 'Orbitron', sans-serif;
             font-size: calc(18px + 2vw);
             margin: 0;
@@ -34,8 +34,8 @@
         }
         .container {
             display: flex;
-            margin-top: 2vh; /* Reduced from 5vh */
-            height: calc(100vh - 2vh - 2vh); /* Adjusted for header */
+            margin-top: 5vh; /* Original margin */
+            height: calc(100vh - 5vh - 3vh); /* Original height */
             overflow: hidden;
         }
         .sidebar {
@@ -44,12 +44,12 @@
             border-right: 2px solid #00FFFF;
             box-shadow: 0 0 10px #00FFFF;
             padding: 15px;
-            padding-top: 20px; /* Reduced from 30px */
+            padding-top: 30px; /* Original padding */
             display: flex;
             flex-direction: column;
             gap: 15px;
             position: fixed;
-            top: 4vh; /* Adjusted to match container */
+            top: 15vh; /* Original position */
             bottom: 0;
             height: auto;
             transition: transform 0.3s ease;
@@ -138,7 +138,7 @@
             top: calc(100% + 5px);
             left: 110px;
             width: calc(100% - 120px);
-            max-height: 400px; /* Reduced from 500px */
+            max-height: 500px;
             overflow-y: auto;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
@@ -153,7 +153,7 @@
         }
         .dropdown-menu.open {
             display: block;
-            max-height: 400px;
+            max-height: 500px;
         }
         .dropdown-item {
             display: flex;
@@ -172,7 +172,7 @@
         .stats-panel {
             display: none;
             width: calc(100% - 120px);
-            max-height: 150px; /* Reduced from 200px */
+            max-height: 200px;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
@@ -188,7 +188,7 @@
         }
         .stats-panel.open {
             display: block;
-            max-height: 150px;
+            max-height: 200px;
         }
         .stats-panel.collapsed {
             border: none;
@@ -211,9 +211,10 @@
             margin-left: 0;
         }
         #graph {
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            margin: 0; /* Remove margins */
+            width: 100%;
+            height: calc(100% - 20px); /* Leave 20px space underneath */
+            margin: 0;
+            padding-bottom: 20px; /* Ensure space is visible */
         }
         #graph::before {
             content: '';
@@ -284,6 +285,7 @@
                 width: 100%;
                 height: 100%;
                 margin: 0;
+                padding-bottom: 0; /* No extra space on mobile */
             }
         }
 
@@ -305,6 +307,7 @@
             }
             #graph {
                 height: 100%;
+                padding-bottom: 0;
             }
         }
 
@@ -314,16 +317,17 @@
                 overflow-y: hidden;
             }
             .container {
-                height: calc(100vh - 2vh - 2vh); /* Match adjusted header */
+                height: calc(100vh - 5vh - 3vh);
                 overflow: hidden;
             }
             .graph-container {
                 height: 100%;
             }
             #graph {
-                height: 100%;
+                height: calc(100% - 20px); /* Leave space underneath */
                 width: 100%;
                 margin: 0;
+                padding-bottom: 20px;
             }
         }
 
@@ -475,7 +479,7 @@
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
-            margin: { l: 50, r: 50, t: 100, b: 50 } /* Reduced margins */
+            margin: { l: 60, r: 60, t: 120, b: 80 } /* Adjusted for axis text and space */
         }, { responsive: true });
 
         fetch(csvUrl)
@@ -708,8 +712,8 @@
         function adjustTextSizes() {
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
-            const titleSize = Math.min(24, Math.max(12, width / 40)); /* Reduced max size */
-            const axisSize = Math.min(16, Math.max(10, width / 50));
+            const titleSize = Math.min(28, Math.max(14, width / 35));
+            const axisSize = Math.min(18, Math.max(10, width / 50));
             return { titleSize, axisSize };
         }
 
@@ -726,9 +730,9 @@
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
-                    y: 0.95, /* Lowered from 0.98 */
+                    y: 0.95, /* Adjusted for better fit */
                     yanchor: 'top',
-                    pad: { t: 10 } /* Reduced from 30 */
+                    pad: { t: 20 }
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -743,7 +747,7 @@
                     tickfont: { size: axisSize, family: 'Lato, sans-serif' }
                 },
                 showlegend: false,
-                margin: { l: 50, r: 50, t: 100, b: 50 } /* Reduced margins */
+                margin: { l: 60, r: 60, t: 120, b: 80 } /* Adjusted for axis text and space */
             };
         }
 
