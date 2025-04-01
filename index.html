@@ -406,6 +406,16 @@
                     <div class="dropdown-item"><input type="radio" name="view" id="diversity_bar" value="diversity_bar"><label for="diversity_bar">Genetic Diversity Bar</label></div>
                 </div>
             </div>
+            <div class="button-container">
+                <span class="button-label">Fit Type:</span>
+                <div class="dropdown-toggle" id="fit-toggle">Auto</div>
+                <div class="dropdown-menu" id="fit-menu">
+                    <div class="dropdown-item"><input type="radio" name="fit" id="fit-auto" value="auto" checked><label for="fit-auto">Auto</label></div>
+                    <div class="dropdown-item"><input type="radio" name="fit" id="fit-linear" value="linear"><label for="fit-linear">Linear</label></div>
+                    <div class="dropdown-item"><input type="radio" name="fit" id="fit-quadratic" value="quadratic"><label for="fit-quadratic">Quadratic</label></div>
+                    <div class="dropdown-item"><input type="radio" name="fit" id="fit-exponential" value="exponential"><label for="fit-exponential">Exponential</label></div>
+                </div>
+            </div>
             <div class="stats-container">
                 <div class="stats-header">
                     <span class="button-label">Stats:</span>
@@ -517,7 +527,7 @@
                 input.id = `biome-${biome}`;
                 input.value = biome;
                 input.checked = true;
-                input.addEventListener('change', updateGraph);  // Simplified to just update graph
+                input.addEventListener('change', updateGraph);
                 const label = document.createElement('label');
                 label.htmlFor = `biome-${biome}`;
                 label.textContent = biome;
@@ -529,10 +539,7 @@
             const conditionMenu = document.getElementById('condition-menu');
             conditionMenu.querySelectorAll('input[type="checkbox"]').forEach(input => {
                 input.checked = true;
-                input.addEventListener('change', (e) => {
-                    // Only update graph, no syncing with ecotrons
-                    updateGraph();
-                });
+                input.addEventListener('change', updateGraph);
             });
 
             const ecotronFullList = document.getElementById('ecotron-full-list');
@@ -544,7 +551,7 @@
                 input.type = 'checkbox';
                 input.id = `ecotron-${ecotron}`;
                 input.value = ecotron;
-                input.checked = true;  // Default all ecotrons on
+                input.checked = true;
                 input.addEventListener('change', updateGraph);
                 const condition = ecotron.split('_').slice(-1)[0];
                 const label = document.createElement('label');
@@ -581,13 +588,21 @@
                 });
             });
 
+            const fitMenu = document.getElementById('fit-menu');
+            fitMenu.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    document.getElementById('fit-toggle').textContent = document.querySelector(`label[for="${e.target.id}"]`).textContent;
+                    updateGraph();
+                });
+            });
+
             console.log('Biomes:', biomes);
             console.log('Ecotrons:', ecotrons);
             updateViewOptions();
         }
 
         function toggleDropdown(id) {
-            const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
+            const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu', 'fit-menu'];
             allMenus.forEach(menuId => {
                 const menu = document.getElementById(menuId);
                 if (menuId !== id && menu.classList.contains('open')) {
@@ -694,12 +709,8 @@
         }
 
         function linearRegression(x, y) {
-            console.log('Running regression - X:', x, 'Y:', y);
             const n = x.length;
-            if (n < 2) {
-                console.warn('Not enough points for regression:', n);
-                return { slope: NaN, intercept: NaN, r2: NaN };
-            }
+            if (n < 2) return { slope: NaN, intercept: NaN, r2: NaN };
             const sumX = x.reduce((a, b) => a + b, 0);
             const sumY = y.reduce((a, b) => a + b, 0);
             const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
@@ -708,8 +719,71 @@
             const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
             const intercept = (sumY - slope * sumX) / n;
             const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
-            console.log('Regression result:', { slope, intercept, r2 });
-            return { slope, intercept, r2 };
+            return { slope, intercept, r2, type: 'linear' };
+        }
+
+        function quadraticRegression(x, y) {
+            const n = x.length;
+            if (n < 3) return { a: NaN, b: NaN, c: NaN, r2: NaN };
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXX = x.reduce((a, b) => a + b * b, 0);
+            const sumXXX = x.reduce((a, b) => a + b * b * b, 0);
+            const sumXXXX = x.reduce((a, b) => a + b * b * b * b, 0);
+            const sumXY = x.reduce((a, b, i) => a + b * y[i], 0);
+            const sumXXY = x.reduce((a, b, i) => a + b * b * y[i], 0);
+
+            const denom = n * sumXX * sumXXXX - sumXX * sumXX + sumX * (sumXXX * sumX - sumXX * sumXXX);
+            const a = (n * (sumXXY * sumXX - sumXY * sumXXX) + sumX * (sumXY * sumXXXX - sumXXY * sumXXX)) / denom;
+            const b = (n * sumXXXX * sumXY - sumXX * sumXXY + sumX * (sumXX * sumXXY - sumXY * sumXXX)) / denom;
+            const c = (sumY * sumXX * sumXXXX - sumX * sumXXY * sumXXXX + sumXX * (sumXY * sumXXX - sumY * sumXXXX)) / denom;
+
+            const yMean = sumY / n;
+            const ssTot = y.reduce((a, b) => a + (b - yMean) ** 2, 0);
+            const yPred = x.map(xi => a * xi * xi + b * xi + c);
+            const ssRes = y.reduce((a, b, i) => a + (b - yPred[i]) ** 2, 0);
+            const r2 = 1 - ssRes / ssTot;
+
+            return { a, b, c, r2, type: 'quadratic' };
+        }
+
+        function exponentialRegression(x, y) {
+            const n = x.length;
+            if (n < 2 || y.some(yi => yi <= 0)) return { a: NaN, b: NaN, r2: NaN }; // Can't log negative or zero y
+            const logY = y.map(yi => Math.log(yi));
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumLogY = logY.reduce((a, b) => a + b, 0);
+            const sumXLogY = x.reduce((a, b, i) => a + b * logY[i], 0);
+            const sumXX = x.reduce((a, b) => a + b * b, 0);
+            const b = (n * sumXLogY - sumX * sumLogY) / (n * sumXX - sumX * sumX);
+            const a = Math.exp((sumLogY - b * sumX) / n);
+
+            const yMean = y.reduce((a, b) => a + b, 0) / n;
+            const ssTot = y.reduce((a, b) => a + (b - yMean) ** 2, 0);
+            const yPred = x.map(xi => a * Math.exp(b * xi));
+            const ssRes = y.reduce((a, b, i) => a + (b - yPred[i]) ** 2, 0);
+            const r2 = 1 - ssRes / ssTot;
+
+            return { a, b, r2, type: 'exponential' };
+        }
+
+        function bestFitCurve(x, y, fitType = 'auto') {
+            console.log('Fitting curve - X:', x, 'Y:', y, 'Fit Type:', fitType);
+            const fits = {};
+            fits.linear = linearRegression(x, y);
+            fits.quadratic = quadraticRegression(x, y);
+            fits.exponential = exponentialRegression(x, y);
+
+            if (fitType !== 'auto') {
+                console.log(`Forced ${fitType} fit:`, fits[fitType]);
+                return fits[fitType];
+            }
+
+            const validFits = Object.values(fits).filter(f => !isNaN(f.r2));
+            if (validFits.length === 0) return { type: 'none', r2: NaN };
+            const bestFit = validFits.reduce((prev, curr) => curr.r2 > prev.r2 ? curr : prev);
+            console.log('Best fit selected:', bestFit);
+            return bestFit;
         }
 
         function updateGraph() {
@@ -720,8 +794,9 @@
             const independent = document.querySelector('#independent-menu input:checked').value;
             const dependent = document.querySelector('#dependent-menu input:checked').value;
             const view = document.querySelector('#view-menu input:checked').value;
+            const fitType = document.querySelector('#fit-menu input:checked').value;
 
-            console.log('Selections:', { biomes, conditions, selectedEcotrons, independent, dependent, view });
+            console.log('Selections:', { biomes, conditions, selectedEcotrons, independent, dependent, view, fitType });
 
             let filteredData = data;
             if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
@@ -755,23 +830,41 @@
                 const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
                 console.log('All data for regression - X:', allX, 'Y:', allY);
                 statsText = '';
-                if (allX.length >= 2 && allX.length === allY.length) {
-                    const { slope, intercept, r2 } = linearRegression(allX, allY);
-                    if (!isNaN(slope) && !isNaN(intercept)) {
-                        const xRange = [Math.min(...allX), Math.max(...allX)];
+                if (allX.length >= 3 && allX.length === allY.length) {
+                    const fit = bestFitCurve(allX, allY, fitType);
+                    const xRange = Array.from({ length: 100 }, (_, i) => Math.min(...allX) + i * (Math.max(...allX) - Math.min(...allX)) / 99);
+                    if (fit.type === 'linear' && !isNaN(fit.slope) && !isNaN(fit.intercept)) {
                         traces.push({
                             x: xRange,
-                            y: xRange.map(xi => slope * xi + intercept),
+                            y: xRange.map(xi => fit.slope * xi + fit.intercept),
                             mode: 'lines',
-                            name: 'Best Fit',
-                            line: { color: '#FF00FF', width: 2 }
+                            name: 'Linear Fit',
+                            line: { color: '#FF00FF', width: 2, dash: 'solid' }
                         });
-                        statsText = `Fit: y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>R² = ${r2.toFixed(3)}<br>Points: ${allX.length}`;
+                        statsText = `Linear Fit: y = ${fit.slope.toFixed(2)}x + ${fit.intercept.toFixed(2)}<br>R² = ${fit.r2.toFixed(3)}<br>Points: ${allX.length}`;
+                    } else if (fit.type === 'quadratic' && !isNaN(fit.a) && !isNaN(fit.b) && !isNaN(fit.c)) {
+                        traces.push({
+                            x: xRange,
+                            y: xRange.map(xi => fit.a * xi * xi + fit.b * xi + fit.c),
+                            mode: 'lines',
+                            name: 'Quadratic Fit',
+                            line: { color: '#FF00FF', width: 2, dash: 'dash' }
+                        });
+                        statsText = `Quadratic Fit: y = ${fit.a.toFixed(3)}x² + ${fit.b.toFixed(2)}x + ${fit.c.toFixed(2)}<br>R² = ${fit.r2.toFixed(3)}<br>Points: ${allX.length}`;
+                    } else if (fit.type === 'exponential' && !isNaN(fit.a) && !isNaN(fit.b)) {
+                        traces.push({
+                            x: xRange,
+                            y: xRange.map(xi => fit.a * Math.exp(fit.b * xi)),
+                            mode: 'lines',
+                            name: 'Exponential Fit',
+                            line: { color: '#FF00FF', width: 2, dash: 'dot' }
+                        });
+                        statsText = `Exponential Fit: y = ${fit.a.toFixed(2)}e^(${fit.b.toFixed(3)}x)<br>R² = ${fit.r2.toFixed(3)}<br>Points: ${allX.length}`;
                     } else {
-                        statsText = 'Regression failed - insufficient valid data';
+                        statsText = 'Fit failed - insufficient valid data';
                     }
                 } else {
-                    statsText = 'Not enough data points for regression (need at least 2)';
+                    statsText = 'Not enough data points for fit (need at least 3)';
                 }
                 console.log('Stats text:', statsText);
                 document.getElementById('stats-content').innerHTML = statsText;
@@ -898,6 +991,7 @@
         document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
         document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
         document.getElementById('view-toggle').addEventListener('click', () => toggleDropdown('view-menu'));
+        document.getElementById('fit-toggle').addEventListener('click', () => toggleDropdown('fit-menu'));
         document.getElementById('stats-toggle').addEventListener('click', () => {
             const statsPanel = document.getElementById('stats-panel');
             if (statsPanel.classList.contains('open')) {
