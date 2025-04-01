@@ -48,8 +48,8 @@
             flex-direction: column;
             gap: 20px;
             position: fixed;
-            top: 15vh; /* Lowered from 12vh (previously 10vh) */
-            height: 85%; /* Adjusted from 88% to match new top position */
+            top: 15vh;
+            height: 85%;
             transition: transform 0.3s ease;
             z-index: 1000;
         }
@@ -175,9 +175,9 @@
             border: 2px solid #00FFFF;
             border-radius: 10px;
             box-shadow: 0 0 8px #00FFFF;
-            color: #00FF00;
+            color: #00FF00; /* Unified with graph stats */
             font-family: 'VT323', monospace;
-            font-size: 10px;
+            font-size: 10px; /* Unified with dropdown and graph stats */
             padding: 8px;
             overflow: hidden;
             transition: max-height 0.5s ease;
@@ -203,7 +203,7 @@
             background-color: #1A1A1A;
             overflow: hidden;
             min-height: 200px;
-            height: 90%; /* Increased from 85% to extend lower */
+            height: 98%; /* Increased from 95% to extend further down */
             transition: margin-left 0.3s ease;
         }
         .graph-container.full-width {
@@ -211,8 +211,8 @@
         }
         #graph {
             width: 90%;
-            height: 95%; /* Increased from 90% to use more vertical space */
-            margin: 2.5% auto; /* Adjusted from 5% to center within larger height */
+            height: 99%; /* Increased from 98% to maximize vertical space */
+            margin: 0.5% auto; /* Reduced from 1% to minimize margins */
         }
         #graph::before {
             content: '';
@@ -236,8 +236,8 @@
                 width: 250px;
                 transform: translateX(-230px);
                 gap: 15px;
-                top: 15vh; /* Consistent with desktop */
-                height: 85%; /* Consistent with desktop */
+                top: 15vh;
+                height: 85%;
             }
             .sidebar.open {
                 transform: translateX(0);
@@ -247,7 +247,7 @@
             }
             .graph-container {
                 margin-left: 0;
-                height: 90%; /* Consistent with desktop */
+                height: 98%; /* Consistent with desktop */
             }
             .button-label {
                 width: 80px;
@@ -261,7 +261,7 @@
             }
             .stats-panel {
                 width: calc(100% - 90px);
-                font-size: 8px;
+                font-size: 8px; /* Consistent with dropdown */
             }
             .dropdown-toggle {
                 font-size: 8px;
@@ -269,9 +269,9 @@
                 width: calc(100% - 90px);
             }
             #graph {
-                width: 95%; /* Increased for mobile landscape */
-                height: 95%; /* Consistent with desktop */
-                margin: 2.5% auto;
+                width: 95%;
+                height: 99%; /* Consistent with desktop */
+                margin: 0.5% auto;
             }
         }
         @media (max-width: 480px) {
@@ -284,25 +284,24 @@
                 gap: 12px;
             }
             .graph-container {
-                height: 90%; /* Consistent with larger screens */
+                height: 98%; /* Consistent with larger screens */
             }
         }
         @media (orientation: landscape) and (max-height: 500px) {
-            /* Adjustments for mobile landscape */
             .sidebar {
-                top: 10vh; /* Slightly higher in landscape to avoid overlap */
-                height: 90%; /* Increased to fit content */
+                top: 10vh;
+                height: 90%;
             }
             .graph-container {
-                height: 95%; /* Maximized for landscape visibility */
+                height: 99%; /* Maximized for landscape */
             }
             #graph {
-                height: 100%; /* Full height in landscape */
-                margin: 0 auto; /* No margins to maximize space */
+                height: 100%;
+                margin: 0 auto;
             }
             h1 {
-                padding: 1vh; /* Reduced padding in landscape */
-                font-size: calc(12px + 1.5vw); /* Smaller title */
+                padding: 1vh;
+                font-size: calc(12px + 1.5vw);
             }
         }
     </style>
@@ -371,6 +370,7 @@
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Target_Population_Size" value="Target_Population_Size"><label for="Target_Population_Size">Target Population Size</label></div>
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Off_Target_Mutations" value="Off_Target_Mutations"><label for="Off_Target_Mutations">Off Target Mutations</label></div>
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Genetic_Diversity" value="Genetic_Diversity"><label for="Genetic_Diversity">Genetic Diversity</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Biodiversity_Shannon" value="Biodiversity_Shannon"><label for="Biodiversity_Shannon">Biodiversity (Shannon Index)</label></div>
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Ecosystem_Trophic_Dynamics" value="Ecosystem_Trophic_Dynamics"><label for="Ecosystem_Trophic_Dynamics">Ecosystem Trophic Dynamics</label></div>
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Vector_Persistence" value="Vector_Persistence"><label for="Vector_Persistence">Vector Persistence</label></div>
                 </div>
@@ -423,7 +423,7 @@
         const units = {
             'CO2_Level': 'ppm', 'Temperature_Level': '°C', 'Fertilizer_Dose': 'kg/ha', 'GMO_Presence': 'binary', 'Vector_Presence': 'binary',
             'Plant_Growth_Rate': 'mm/day', 'Photosynthesis_Rate': 'µmol/m²s', 'Soil_Carbon_Content': '%', 'Gene_Flow': '%',
-            'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index'
+            'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index', 'Biodiversity_Shannon': 'H\'' // Shannon Index unit
         };
 
         const csvUrl = 'https://aime2solve.github.io/200earths/200earths.csv';
@@ -669,7 +669,7 @@
                 } else if (value === 'mutation_heatmap') {
                     option.className = dependent === 'Off_Target_Mutations' ? 'dropdown-item' : 'dropdown-item inactive';
                 } else if (value === 'diversity_bar') {
-                    option.className = dependent === 'Genetic_Diversity' ? 'dropdown-item' : 'dropdown-item inactive';
+                    option.className = (dependent === 'Genetic_Diversity' || dependent === 'Biodiversity_Shannon') ? 'dropdown-item' : 'dropdown-item inactive';
                 }
             });
         }
@@ -692,7 +692,7 @@
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
                 title: {
-                    text: addStats ? `${cleanTitle}<br><span style="font-size: ${titleSize * 0.8}px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
+                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 10px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
@@ -874,7 +874,7 @@
                 layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Ecotron';
                 document.getElementById('stats-content').innerHTML = '';
-            } else if (view === 'diversity_bar' && dependent === 'Genetic_Diversity') {
+            } else if (view === 'diversity_bar' && (dependent === 'Genetic_Diversity' || dependent === 'Biodiversity_Shannon')) {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
                 if (url) {
                     Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
@@ -899,7 +899,7 @@
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
-                layout.yaxis.title = 'Genetic Diversity (index)';
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
                 document.getElementById('stats-content').innerHTML = '';
             } else {
                 Plotly.newPlot('graph', [], layoutConfig('View not applicable for this variable'));
