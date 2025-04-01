@@ -130,7 +130,7 @@
             box-shadow: 0 0 12px #00FFFF;
         }
         .dropdown-menu {
-            display: none; /* Hidden by default */
+            display: none;
             position: absolute;
             top: calc(100% + 5px);
             left: 110px;
@@ -146,9 +146,11 @@
             color: #00FFFF;
             font-family: 'Exo 2', sans-serif;
             font-size: 12px;
+            transition: max-height 0.5s ease; /* Fixed duration for consistent speed */
         }
         .dropdown-menu.open {
-            display: block; /* Visible when open */
+            display: block;
+            max-height: 500px; /* Increased to ensure full visibility of longer menus */
         }
         .dropdown-item {
             display: flex;
@@ -283,10 +285,10 @@
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item"><input type="checkbox" id="Control" value="Control"><label for="Control">Control</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2">High_CO2</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2">High CO2</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="Fertilized" value="Fertilized"><label for="Fertilized">Fertilized</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="Heat" value="Heat"><label for="Heat">Heat</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control">Outside_Control</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control">Outside Control</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -296,41 +298,41 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Independent:</span>
-                <div class="dropdown-toggle" id="independent-toggle">CO2_Level</div>
+                <div class="dropdown-toggle" id="independent-toggle">CO2 Level</div>
                 <div class="dropdown-menu" id="independent-menu">
-                    <div class="dropdown-item"><input type="radio" name="independent" id="CO2_Level" value="CO2_Level" checked><label for="CO2_Level">CO2_Level</label></div>
-                    <div class="dropdown-item"><input type="radio" name="independent" id="Temperature_Level" value="Temperature_Level"><label for="Temperature_Level">Temperature_Level</label></div>
-                    <div class="dropdown-item"><input type="radio" name="independent" id="Fertilizer_Dose" value="Fertilizer_Dose"><label for="Fertilizer_Dose">Fertilizer_Dose</label></div>
-                    <div class="dropdown-item"><input type="radio" name="independent" id="GMO_Presence" value="GMO_Presence"><label for="GMO_Presence">GMO_Presence</label></div>
-                    <div class="dropdown-item"><input type="radio" name="independent" id="Vector_Presence" value="Vector_Presence"><label for="Vector_Presence">Vector_Presence</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="CO2_Level" value="CO2_Level" checked><label for="CO2_Level">CO2 Level</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="Temperature_Level" value="Temperature_Level"><label for="Temperature_Level">Temperature Level</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="Fertilizer_Dose" value="Fertilizer_Dose"><label for="Fertilizer_Dose">Fertilizer Dose</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="GMO_Presence" value="GMO_Presence"><label for="GMO_Presence">GMO Presence</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="Vector_Presence" value="Vector_Presence"><label for="Vector_Presence">Vector Presence</label></div>
                 </div>
             </div>
             <div class="button-container">
                 <span class="button-label">Dependent:</span>
-                <div class="dropdown-toggle" id="dependent-toggle">Plant_Growth_Rate</div>
+                <div class="dropdown-toggle" id="dependent-toggle">Plant Growth Rate</div>
                 <div class="dropdown-menu" id="dependent-menu">
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Plant_Growth_Rate" value="Plant_Growth_Rate" checked><label for="Plant_Growth_Rate">Plant_Growth_Rate</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Photosynthesis_Rate" value="Photosynthesis_Rate"><label for="Photosynthesis_Rate">Photosynthesis_Rate</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Carbon_Content" value="Soil_Carbon_Content"><label for="Soil_Carbon_Content">Soil_Carbon_Content</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Species_Composition" value="Species_Composition"><label for="Species_Composition">Species_Composition</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Water_Use_Efficiency" value="Water_Use_Efficiency"><label for="Water_Use_Efficiency">Water_Use_Efficiency</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Plant_Growth_Rate" value="Plant_Growth_Rate" checked><label for="Plant_Growth_Rate">Plant Growth Rate</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Photosynthesis_Rate" value="Photosynthesis_Rate"><label for="Photosynthesis_Rate">Photosynthesis Rate</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Carbon_Content" value="Soil_Carbon_Content"><label for="Soil_Carbon_Content">Soil Carbon Content</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Species_Composition" value="Species_Composition"><label for="Species_Composition">Species Composition</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Water_Use_Efficiency" value="Water_Use_Efficiency"><label for="Water_Use_Efficiency">Water Use Efficiency</label></div>
                     <div class="dropdown-item"><input type="radio" name="dependent" id="Phenology" value="Phenology"><label for="Phenology">Phenology</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Moisture_Content" value="Soil_Moisture_Content"><label for="Soil_Moisture_Content">Soil_Moisture_Content</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Net_Primary_Productivity" value="Net_Primary_Productivity"><label for="Net_Primary_Productivity">Net_Primary_Productivity</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Mortality_Rates" value="Mortality_Rates"><label for="Mortality_Rates">Mortality_Rates</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Plant_Biomass" value="Plant_Biomass"><label for="Plant_Biomass">Plant_Biomass</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Nutrient_Leaching" value="Nutrient_Leaching"><label for="Nutrient_Leaching">Nutrient_Leaching</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Microbial_Activity" value="Soil_Microbial_Activity"><label for="Soil_Microbial_Activity">Soil_Microbial_Activity</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Eutrophication_Levels" value="Eutrophication_Levels"><label for="Eutrophication_Levels">Eutrophication_Levels</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Gene_Flow" value="Gene_Flow"><label for="Gene_Flow">Gene_Flow</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Crop_Yield" value="Crop_Yield"><label for="Crop_Yield">Crop_Yield</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Non_Target_Species_Effects" value="Non_Target_Species_Effects"><label for="Non_Target_Species_Effects">Non_Target_Species_Effects</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Pest_Resistance" value="Pest_Resistance"><label for="Pest_Resistance">Pest_Resistance</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Target_Population_Size" value="Target_Population_Size"><label for="Target_Population_Size">Target_Population_Size</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Off_Target_Mutations" value="Off_Target_Mutations"><label for="Off_Target_Mutations">Off_Target_Mutations</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Genetic_Diversity" value="Genetic_Diversity"><label for="Genetic_Diversity">Genetic_Diversity</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Ecosystem_Trophic_Dynamics" value="Ecosystem_Trophic_Dynamics"><label for="Ecosystem_Trophic_Dynamics">Ecosystem_Trophic_Dynamics</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="Vector_Persistence" value="Vector_Persistence"><label for="Vector_Persistence">Vector_Persistence</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Moisture_Content" value="Soil_Moisture_Content"><label for="Soil_Moisture_Content">Soil Moisture Content</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Net_Primary_Productivity" value="Net_Primary_Productivity"><label for="Net_Primary_Productivity">Net Primary Productivity</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Mortality_Rates" value="Mortality_Rates"><label for="Mortality_Rates">Mortality Rates</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Plant_Biomass" value="Plant_Biomass"><label for="Plant_Biomass">Plant Biomass</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Nutrient_Leaching" value="Nutrient_Leaching"><label for="Nutrient_Leaching">Nutrient Leaching</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Soil_Microbial_Activity" value="Soil_Microbial_Activity"><label for="Soil_Microbial_Activity">Soil Microbial Activity</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Eutrophication_Levels" value="Eutrophication_Levels"><label for="Eutrophication_Levels">Eutrophication Levels</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Gene_Flow" value="Gene_Flow"><label for="Gene_Flow">Gene Flow</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Crop_Yield" value="Crop_Yield"><label for="Crop_Yield">Crop Yield</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Non_Target_Species_Effects" value="Non_Target_Species_Effects"><label for="Non_Target_Species_Effects">Non Target Species Effects</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Pest_Resistance" value="Pest_Resistance"><label for="Pest_Resistance">Pest Resistance</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Target_Population_Size" value="Target_Population_Size"><label for="Target_Population_Size">Target Population Size</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Off_Target_Mutations" value="Off_Target_Mutations"><label for="Off_Target_Mutations">Off Target Mutations</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Genetic_Diversity" value="Genetic_Diversity"><label for="Genetic_Diversity">Genetic Diversity</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Ecosystem_Trophic_Dynamics" value="Ecosystem_Trophic_Dynamics"><label for="Ecosystem_Trophic_Dynamics">Ecosystem Trophic Dynamics</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="Vector_Persistence" value="Vector_Persistence"><label for="Vector_Persistence">Vector Persistence</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -492,7 +494,7 @@
             const independentMenu = document.getElementById('independent-menu');
             independentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
                 input.addEventListener('change', (e) => {
-                    document.getElementById('independent-toggle').textContent = e.target.value;
+                    document.getElementById('independent-toggle').textContent = e.target.nextElementSibling.textContent;
                     updateGraph();
                 });
             });
@@ -500,7 +502,7 @@
             const dependentMenu = document.getElementById('dependent-menu');
             dependentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
                 input.addEventListener('change', (e) => {
-                    document.getElementById('dependent-toggle').textContent = e.target.value;
+                    document.getElementById('dependent-toggle').textContent = e.target.nextElementSibling.textContent;
                     updateViewOptions();
                     updateGraph();
                 });
@@ -521,56 +523,23 @@
         }
 
         function toggleDropdown(id) {
-            const velocity = 500; // Pixels per second for consistent slow speed
+            const duration = 500; // Fixed duration in milliseconds for consistent speed
             const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'view-menu'];
             allMenus.forEach(menuId => {
                 const menu = document.getElementById(menuId);
                 if (menuId !== id && menu.classList.contains('open')) {
-                    const height = menu.scrollHeight;
-                    const duration = height / velocity * 1000; // Convert to milliseconds
-                    menu.style.transition = `height ${duration}ms ease`;
-                    menu.style.height = height + 'px'; // Set to current height
-                    setTimeout(() => {
-                        menu.style.height = '0'; // Slide up
-                        setTimeout(() => {
-                            menu.classList.remove('open');
-                            menu.style.display = 'none'; // Hide after animation
-                            menu.style.height = ''; // Reset height
-                            menu.style.transition = ''; // Reset transition
-                        }, duration); // Match dynamic duration
-                    }, 10); // Small delay to ensure height is set
+                    menu.classList.remove('open');
+                    menu.style.display = 'none';
                 }
             });
 
             const menu = document.getElementById(id);
             if (menu.classList.contains('open')) {
-                const height = menu.scrollHeight;
-                const duration = height / velocity * 1000; // Convert to milliseconds
-                menu.style.transition = `height ${duration}ms ease`;
-                menu.style.height = height + 'px'; // Set to current height
-                setTimeout(() => {
-                    menu.style.height = '0'; // Slide up
-                    setTimeout(() => {
-                        menu.classList.remove('open');
-                        menu.style.display = 'none'; // Hide after animation
-                        menu.style.height = ''; // Reset height
-                        menu.style.transition = ''; // Reset transition
-                    }, duration); // Match dynamic duration
-                }, 10); // Small delay to ensure height is set
+                menu.classList.remove('open');
+                menu.style.display = 'none';
             } else {
-                menu.style.display = 'block'; // Show immediately
-                const height = menu.scrollHeight;
-                const duration = height / velocity * 1000; // Convert to milliseconds
-                menu.style.transition = `height ${duration}ms ease`;
-                menu.style.height = '0'; // Start at 0 height
+                menu.style.display = 'block';
                 menu.classList.add('open');
-                setTimeout(() => {
-                    menu.style.height = height + 'px'; // Slide down to full height
-                    setTimeout(() => {
-                        menu.style.height = 'auto'; // Set to auto after animation
-                        menu.style.transition = ''; // Reset transition
-                    }, duration); // Match dynamic duration
-                }, 10); // Small delay to ensure display is set
             }
 
             if (id === 'ecotron-full-list') syncEcotrons();
@@ -584,6 +553,7 @@
             graphContainer.classList.toggle('full-width');
             toggle.innerHTML = sidebar.classList.contains('collapsed') ? '<' : '>';
             Plotly.Plots.resize(document.getElementById('graph'));
+            adjustTitleSize();
         }
 
         function toggleMobileSidebar() {
@@ -593,6 +563,7 @@
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
             Plotly.Plots.resize(document.getElementById('graph'));
+            adjustTitleSize();
         }
 
         function syncEcotrons() {
@@ -655,14 +626,22 @@
             });
         }
 
+        function adjustTitleSize() {
+            const graphContainer = document.getElementById('graph-container');
+            const width = graphContainer.offsetWidth;
+            let fontSize = Math.min(24, Math.max(12, width / 40)); // Scale between 12px and 24px
+            return fontSize;
+        }
+
         function layoutConfig(title = 'Select Variables to Begin') {
+            const cleanTitle = title.replace(/_/g, ' ');
             return {
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', family: 'Exo 2, sans-serif', size: 14 },
                 title: {
-                    text: title,
-                    font: { size: 24, color: '#00FFFF', family: 'VT323, monospace' },
+                    text: cleanTitle,
+                    font: { size: adjustTitleSize(), color: '#00FFFF', family: 'VT323, monospace' },
                     x: 0.5,
                     xanchor: 'center',
                     y: 0.95,
@@ -713,7 +692,7 @@
 
             console.log('Filtered data (first 5):', filteredData.slice(0, 5));
             let traces = [];
-            let layout = layoutConfig(`${dependent} vs ${independent}`);
+            let layout = layoutConfig(`${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}`);
 
             if (view === 'scatter') {
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
@@ -759,8 +738,8 @@
                 console.log('Stats text:', statsText);
                 document.getElementById('stats-panel').innerHTML = statsText;
 
-                layout.xaxis.title = `${independent} (${units[independent] || ''})`;
-                layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
+                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
             } else if (view === 'bar') {
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 const x = ecotrons;
@@ -780,7 +759,7 @@
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
-                layout.yaxis.title = `${dependent} (${units[dependent] || ''})`;
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
                 document.getElementById('stats-panel').innerHTML = '';
             } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
@@ -806,7 +785,7 @@
                         });
                     }
                 });
-                layout.xaxis.title = `${independent} (${units[independent] || ''})`;
+                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Gene Flow (%)';
                 document.getElementById('stats-panel').innerHTML = '';
             } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
@@ -828,7 +807,7 @@
                     type: 'heatmap',
                     colorscale: 'Viridis'
                 });
-                layout.xaxis.title = `${independent} (${units[independent] || ''})`;
+                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Ecotron';
                 document.getElementById('stats-panel').innerHTML = '';
             } else if (view === 'diversity_bar' && dependent === 'Genetic_Diversity') {
@@ -875,14 +854,6 @@
                 .catch(err => console.error('Plotly error:', err));
         }
 
-        // Add transition style dynamically to all dropdown menus
-        document.addEventListener('DOMContentLoaded', () => {
-            const dropdownMenus = document.querySelectorAll('.dropdown-menu');
-            dropdownMenus.forEach(menu => {
-                menu.style.overflow = 'hidden'; // Ensure content doesn't spill during animation
-            });
-        });
-
         document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
         document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
         document.getElementById('ecotron-toggle').addEventListener('click', () => toggleDropdown('ecotron-full-list'));
@@ -900,6 +871,13 @@
 
         window.addEventListener('resize', () => {
             Plotly.Plots.resize(document.getElementById('graph'));
+            adjustTitleSize();
+            updateGraph(); // Re-render to adjust title
+        });
+
+        // Initial title size adjustment
+        document.addEventListener('DOMContentLoaded', () => {
+            adjustTitleSize();
         });
     </script>
 </body>
