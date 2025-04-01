@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <style>
         body, html {
             margin: 0;
@@ -55,6 +55,15 @@
         }
         .sidebar.collapsed {
             transform: translateX(-280px);
+        }
+        .sidebar-title {
+            font-family: 'Merriweather', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #00FFFF;
+            text-align: center;
+            text-shadow: 0 0 5px #00FFFF;
+            margin-bottom: 10px;
         }
         .sidebar-toggle {
             position: absolute;
@@ -175,9 +184,9 @@
             border: 2px solid #00FFFF;
             border-radius: 10px;
             box-shadow: 0 0 8px #00FFFF;
-            color: #00FF00; /* Unified with graph stats */
+            color: #00FF00;
             font-family: 'VT323', monospace;
-            font-size: 10px; /* Unified with dropdown and graph stats */
+            font-size: 10px;
             padding: 8px;
             overflow: hidden;
             transition: max-height 0.5s ease;
@@ -203,7 +212,7 @@
             background-color: #1A1A1A;
             overflow: hidden;
             min-height: 200px;
-            height: 98%; /* Increased from 95% to extend further down */
+            height: 98%;
             transition: margin-left 0.3s ease;
         }
         .graph-container.full-width {
@@ -211,8 +220,8 @@
         }
         #graph {
             width: 90%;
-            height: 99%; /* Increased from 98% to maximize vertical space */
-            margin: 0.5% auto; /* Reduced from 1% to minimize margins */
+            height: 99%;
+            margin: 0.5% auto;
         }
         #graph::before {
             content: '';
@@ -247,7 +256,7 @@
             }
             .graph-container {
                 margin-left: 0;
-                height: 98%; /* Consistent with desktop */
+                height: 98%;
             }
             .button-label {
                 width: 80px;
@@ -261,7 +270,7 @@
             }
             .stats-panel {
                 width: calc(100% - 90px);
-                font-size: 8px; /* Consistent with dropdown */
+                font-size: 8px;
             }
             .dropdown-toggle {
                 font-size: 8px;
@@ -270,8 +279,11 @@
             }
             #graph {
                 width: 95%;
-                height: 99%; /* Consistent with desktop */
+                height: 99%;
                 margin: 0.5% auto;
+            }
+            .sidebar-title {
+                font-size: 20px;
             }
         }
         @media (max-width: 480px) {
@@ -284,7 +296,10 @@
                 gap: 12px;
             }
             .graph-container {
-                height: 98%; /* Consistent with larger screens */
+                height: 98%;
+            }
+            .sidebar-title {
+                font-size: 18px;
             }
         }
         @media (orientation: landscape) and (max-height: 500px) {
@@ -293,7 +308,7 @@
                 height: 90%;
             }
             .graph-container {
-                height: 99%; /* Maximized for landscape */
+                height: 99%;
             }
             #graph {
                 height: 100%;
@@ -302,6 +317,9 @@
             h1 {
                 padding: 1vh;
                 font-size: calc(12px + 1.5vw);
+            }
+            .sidebar-title {
+                font-size: 20px;
             }
         }
     </style>
@@ -314,6 +332,7 @@
         <button class="mobile-toggle" id="mobile-toggle">☰</button>
         <div class="sidebar" id="sidebar">
             <button class="sidebar-toggle" id="sidebar-toggle">></button>
+            <div class="sidebar-title">200 Earths</div>
             <div class="button-container">
                 <span class="button-label">Biome:</span>
                 <div class="dropdown-toggle" id="biome-toggle">Select Biomes</div>
@@ -423,7 +442,7 @@
         const units = {
             'CO2_Level': 'ppm', 'Temperature_Level': '°C', 'Fertilizer_Dose': 'kg/ha', 'GMO_Presence': 'binary', 'Vector_Presence': 'binary',
             'Plant_Growth_Rate': 'mm/day', 'Photosynthesis_Rate': 'µmol/m²s', 'Soil_Carbon_Content': '%', 'Gene_Flow': '%',
-            'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index', 'Biodiversity_Shannon': 'H\'' // Shannon Index unit
+            'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index', 'Biodiversity_Shannon': 'H\''
         };
 
         const csvUrl = 'https://aime2solve.github.io/200earths/200earths.csv';
