@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
         body, html {
             margin: 0;
@@ -21,7 +21,7 @@
             color: #00FFFF;
             text-align: center;
             text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
-            padding: 3vh; /* Increased for breathing room */
+            padding: 3vh;
             font-family: 'Orbitron', sans-serif;
             font-size: calc(18px + 2vw);
             margin: 0;
@@ -37,6 +37,7 @@
             display: flex;
             flex-grow: 1;
             overflow: hidden;
+            margin-top: 5vh; /* Lowered chart and sidebar */
         }
         .sidebar {
             width: 300px;
@@ -48,8 +49,8 @@
             flex-direction: column;
             gap: 15px;
             position: fixed;
-            top: 10vh; /* Lowered slightly */
-            height: 90%; /* Adjusted to fit */
+            top: 15vh; /* Lowered further */
+            height: 80%; /* Closer to chart height */
             transition: transform 0.3s ease;
             z-index: 1000;
         }
@@ -202,8 +203,7 @@
             position: relative;
             background-color: #1A1A1A;
             overflow: hidden;
-            min-height: 200px;
-            height: 85%; /* Reduced slightly */
+            height: 75%; /* Adjusted to extend to bottom */
             transition: margin-left 0.3s ease;
         }
         .graph-container.full-width {
@@ -415,7 +415,7 @@
             xaxis: { gridcolor: '#333333', automargin: true },
             yaxis: { gridcolor: '#333333', automargin: true },
             showlegend: false,
-            margin: { l: 50, r: 50, t: 120, b: 50 }
+            margin: { l: 60, r: 60, t: 140, b: 60 }
         }, { responsive: true });
 
         fetch(csvUrl)
@@ -648,8 +648,8 @@
         function adjustTextSizes() {
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
-            const titleSize = Math.min(24, Math.max(12, width / 40));
-            const axisSize = Math.min(18, Math.max(10, width / 50)); // Increased base size
+            const titleSize = Math.min(28, Math.max(14, width / 35)); // Increased base size
+            const axisSize = Math.min(18, Math.max(10, width / 50));
             return { titleSize, axisSize };
         }
 
@@ -662,14 +662,14 @@
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
                 title: {
-                    text: addStats ? `${cleanTitle}<br><span style="font-size: ${titleSize * 0.8}px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
+                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
-                    y: 0.97, // Raised slightly
+                    y: 0.98, // Raised higher
                     yanchor: 'top',
-                    pad: { t: 20 }, // Increased padding for stats
-                    textShadow: '0 0 5px #00FFFF'
+                    pad: { t: 30 }, // Increased for more space
+                    textShadow: '0 0 8px #00FFFF' // Enhanced glow
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -684,7 +684,7 @@
                     tickfont: { size: axisSize, family: 'Lato, sans-serif' }
                 },
                 showlegend: false,
-                margin: { l: 60, r: 60, t: 120, b: 60 }, // Adjusted margins
+                margin: { l: 60, r: 60, t: 140, b: 60 }, // Adjusted top margin
                 autosize: true
             };
         }
