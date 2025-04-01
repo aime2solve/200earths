@@ -13,9 +13,7 @@
             width: 100%;
             background-color: #000000;
             font-family: 'Exo 2', sans-serif;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
         h1 {
             color: #00FFFF;
@@ -37,7 +35,8 @@
             display: flex;
             flex-grow: 1;
             overflow: hidden;
-            margin-top: 5vh; /* Lowered chart and sidebar */
+            margin-top: 5vh;
+            min-height: calc(100vh - 5vh - 3vh); /* Adjust for header */
         }
         .sidebar {
             width: 300px;
@@ -45,12 +44,14 @@
             border-right: 2px solid #00FFFF;
             box-shadow: 0 0 10px #00FFFF;
             padding: 15px;
+            padding-top: 30px;
             display: flex;
             flex-direction: column;
             gap: 15px;
             position: fixed;
-            top: 15vh; /* Lowered further */
-            height: 80%; /* Closer to chart height */
+            top: 15vh;
+            bottom: 0;
+            height: auto;
             transition: transform 0.3s ease;
             z-index: 1000;
         }
@@ -203,7 +204,9 @@
             position: relative;
             background-color: #1A1A1A;
             overflow: hidden;
-            height: 75%; /* Adjusted to extend to bottom */
+            height: auto;
+            top: 0;
+            bottom: 0;
             transition: margin-left 0.3s ease;
         }
         .graph-container.full-width {
@@ -231,19 +234,40 @@
             pointer-events: none;
             z-index: 10;
         }
+
+        /* Mobile Adjustments */
         @media (max-width: 768px) {
+            body {
+                overflow-y: auto; /* Enable vertical scrolling */
+            }
+            .container {
+                flex-direction: column; /* Stack sidebar and graph */
+                margin-top: 2vh; /* Reduce top margin */
+                min-height: auto; /* Allow content to dictate height */
+            }
             .sidebar {
-                width: 250px;
-                transform: translateX(-230px);
+                width: 100%;
+                position: relative;
+                top: 0;
+                bottom: auto;
+                height: auto;
+                transform: translateX(-100%);
+                padding-top: 15px; /* Reduce padding for mobile */
             }
             .sidebar.open {
                 transform: translateX(0);
+            }
+            .sidebar.collapsed {
+                transform: translateX(-100%);
             }
             .mobile-toggle {
                 display: block;
             }
             .graph-container {
                 margin-left: 0;
+                width: 100%;
+                height: auto;
+                min-height: 50vh; /* Minimum height for chart */
             }
             .button-label {
                 width: 80px;
@@ -267,13 +291,35 @@
                 margin: 5% auto;
             }
         }
-        @media (max-width: 480px) {
+
+        /* Landscape Adjustments */
+        @media (max-width: 768px) and (orientation: landscape) {
+            h1 {
+                font-size: calc(12px + 1vw); /* Shrink title */
+                padding: 1vh; /* Reduce padding */
+            }
+            .container {
+                min-height: auto; /* Allow scrolling */
+                overflow-y: auto; /* Enable vertical scrolling */
+            }
+            .sidebar {
+                padding-top: 10px; /* Further reduce padding */
+            }
+            .graph-container {
+                min-height: 40vh; /* Smaller chart height to fit */
+            }
+            #graph {
+                height: 100%; /* Fit chart to container */
+            }
+        }
+
+        @media (max-width: 480px) and (orientation: portrait) {
             h1 {
                 font-size: calc(14px + 2vw);
             }
             .sidebar {
-                width: 200px;
-                transform: translateX(-180px);
+                width: 100%;
+                transform: translateX(-100%);
             }
         }
     </style>
@@ -648,7 +694,7 @@
         function adjustTextSizes() {
             const graphContainer = document.getElementById('graph-container');
             const width = graphContainer.offsetWidth;
-            const titleSize = Math.min(28, Math.max(14, width / 35)); // Increased base size
+            const titleSize = Math.min(28, Math.max(14, width / 35));
             const axisSize = Math.min(18, Math.max(10, width / 50));
             return { titleSize, axisSize };
         }
@@ -662,14 +708,14 @@
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
                 title: {
-                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
+                    text: addStats ? `${cleanTitle}<br><br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
-                    y: 0.98, // Raised higher
+                    y: 0.98,
                     yanchor: 'top',
-                    pad: { t: 30 }, // Increased for more space
-                    textShadow: '0 0 8px #00FFFF' // Enhanced glow
+                    pad: { t: 30 },
+                    textShadow: '0 0 8px #00FFFF'
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -684,7 +730,7 @@
                     tickfont: { size: axisSize, family: 'Lato, sans-serif' }
                 },
                 showlegend: false,
-                margin: { l: 60, r: 60, t: 140, b: 60 }, // Adjusted top margin
+                margin: { l: 60, r: 60, t: 140, b: 60 },
                 autosize: true
             };
         }
