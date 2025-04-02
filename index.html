@@ -409,7 +409,7 @@
             <div class="button-container">
                 <span class="button-label">Fit Type:</span>
                 <div class="dropdown-toggle" id="fit-toggle">Auto</div>
-                <div class="dropdown-menu" id="fit-menu">
+                <divmc class="dropdown-menu" id="fit-menu">
                     <div class="dropdown-item"><input type="radio" name="fit" id="fit-auto" value="auto" checked><label for="fit-auto">Auto</label></div>
                     <div class="dropdown-item"><input type="radio" name="fit" id="fit-linear" value="linear"><label for="fit-linear">Linear</label></div>
                     <div class="dropdown-item"><input type="radio" name="fit" id="fit-quadratic" value="quadratic"><label for="fit-quadratic">Quadratic</label></div>
@@ -681,14 +681,13 @@
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
                 title: {
-                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 10px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
+                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
                     y: 0.97,
                     yanchor: 'top',
-                    pad: { t: 20 },
-                    textShadow: '0 0 5px #00FFFF'
+                    pad: { t: 20 }
                 },
                 xaxis: { 
                     gridcolor: '#333333', 
@@ -703,8 +702,8 @@
                     tickfont: { size: axisSize, family: 'Lato, sans-serif' }
                 },
                 showlegend: false,
-                margin: { l: 60, r: 60, t: 120, b: 60 },
-                autosize: true
+                margin: { l: 60, r: 60, t: 100, b: 60 }, // Reduced t margin to move top up
+                height: document.getElementById('graph-container').offsetHeight * 1.05 // Slightly taller
             };
         }
 
@@ -749,7 +748,7 @@
 
         function exponentialRegression(x, y) {
             const n = x.length;
-            if (n < 2 || y.some(yi => yi <= 0)) return { a: NaN, b: NaN, r2: NaN }; // Can't log negative or zero y
+            if (n < 2 || y.some(yi => yi <= 0)) return { a: NaN, b: NaN, r2: NaN };
             const logY = y.map(yi => Math.log(yi));
             const sumX = x.reduce((a, b) => a + b, 0);
             const sumLogY = logY.reduce((a, b) => a + b, 0);
@@ -786,204 +785,204 @@
             return bestFit;
         }
 
-       function updateGraph() {
-    console.log('Updating graph');
-    const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
-    const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
-    const selectedEcotrons = Array.from(document.getElementById('ecotron-full-list').querySelectorAll('input:checked')).map(input => input.value);
-    const independent = document.querySelector('#independent-menu input:checked').value;
-    const dependent = document.querySelector('#dependent-menu input:checked').value;
-    const view = document.querySelector('#view-menu input:checked').value;
-    const fitType = document.querySelector('#fit-menu input:checked').value;
+        function updateGraph() {
+            console.log('Updating graph');
+            const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const selectedEcotrons = Array.from(document.getElementById('ecotron-full-list').querySelectorAll('input:checked')).map(input => input.value);
+            const independent = document.querySelector('#independent-menu input:checked').value;
+            const dependent = document.querySelector('#dependent-menu input:checked').value;
+            const view = document.querySelector('#view-menu input:checked').value;
+            const fitType = document.querySelector('#fit-menu input:checked').value;
 
-    console.log('Selections:', { biomes, conditions, selectedEcotrons, independent, dependent, view, fitType });
+            console.log('Selections:', { biomes, conditions, selectedEcotrons, independent, dependent, view, fitType });
 
-    let filteredData = data;
-    if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
-    if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
-    if (selectedEcotrons.length > 0) filteredData = filteredData.filter(row => selectedEcotrons.includes(row.Ecotron));
+            let filteredData = data;
+            if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
+            if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
+            if (selectedEcotrons.length > 0) filteredData = filteredData.filter(row => selectedEcotrons.includes(row.Ecotron));
 
-    console.log('Filtered data (first 5):', filteredData.slice(0, 5));
-    let traces = [];
-    let layout = layoutConfig(`${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}`);
+            console.log('Filtered data (first 5):', filteredData.slice(0, 5));
+            let traces = [];
+            let layout = layoutConfig(`${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}`);
 
-    if (view === 'scatter') {
-        const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-        ecotrons.forEach(ecotron => {
-            const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-            const condition = ecotronData[0]?.Dome_Type || 'Unknown';
-            const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-            const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-            console.log(`Ecotron ${ecotron}: X=${x}, Y=${y}`);
-            if (x.length > 0 && y.length > 0) {
+            if (view === 'scatter') {
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                ecotrons.forEach(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const condition = ecotronData[0]?.Dome_Type || 'Unknown';
+                    const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                    const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    console.log(`Ecotron ${ecotron}: X=${x}, Y=${y}`);
+                    if (x.length > 0 && y.length > 0) {
+                        traces.push({
+                            x: x,
+                            y: y,
+                            mode: 'markers',
+                            name: ecotron,
+                            marker: { size: 12, color: conditionColors[condition] || '#FFFFFF', line: { width: 2, color: '#FFFFFF' } }
+                        });
+                    }
+                });
+
+                const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                console.log('All data for regression - X:', allX, 'Y:', allY);
+                statsText = '';
+                if (allX.length >= 3 && allX.length === allY.length) {
+                    const fit = bestFitCurve(allX, allY, fitType);
+                    const xRange = Array.from({ length: 100 }, (_, i) => Math.min(...allX) + i * (Math.max(...allX) - Math.min(...allX)) / 99);
+                    if (fit.type === 'linear' && !isNaN(fit.slope) && !isNaN(fit.intercept)) {
+                        traces.push({
+                            x: xRange,
+                            y: xRange.map(xi => fit.slope * xi + fit.intercept),
+                            mode: 'lines',
+                            name: 'Linear Fit',
+                            line: { color: '#FF00FF', width: 2, dash: 'solid' }
+                        });
+                        statsText = `Linear Fit: y = ${fit.slope.toFixed(2)}x + ${fit.intercept.toFixed(2)}, R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
+                    } else if (fit.type === 'quadratic' && !isNaN(fit.a) && !isNaN(fit.b) && !isNaN(fit.c)) {
+                        traces.push({
+                            x: xRange,
+                            y: xRange.map(xi => fit.a * xi * xi + fit.b * xi + fit.c),
+                            mode: 'lines',
+                            name: 'Quadratic Fit',
+                            line: { color: '#FF00FF', width: 2, dash: 'dash' }
+                        });
+                        statsText = `Quadratic Fit: y = ${fit.a.toFixed(3)}x² + ${fit.b.toFixed(2)}x + ${fit.c.toFixed(2)}, R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
+                    } else if (fit.type === 'exponential' && !isNaN(fit.a) && !isNaN(fit.b)) {
+                        traces.push({
+                            x: xRange,
+                            y: xRange.map(xi => fit.a * Math.exp(fit.b * xi)),
+                            mode: 'lines',
+                            name: 'Exponential Fit',
+                            line: { color: '#FF00FF', width: 2, dash: 'dot' }
+                        });
+                        statsText = `Exponential Fit: y = ${fit.a.toFixed(2)}e^(${fit.b.toFixed(3)}x), R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
+                    } else {
+                        statsText = 'Fit failed - insufficient valid data';
+                    }
+                } else {
+                    statsText = 'Not enough data points for fit (need at least 3)';
+                }
+                console.log('Stats text:', statsText);
+                document.getElementById('stats-content').innerHTML = statsText;
+
+                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
+            } else if (view === 'bar') {
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                const x = ecotrons;
+                const y = ecotrons.map(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+                });
+                const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron)?.Dome_Type || 'Unknown');
                 traces.push({
                     x: x,
                     y: y,
-                    mode: 'markers',
-                    name: ecotron,
-                    marker: { size: 12, color: conditionColors[condition] || '#FFFFFF', line: { width: 2, color: '#FFFFFF' } }
+                    type: 'bar',
+                    marker: {
+                        color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
+                        line: { width: 2, color: '#FFFFFF' }
+                    }
                 });
-            }
-        });
-
-        const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-        const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-        console.log('All data for regression - X:', allX, 'Y:', allY);
-        statsText = '';
-        if (allX.length >= 3 && allX.length === allY.length) {
-            const fit = bestFitCurve(allX, allY, fitType);
-            const xRange = Array.from({ length: 100 }, (_, i) => Math.min(...allX) + i * (Math.max(...allX) - Math.min(...allX)) / 99);
-            if (fit.type === 'linear' && !isNaN(fit.slope) && !isNaN(fit.intercept)) {
+                layout.xaxis.title = 'Ecotron';
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
+                document.getElementById('stats-content').innerHTML = '';
+            } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
+                const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
+                if (url) {
+                    Plotly.newPlot('graph', [], layoutConfig(`Gene Flow data at: ${url}`));
+                    document.getElementById('stats-content').innerHTML = '';
+                    return;
+                }
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                ecotrons.forEach(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const condition = ecotronData[0]?.Dome_Type || 'Unknown';
+                    const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
+                    const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    if (x.length > 0 && y.length > 0) {
+                        traces.push({
+                            x: x,
+                            y: y,
+                            mode: 'lines+markers',
+                            name: ecotron,
+                            line: { color: conditionColors[condition] || '#FFFFFF', width: 2 },
+                            marker: { size: 8, color: conditionColors[condition] || '#FFFFFF' }
+                        });
+                    }
+                });
+                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
+                layout.yaxis.title = 'Gene Flow (%)';
+                document.getElementById('stats-content').innerHTML = '';
+            } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
+                const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
+                if (url) {
+                    Plotly.newPlot('graph', [], layoutConfig(`Mutation data at: ${url}`));
+                    document.getElementById('stats-content').innerHTML = '';
+                    return;
+                }
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                const z = ecotrons.map(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    return ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : 0);
+                });
                 traces.push({
-                    x: xRange,
-                    y: xRange.map(xi => fit.slope * xi + fit.intercept),
-                    mode: 'lines',
-                    name: 'Linear Fit',
-                    line: { color: '#FF00FF', width: 2, dash: 'solid' }
+                    z: z,
+                    x: filteredData.map(row => row[independent]).slice(0, z[0].length),
+                    y: ecotrons,
+                    type: 'heatmap',
+                    colorscale: 'Viridis'
                 });
-                statsText = `Linear Fit: y = ${fit.slope.toFixed(2)}x + ${fit.intercept.toFixed(2)}, R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
-            } else if (fit.type === 'quadratic' && !isNaN(fit.a) && !isNaN(fit.b) && !isNaN(fit.c)) {
+                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
+                layout.yaxis.title = 'Ecotron';
+                document.getElementById('stats-content').innerHTML = '';
+            } else if (view === 'diversity_bar' && (dependent === 'Genetic_Diversity' || dependent === 'Biodiversity_Shannon')) {
+                const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
+                if (url) {
+                    Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
+                    document.getElementById('stats-content').innerHTML = '';
+                    return;
+                }
+                const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
+                const x = ecotrons;
+                const y = ecotrons.map(ecotron => {
+                    const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
+                    const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
+                    return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+                });
+                const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron)?.Dome_Type || 'Unknown');
                 traces.push({
-                    x: xRange,
-                    y: xRange.map(xi => fit.a * xi * xi + fit.b * xi + fit.c),
-                    mode: 'lines',
-                    name: 'Quadratic Fit',
-                    line: { color: '#FF00FF', width: 2, dash: 'dash' }
+                    x: x,
+                    y: y,
+                    type: 'bar',
+                    marker: {
+                        color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
+                        line: { width: 2, color: '#FFFFFF' }
+                    }
                 });
-                statsText = `Quadratic Fit: y = ${fit.a.toFixed(3)}x² + ${fit.b.toFixed(2)}x + ${fit.c.toFixed(2)}, R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
-            } else if (fit.type === 'exponential' && !isNaN(fit.a) && !isNaN(fit.b)) {
-                traces.push({
-                    x: xRange,
-                    y: xRange.map(xi => fit.a * Math.exp(fit.b * xi)),
-                    mode: 'lines',
-                    name: 'Exponential Fit',
-                    line: { color: '#FF00FF', width: 2, dash: 'dot' }
-                });
-                statsText = `Exponential Fit: y = ${fit.a.toFixed(2)}e^(${fit.b.toFixed(3)}x), R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
+                layout.xaxis.title = 'Ecotron';
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
+                document.getElementById('stats-content').innerHTML = '';
             } else {
-                statsText = 'Fit failed - insufficient valid data';
+                Plotly.newPlot('graph', [], layoutConfig('View not applicable for this variable'));
+                document.getElementById('stats-content').innerHTML = '';
+                return;
             }
-        } else {
-            statsText = 'Not enough data points for fit (need at least 3)';
-        }
-        console.log('Stats text:', statsText);
-        document.getElementById('stats-content').innerHTML = statsText;
 
-        layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
-        layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
-    } else if (view === 'bar') {
-        const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-        const x = ecotrons;
-        const y = ecotrons.map(ecotron => {
-            const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-            const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-            return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
-        });
-        const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron)?.Dome_Type || 'Unknown');
-        traces.push({
-            x: x,
-            y: y,
-            type: 'bar',
-            marker: {
-                color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
-                line: { width: 2, color: '#FFFFFF' }
+            console.log('Traces to plot:', traces);
+            if (traces.length === 0) {
+                console.warn('No traces generated');
+                Plotly.newPlot('graph', [], layoutConfig('No data to plot after filtering'));
+                return;
             }
-        });
-        layout.xaxis.title = 'Ecotron';
-        layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
-        document.getElementById('stats-content').innerHTML = '';
-    } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
-        const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
-        if (url) {
-            Plotly.newPlot('graph', [], layoutConfig(`Gene Flow data at: ${url}`));
-            document.getElementById('stats-content').innerHTML = '';
-            return;
+            Plotly.newPlot('graph', traces, layout, { responsive: true })
+                .then(() => console.log('Plot rendered successfully'))
+                .catch(err => console.error('Plotly error:', err));
         }
-        const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-        ecotrons.forEach(ecotron => {
-            const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-            const condition = ecotronData[0]?.Dome_Type || 'Unknown';
-            const x = ecotronData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-            const y = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-            if (x.length > 0 && y.length > 0) {
-                traces.push({
-                    x: x,
-                    y: y,
-                    mode: 'lines+markers',
-                    name: ecotron,
-                    line: { color: conditionColors[condition] || '#FFFFFF', width: 2 },
-                    marker: { size: 8, color: conditionColors[condition] || '#FFFFFF' }
-                });
-            }
-        });
-        layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
-        layout.yaxis.title = 'Gene Flow (%)';
-        document.getElementById('stats-content').innerHTML = '';
-    } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
-        const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
-        if (url) {
-            Plotly.newPlot('graph', [], layoutConfig(`Mutation data at: ${url}`));
-            document.getElementById('stats-content').innerHTML = '';
-            return;
-        }
-        const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-        const z = ecotrons.map(ecotron => {
-            const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-            return ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : 0);
-        });
-        traces.push({
-            z: z,
-            x: filteredData.map(row => row[independent]).slice(0, z[0].length),
-            y: ecotrons,
-            type: 'heatmap',
-            colorscale: 'Viridis'
-        });
-        layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
-        layout.yaxis.title = 'Ecotron';
-        document.getElementById('stats-content').innerHTML = '';
-    } else if (view === 'diversity_bar' && (dependent === 'Genetic_Diversity' || dependent === 'Biodiversity_Shannon')) {
-        const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
-        if (url) {
-            Plotly.newPlot('graph', [], layoutConfig(`Diversity data at: ${url}`));
-            document.getElementById('stats-content').innerHTML = '';
-            return;
-        }
-        const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
-        const x = ecotrons;
-        const y = ecotrons.map(ecotron => {
-            const ecotronData = filteredData.filter(row => row.Ecotron === ecotron);
-            const values = ecotronData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-            return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
-        });
-        const conditions = ecotrons.map(ecotron => filteredData.find(row => row.Ecotron === ecotron)?.Dome_Type || 'Unknown');
-        traces.push({
-            x: x,
-            y: y,
-            type: 'bar',
-            marker: {
-                color: conditions.map(dt => conditionColors[dt] || '#FFFFFF'),
-                line: { width: 2, color: '#FFFFFF' }
-            }
-        });
-        layout.xaxis.title = 'Ecotron';
-        layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
-        document.getElementById('stats-content').innerHTML = '';
-    } else {
-        Plotly.newPlot('graph', [], layoutConfig('View not applicable for this variable'));
-        document.getElementById('stats-content').innerHTML = '';
-        return;
-    }
-
-    console.log('Traces to plot:', traces);
-    if (traces.length === 0) {
-        console.warn('No traces generated');
-        Plotly.newPlot('graph', [], layoutConfig('No data to plot after filtering'));
-        return;
-    }
-    Plotly.newPlot('graph', traces, layout, { responsive: true })
-        .then(() => console.log('Plot rendered successfully'))
-        .catch(err => console.error('Plotly error:', err));
-}
 
         document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
         document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
