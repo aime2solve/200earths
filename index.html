@@ -377,7 +377,7 @@
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item"><input type="checkbox" id="Inside_Control" value="Inside_Control"><label for="Inside_Control" style="color: #008888;">Inside Control</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2" style="color: #FF5555;">High CO2</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="High_CO2" value="High_CO2"><label for="High_CO2" style="color: #FF5555;">High CO<sub>2</sub></label></div>
                     <div class="dropdown-item"><input type="checkbox" id="Fertilizer" value="Fertilizer"><label for="Fertilizer" style="color: #55FF55;">Fertilizer</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="Heat" value="Heat"><label for="Heat" style="color: #FFAA55;">Heat</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="Outside_Control" value="Outside_Control"><label for="Outside_Control" style="color: #00CCCC;">Outside Control</label></div>
@@ -390,9 +390,9 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Independent:</span>
-                <div class="dropdown-toggle" id="independent-toggle">CO2 Level</div>
+                <div class="dropdown-toggle" id="independent-toggle">CO<sub>2</sub> Level</div>
                 <div class="dropdown-menu" id="independent-menu">
-                    <div class="dropdown-item"><input type="radio" name="independent" id="CO2_Level" value="CO2_Level" checked><label for="CO2_Level">CO2 Level</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="CO2_Level" value="CO2_Level" checked><label for="CO2_Level">CO<sub>2</sub> Level</label></div>
                     <div class="dropdown-item"><input type="radio" name="independent" id="Temperature_Level" value="Temperature_Level"><label for="Temperature_Level">Temperature Level</label></div>
                     <div class="dropdown-item"><input type="radio" name="independent" id="Fertilizer_Dose" value="Fertilizer_Dose"><label for="Fertilizer_Dose">Fertilizer Dose</label></div>
                     <div class="dropdown-item"><input type="radio" name="independent" id="GMO_Presence" value="GMO_Presence"><label for="GMO_Presence">GMO Presence</label></div>
@@ -553,9 +553,18 @@
         };
 
         const units = {
-            'CO2_Level': 'ppm', 'Temperature_Level': '°C', 'Fertilizer_Dose': 'kg/ha', 'GMO_Presence': 'binary', 'Vector_Presence': 'binary',
-            'Plant_Growth_Rate': 'mm/day', 'Photosynthesis_Rate': 'µmol/m²s', 'Soil_Carbon_Content': '%', 'Gene_Flow': '%',
-            'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index', 'Biodiversity_Shannon': 'H\''
+            'CO2_Level': 'ppm',
+            'Temperature_Level': '°C',
+            'Fertilizer_Dose': 'kg/ha',
+            'GMO_Presence': 'binary',
+            'Vector_Presence': 'binary',
+            'Plant_Growth_Rate': 'mm/day',
+            'Photosynthesis_Rate': 'µmol/m²s',
+            'Soil_Carbon_Content': '%',
+            'Gene_Flow': '%',
+            'Off_Target_Mutations': '%',
+            'Genetic_Diversity': 'index',
+            'Biodiversity_Shannon': 'H\''
         };
 
         const csvUrl = './200earths.csv';
@@ -659,7 +668,7 @@
             const independentMenu = document.getElementById('independent-menu');
             independentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
                 input.addEventListener('change', (e) => {
-                    document.getElementById('independent-toggle').textContent = e.target.nextElementSibling.textContent;
+                    document.getElementById('independent-toggle').innerHTML = e.target.nextElementSibling.innerHTML;
                     updateGraph();
                 });
             });
@@ -718,7 +727,7 @@
                 const siteId = ecotron.split('_')[0] + '_' + ecotron.split('_')[1];
                 const label = document.createElement('label');
                 label.htmlFor = `ecotron-${ecotron}`;
-                label.textContent = `${ecotron} (${siteAssignments.find(site => site.id === siteId).location})`;
+                label.innerHTML = `${ecotron.replace('High_CO2', 'High CO<sub>2</sub>')} (${siteAssignments.find(site => site.id === siteId).location})`;
                 label.style.color = conditionColors[condition] || '#FFFFFF';
                 div.appendChild(input);
                 div.appendChild(label);
@@ -837,7 +846,7 @@
         }
 
         function layoutConfig(title = 'Select Variables to Begin') {
-            const cleanTitle = title.replace(/_/g, ' ');
+            const cleanTitle = title.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>');
             const { titleSize, axisSize } = adjustTextSizes();
             const addStats = document.getElementById('add-stats-to-chart')?.checked;
             return {
@@ -845,7 +854,7 @@
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
                 title: {
-                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
+                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ').replace('CO2', 'CO<sub>2</sub>')}</span>` : cleanTitle,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
@@ -1040,8 +1049,8 @@
                 console.log('Stats text:', statsText);
                 document.getElementById('stats-content').innerHTML = statsText;
 
-                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
-                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
+                layout.xaxis.title = `${independent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[independent] || ''})`;
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[dependent] || ''})`;
             } else if (view === 'bar') {
                 const ecotrons = [...new Set(filteredData.map(row => row.Ecotron))];
                 const x = ecotrons;
@@ -1061,7 +1070,7 @@
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
-                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[dependent] || ''})`;
                 document.getElementById('stats-content').innerHTML = '';
             } else if (view === 'gene_flow' && dependent === 'Gene_Flow') {
                 const url = filteredData.find(row => row.Data_URL)?.Data_URL || '';
@@ -1087,7 +1096,7 @@
                         });
                     }
                 });
-                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
+                layout.xaxis.title = `${independent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Gene Flow (%)';
                 document.getElementById('stats-content').innerHTML = '';
             } else if (view === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') {
@@ -1109,7 +1118,7 @@
                     type: 'heatmap',
                     colorscale: 'Viridis'
                 });
-                layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
+                layout.xaxis.title = `${independent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[independent] || ''})`;
                 layout.yaxis.title = 'Ecotron';
                 document.getElementById('stats-content').innerHTML = '';
             } else if (view === 'diversity_bar' && (dependent === 'Genetic_Diversity' || dependent === 'Biodiversity_Shannon')) {
@@ -1137,7 +1146,7 @@
                     }
                 });
                 layout.xaxis.title = 'Ecotron';
-                layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
+                layout.yaxis.title = `${dependent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[dependent] || ''})`;
                 document.getElementById('stats-content').innerHTML = '';
             } else {
                 Plotly.newPlot('graph', [], layoutConfig('View not applicable for this variable'));
@@ -1190,7 +1199,7 @@
             dateFormat: "m/d/Y",
             altInput: true,
             altFormat: "m/d/Y",
-            clickOpens: false, // Prevents auto-open on click, keeps calendar open during manual entry
+            clickOpens: false,
             onChange: function(selectedDates, dateStr) {
                 startDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
@@ -1203,7 +1212,7 @@
             dateFormat: "m/d/Y",
             altInput: true,
             altFormat: "m/d/Y",
-            clickOpens: false, // Prevents auto-open on click, keeps calendar open during manual entry
+            clickOpens: false,
             onChange: function(selectedDates, dateStr) {
                 endDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
@@ -1212,12 +1221,11 @@
             }
         });
 
-        // Handle Enter key for manual entry without closing calendar
         document.getElementById('start-date-input').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 startPicker.setDate(this.value, true);
-                startPicker.open(); // Keep calendar open
+                startPicker.open();
             }
         });
 
@@ -1225,7 +1233,7 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 endPicker.setDate(this.value, true);
-                endPicker.open(); // Keep calendar open
+                endPicker.open();
             }
         });
 
