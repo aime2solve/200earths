@@ -512,13 +512,15 @@
         </div>
     </div>
 
-   <script>
+  <script>
     console.log('Script started');
 
     const siteAssignments = [
-        { id: 'Site_01', location: 'Cornell University, Ithaca, NY', biome: 'Temperate_Forest' },
-        { id: 'Site_40', location: 'University of New Hampshire, Durham, NH', biome: 'Temperate_Forest' },
-        // Add more sites as needed
+        { id: 'Site_1', location: 'Cornell University, Ithaca, NY', biome: 'Temperate_Forest' },
+        { id: 'Site_2', location: 'University of Kansas, Lawrence, KS', biome: 'Prairie' },
+        { id: 'Site_3', location: 'University of Arizona, Tucson, AZ', biome: 'Desert' },
+        { id: 'Site_40', location: 'University of New Hampshire, Durham, NH', biome: 'Temperate_Forest' }
+        // Add more sites as needed up to Site_50
     ];
 
     const conditionColors = {
@@ -566,9 +568,8 @@
         })
         .then(jsonData => {
             console.log('Received JSON:', jsonData);
-            // Mock API returns [{id: 1, title: "Post 1"}, ...] - adapt to your data
             data = jsonData.map(item => ({
-                Ecotron: `Site_${item.id}_High_CO2`, // Mock mapping
+                Ecotron: `Site_${item.id}_High_CO2`,
                 Biome: 'Temperate_Forest',
                 Dome_Type: 'High_CO2',
                 CO2_Level: 400 + item.id * 10,
@@ -594,6 +595,7 @@
         });
 
     function populateSelectors() {
+        console.log('Populating selectors');
         const biomes = [...new Set(siteAssignments.map(site => site.biome))].sort();
         const biomeMenu = document.getElementById('biome-menu');
         biomeMenu.innerHTML = '';
@@ -635,17 +637,16 @@
     }
 
     function updateEcotronDropdown() {
+        console.log('Updating Ecotron dropdown');
         const selectedBiomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
-        const conditions = ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'];
         const ecotronFullList = document.getElementById('ecotron-full-list');
-        const relevantSites = siteAssignments.filter(site => selectedBiomes.includes(site.biome));
-        const ecotrons = relevantSites.flatMap(site => conditions.map(condition => `${site.id}_${condition}`));
+        const ecotrons = [...new Set(data.filter(row => selectedBiomes.includes(row.Biome)).map(row => row.Ecotron))];
 
         function renderEcotrons(filter = '') {
             ecotronFullList.innerHTML = '<input type="text" id="ecotron-search" placeholder="Search Ecotrons...">';
             const filteredEcotrons = ecotrons.filter(ecotron => 
                 ecotron.toLowerCase().includes(filter.toLowerCase()) || 
-                siteAssignments.find(site => ecotron.startsWith(site.id)).location.toLowerCase().includes(filter.toLowerCase())
+                (siteAssignments.find(site => ecotron.startsWith(site.id))?.location || '').toLowerCase().includes(filter.toLowerCase())
             );
             filteredEcotrons.forEach(ecotron => {
                 const div = document.createElement('div');
@@ -660,7 +661,7 @@
                 const siteId = ecotron.split('_')[0] + '_' + ecotron.split('_')[1];
                 const label = document.createElement('label');
                 label.htmlFor = `ecotron-${ecotron}`;
-                label.textContent = `${ecotron} (${siteAssignments.find(site => site.id === siteId).location})`;
+                label.textContent = `${ecotron} (${siteAssignments.find(site => site.id === siteId)?.location || 'Unknown'})`;
                 label.style.color = conditionColors[condition] || '#FFFFFF';
                 div.appendChild(input);
                 div.appendChild(label);
@@ -676,6 +677,7 @@
     }
 
     function populateSelectorsFallback() {
+        console.log('Populating selectors with fallback data');
         const biomes = [...new Set(siteAssignments.map(site => site.biome))].sort();
         const biomeMenu = document.getElementById('biome-menu');
         biomeMenu.innerHTML = '';
@@ -748,6 +750,7 @@
     }
 
     function updateViewOptions() {
+        console.log('Updating view options');
         const dependent = document.querySelector('#dependent-menu input:checked').value;
         const viewMenu = document.getElementById('view-menu');
         const viewOptions = viewMenu.querySelectorAll('.dropdown-item');
@@ -839,6 +842,7 @@
     }
 
     function updateGraph() {
+        console.log('Updating graph');
         const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
         const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
         const selectedEcotrons = Array.from(document.getElementById('ecotron-full-list').querySelectorAll('input:checked')).map(input => input.value);
@@ -848,12 +852,15 @@
         const view = document.querySelector('#view-menu input:checked').value;
         const fitType = document.querySelector('#fit-menu input:checked').value;
 
+        console.log('Selections:', { biomes, conditions, selectedEcotrons, independent, dependent, organism, view, fitType });
+
         let filteredData = data;
         if (biomes.length > 0) filteredData = filteredData.filter(row => biomes.includes(row.Biome));
         if (conditions.length > 0) filteredData = filteredData.filter(row => conditions.includes(row.Dome_Type));
         if (selectedEcotrons.length > 0) filteredData = filteredData.filter(row => selectedEcotrons.includes(row.Ecotron));
         if (organism !== 'All') filteredData = filteredData.filter(row => row.Organism === organism);
 
+        console.log('Filtered data:', filteredData);
         let traces = [];
         let layout = layoutConfig(`${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}`);
 
@@ -935,6 +942,7 @@
             document.getElementById('stats-content').innerHTML = 'Volcano: significance vs. fold change';
         }
 
+        console.log('Traces:', traces);
         if (traces.length === 0) {
             Plotly.newPlot('graph', [], layoutConfig('No data to plot'));
             return;
