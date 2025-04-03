@@ -61,9 +61,9 @@
             font-family: 'Merriweather', serif;
             font-size: 24px;
             font-weight: 700;
-            color: #DAA520; /* Sunburnt gold */
+            color: #DAA520;
             text-align: center;
-            text-shadow: 0 0 10px #DAA520, 0 0 20px #DAA520; /* Glowing effect */
+            text-shadow: 0 0 10px #DAA520, 0 0 20px #DAA520;
             animation: goldGlow 1.5s ease-in-out infinite alternate;
             margin-bottom: 10px;
         }
@@ -201,9 +201,7 @@
             margin-top: 5px;
             font-family: 'Exo 2', sans-serif;
             font-size: 10px;
-        }
-        #start-calendar, #end-calendar {
-            margin-top: 5px;
+            cursor: pointer;
         }
         .stats-panel {
             display: none;
@@ -435,12 +433,10 @@
                     <div class="dropdown-item">
                         <label for="start-date-input">Start Date:</label>
                         <input type="text" id="start-date-input" placeholder="MM/DD/YYYY">
-                        <div id="start-calendar"></div>
                     </div>
                     <div class="dropdown-item">
                         <label for="end-date-input">End Date:</label>
                         <input type="text" id="end-date-input" placeholder="MM/DD/YYYY">
-                        <div id="end-calendar"></div>
                     </div>
                 </div>
             </div>
@@ -1197,44 +1193,45 @@
 
         const startPicker = flatpickr("#start-date-input", {
             dateFormat: "m/d/Y",
-            altInput: true,
-            altFormat: "m/d/Y",
-            clickOpens: false,
+            minDate: "2024-01-01",
+            maxDate: "2024-12-31",
             onChange: function(selectedDates, dateStr) {
                 startDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
-                    `${startDate ? startDate.toLocaleDateString() : 'Start'} - ${endDate ? endDate.toLocaleDateString() : 'End'}`;
+                    `${startDate ? startDate.toLocaleDateString('en-US') : 'Start'} - ${endDate ? endDate.toLocaleDateString('en-US') : 'End'}`;
                 updateGraph();
-            }
+            },
+            enableTime: false,
+            clickOpens: true // Allow calendar to pop up on click
         });
 
         const endPicker = flatpickr("#end-date-input", {
             dateFormat: "m/d/Y",
-            altInput: true,
-            altFormat: "m/d/Y",
-            clickOpens: false,
+            minDate: "2024-01-01",
+            maxDate: "2024-12-31",
             onChange: function(selectedDates, dateStr) {
                 endDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
-                    `${startDate ? startDate.toLocaleDateString() : 'Start'} - ${endDate ? endDate.toLocaleDateString() : 'End'}`;
+                    `${startDate ? startDate.toLocaleDateString('en-US') : 'Start'} - ${endDate ? endDate.toLocaleDateString('en-US') : 'End'}`;
                 updateGraph();
-            }
+            },
+            enableTime: false,
+            clickOpens: true // Allow calendar to pop up on click
         });
 
-        document.getElementById('start-date-input').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                startPicker.setDate(this.value, true);
-                startPicker.open();
-            }
-        });
-
-        document.getElementById('end-date-input').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                endPicker.setDate(this.value, true);
-                endPicker.open();
-            }
+        // Ensure calendar opens on click and supports manual entry
+        document.querySelectorAll('#start-date-input, #end-date-input').forEach(input => {
+            input.addEventListener('click', function() {
+                this._flatpickr.open(); // Force open the calendar on click
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this._flatpickr.setDate(this.value, true); // Set date on Enter
+                    this._flatpickr.close(); // Close calendar after manual entry
+                    updateGraph(); // Update graph immediately
+                }
+            });
         });
 
         window.addEventListener('resize', () => {
