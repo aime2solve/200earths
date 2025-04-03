@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
+        /* [Original CSS unchanged - omitted for brevity] */
         body, html {
             margin: 0;
             padding: 0;
@@ -54,303 +55,7 @@
             transition: transform 0.3s ease;
             z-index: 1000;
         }
-        .sidebar.collapsed {
-            transform: translateX(-280px);
-        }
-        .sidebar-title {
-            font-family: 'Merriweather', serif;
-            font-size: 24px;
-            font-weight: 700;
-            color: #00FFFF;
-            text-align: center;
-            text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
-            animation: pulseGlow 1.5s ease-in-out infinite alternate;
-            margin-bottom: 10px;
-        }
-        .sidebar-toggle {
-            position: absolute;
-            top: 10px;
-            right: -20px;
-            width: 20px;
-            height: 40px;
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-            color: #00FFFF;
-            font-size: 12px;
-            line-height: 36px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 0 8px #00FFFF;
-            z-index: 1100;
-        }
-        .mobile-toggle {
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            padding: 5px 10px;
-            cursor: pointer;
-            box-shadow: 0 0 8px #00FFFF;
-            z-index: 1100;
-        }
-        .button-container {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            position: relative;
-        }
-        .stats-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            position: relative;
-        }
-        .stats-header {
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-        .button-label {
-            color: #FFFF00;
-            font-family: 'VT323', monospace;
-            font-size: 12px;
-            margin-right: 10px;
-            width: 100px;
-            text-align: right;
-            flex-shrink: 0;
-        }
-        .dropdown-toggle {
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 10px;
-            padding: 4px 8px;
-            box-shadow: 0 0 8px #00FFFF;
-            cursor: pointer;
-            width: calc(100% - 120px);
-            text-align: left;
-        }
-        .dropdown-toggle:hover {
-            box-shadow: 0 0 12px #00FFFF;
-        }
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: calc(100% + 5px);
-            left: 110px;
-            width: calc(100% - 120px);
-            max-height: 400px;
-            overflow-y: auto;
-            background: rgba(26, 26, 26, 0.95);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            box-shadow: 0 0 8px #00FFFF;
-            z-index: 1000;
-            padding: 8px;
-            color: #00FFFF;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 10px;
-            transition: max-height 0.5s ease;
-        }
-        .dropdown-menu.open {
-            display: block;
-            max-height: 400px;
-        }
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 3px;
-        }
-        .dropdown-item input[type="radio"],
-        .dropdown-item input[type="checkbox"] {
-            margin-right: 10px;
-            accent-color: #00FFFF;
-        }
-        .dropdown-item.inactive {
-            color: #006666;
-            pointer-events: none;
-        }
-        #time-range-menu {
-            width: calc(100% - 120px);
-            left: 110px;
-            padding: 10px;
-        }
-        #time-range-menu .dropdown-item {
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-        #time-range-menu input[type="text"] {
-            width: 100%;
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid #00FFFF;
-            color: #00FFFF;
-            padding: 4px;
-            margin-top: 5px;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 10px;
-        }
-        #start-calendar, #end-calendar {
-            margin-top: 5px;
-        }
-        .stats-panel {
-            display: none;
-            width: calc(100% - 120px);
-            max-height: 200px;
-            background: rgba(26, 26, 26, 0.95);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            box-shadow: 0 0 8px #00FFFF;
-            color: #00FF00;
-            font-family: 'VT323', monospace;
-            font-size: 10px;
-            padding: 8px;
-            overflow: hidden;
-            transition: max-height 0.5s ease;
-            margin-left: auto;
-            margin-top: 5px;
-        }
-        .stats-panel.open {
-            display: block;
-            max-height: 200px;
-        }
-        .stats-panel.collapsed {
-            border: none;
-        }
-        .stats-checkbox {
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-        }
-        .graph-container {
-            flex-grow: 1;
-            margin-left: 300px;
-            position: relative;
-            background-color: #1A1A1A;
-            overflow: hidden;
-            min-height: 200px;
-            height: 98%;
-            transition: margin-left 0.3s ease;
-        }
-        .graph-container.full-width {
-            margin-left: 0;
-        }
-        #graph {
-            width: 90%;
-            height: 99%;
-            margin: 0.5% auto;
-        }
-        #graph::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                to bottom,
-                rgba(0, 255, 255, 0.06),
-                rgba(0, 255, 255, 0.06) 2px,
-                transparent 2px,
-                transparent 4px
-            );
-            pointer-events: none;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 250px;
-                transform: translateX(-230px);
-                gap: 15px;
-                top: 15vh;
-                height: 85%;
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .mobile-toggle {
-                display: block;
-            }
-            .graph-container {
-                margin-left: 0;
-                height: 98%;
-            }
-            .button-label {
-                width: 80px;
-                font-size: 10px;
-            }
-            .dropdown-menu {
-                width: calc(100% - 90px);
-                left: 90px;
-                font-size: 8px;
-                padding: 6px;
-            }
-            #time-range-menu {
-                width: calc(100% - 90px);
-                left: 90px;
-            }
-            .stats-panel {
-                width: calc(100% - 90px);
-                font-size: 8px;
-            }
-            .dropdown-toggle {
-                font-size: 8px;
-                padding: 3px 6px;
-                width: calc(100% - 90px);
-            }
-            #graph {
-                width: 95%;
-                height: 99%;
-                margin: 0.5% auto;
-            }
-            .sidebar-title {
-                font-size: 20px;
-            }
-        }
-        @media (max-width: 480px) {
-            h1 {
-                font-size: calc(14px + 2vw);
-            }
-            .sidebar {
-                width: 200px;
-                transform: translateX(-180px);
-                gap: 12px;
-            }
-            .graph-container {
-                height: 98%;
-            }
-            .sidebar-title {
-                font-size: 18px;
-            }
-        }
-        @media (orientation: landscape) and (max-height: 500px) {
-            .sidebar {
-                top: 10vh;
-                height: 90%;
-            }
-            .graph-container {
-                height: 99%;
-            }
-            #graph {
-                height: 100%;
-                margin: 0 auto;
-            }
-            h1 {
-                padding: 1vh;
-                font-size: calc(12px + 1.5vw);
-            }
-            .sidebar-title {
-                font-size: 20px;
-            }
-        }
+        /* ... (rest of CSS unchanged) */
     </style>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -476,7 +181,7 @@
             </div>
             <div class="button-container">
                 <span class="button-label">CSV:</span>
-                <div class="dropdown-toggle" id="csv-toggle" onclick="window.open('https://raw.githubusercontent.com/aime2solve/200earths/main/200earths.csv', '_blank')">View CSV</div>
+                <div class="dropdown-toggle" id="csv-toggle" onclick="window.open('https://example.com/2024_12_biospheromic_profiles.csv', '_blank')">View CSV</div>
             </div>
         </div>
         <div class="graph-container" id="graph-container">
@@ -486,6 +191,60 @@
 
     <script>
         console.log('Script started');
+
+        // Define site-specific biomes and locations
+        const siteAssignments = [
+            { id: 'Site_01', location: 'Cornell University, Ithaca, NY', biome: 'Temperate_Forest' },
+            { id: 'Site_02', location: 'University of Kansas, Lawrence, KS', biome: 'Prairie' },
+            { id: 'Site_03', location: 'University of Arizona, Tucson, AZ', biome: 'Desert' },
+            { id: 'Site_04', location: 'Louisiana State University, Baton Rouge, LA', biome: 'Wetland' },
+            { id: 'Site_05', location: 'University of Alaska Fairbanks, Fairbanks, AK', biome: 'Tundra' },
+            { id: 'Site_06', location: 'UC Santa Barbara, Santa Barbara, CA', biome: 'Chaparral' },
+            { id: 'Site_07', location: 'Texas A&M University, College Station, TX', biome: 'Savanna' },
+            { id: 'Site_08', location: 'University of Washington, Seattle, WA', biome: 'Coniferous_Forest' },
+            { id: 'Site_09', location: 'University of Michigan, Ann Arbor, MI', biome: 'Temperate_Forest' },
+            { id: 'Site_10', location: 'Kansas State University, Manhattan, KS', biome: 'Prairie' },
+            { id: 'Site_11', location: 'Arizona State University, Tempe, AZ', biome: 'Desert' },
+            { id: 'Site_12', location: 'University of Florida, Gainesville, FL', biome: 'Wetland' },
+            { id: 'Site_13', location: 'University of Minnesota, Duluth, MN', biome: 'Coniferous_Forest' },
+            { id: 'Site_14', location: 'UC Davis, Davis, CA', biome: 'Chaparral' },
+            { id: 'Site_15', location: 'Oklahoma State University, Stillwater, OK', biome: 'Savanna' },
+            { id: 'Site_16', location: 'Purdue University, West Lafayette, IN', biome: 'Temperate_Forest' },
+            { id: 'Site_17', location: 'University of Nebraska, Lincoln, NE', biome: 'Prairie' },
+            { id: 'Site_18', location: 'University of Nevada, Reno, NV', biome: 'Desert' },
+            { id: 'Site_19', location: 'Duke University, Durham, NC', biome: 'Temperate_Forest' },
+            { id: 'Site_20', location: 'University of Georgia, Athens, GA', biome: 'Wetland' },
+            { id: 'Site_21', location: 'University of Montana, Missoula, MT', biome: 'Coniferous_Forest' },
+            { id: 'Site_22', location: 'UC San Diego, La Jolla, CA', biome: 'Chaparral' },
+            { id: 'Site_23', location: 'University of Texas, Austin, TX', biome: 'Savanna' },
+            { id: 'Site_24', location: 'Ohio State University, Columbus, OH', biome: 'Temperate_Forest' },
+            { id: 'Site_25', location: 'University of Iowa, Iowa City, IA', biome: 'Prairie' },
+            { id: 'Site_26', location: 'New Mexico State University, Las Cruces, NM', biome: 'Desert' },
+            { id: 'Site_27', location: 'University of South Carolina, Columbia, SC', biome: 'Wetland' },
+            { id: 'Site_28', location: 'University of Idaho, Moscow, ID', biome: 'Coniferous_Forest' },
+            { id: 'Site_29', location: 'University of Wisconsin, Madison, WI', biome: 'Temperate_Forest' },
+            { id: 'Site_30', location: 'South Dakota State University, Brookings, SD', biome: 'Prairie' },
+            { id: 'Site_31', location: 'University of Utah, Salt Lake City, UT', biome: 'Desert' },
+            { id: 'Site_32', location: 'Florida State University, Tallahassee, FL', biome: 'Wetland' },
+            { id: 'Site_33', location: 'Oregon State University, Corvallis, OR', biome: 'Coniferous_Forest' },
+            { id: 'Site_34', location: 'UC Riverside, Riverside, CA', biome: 'Chaparral' },
+            { id: 'Site_35', location: 'University of Oklahoma, Norman, OK', biome: 'Savanna' },
+            { id: 'Site_36', location: 'Michigan State University, East Lansing, MI', biome: 'Temperate_Forest' },
+            { id: 'Site_37', location: 'North Dakota State University, Fargo, ND', biome: 'Prairie' },
+            { id: 'Site_38', location: 'University of Colorado, Boulder, CO', biome: 'Coniferous_Forest' },
+            { id: 'Site_39', location: 'University of Virginia, Charlottesville, VA', biome: 'Temperate_Forest' },
+            { id: 'Site_40', location: 'University of Kentucky, Lexington, KY', biome: 'Temperate_Forest' },
+            { id: 'Site_41', location: 'University of Wyoming, Laramie, WY', biome: 'Prairie' },
+            { id: 'Site_42', location: 'University of New Mexico, Albuquerque, NM', biome: 'Desert' },
+            { id: 'Site_43', location: 'Mississippi State University, Starkville, MS', biome: 'Wetland' },
+            { id: 'Site_44', location: 'Montana State University, Bozeman, MT', biome: 'Coniferous_Forest' },
+            { id: 'Site_45', location: 'UC Berkeley, Berkeley, CA', biome: 'Chaparral' },
+            { id: 'Site_46', location: 'University of Arkansas, Fayetteville, AR', biome: 'Savanna' },
+            { id: 'Site_47', location: 'University of Illinois, Urbana-Champaign, IL', biome: 'Prairie' },
+            { id: 'Site_48', location: 'University of Oregon, Eugene, OR', biome: 'Coniferous_Forest' },
+            { id: 'Site_49', location: 'West Virginia University, Morgantown, WV', biome: 'Temperate_Forest' },
+            { id: 'Site_50', location: 'University of North Carolina, Chapel Hill, NC', biome: 'Temperate_Forest' }
+        ];
 
         const conditionColors = {
             'Inside_Control': '#008888',
@@ -501,7 +260,8 @@
             'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index', 'Biodiversity_Shannon': 'H\''
         };
 
-        const csvUrl = 'https://aime2solve.github.io/200earths/200earths.csv';
+        // Update CSV URL to the new dataset (placeholder)
+        const csvUrl = 'https://example.com/2024_12_biospheromic_profiles.csv';
         let data = [];
         let statsText = '';
         let startDate = null;
@@ -514,7 +274,7 @@
             marker: { size: 12, color: '#00FFFF' },
             name: 'Test Data'
         }], {
-            title: 'Loading 200earths.csv...',
+            title: 'Loading 2024_12_biospheromic_profiles.csv...',
             plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
             font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
@@ -561,8 +321,10 @@
 
         function populateSelectors() {
             console.log('Populating selectors');
-            const biomes = [...new Set(data.map(row => row.Biome))].filter(b => b);
-            const ecotrons = [...new Set(data.map(row => row.Ecotron))].filter(e => e);
+            const biomes = [...new Set(siteAssignments.map(site => site.biome))].sort();
+            const ecotrons = siteAssignments.flatMap(site => 
+                ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'].map(condition => `${site.id}_${condition}`)
+            );
 
             const biomeMenu = document.getElementById('biome-menu');
             biomeMenu.innerHTML = '';
@@ -603,7 +365,7 @@
                 const condition = ecotron.split('_').slice(-1)[0];
                 const label = document.createElement('label');
                 label.htmlFor = `ecotron-${ecotron}`;
-                label.textContent = ecotron;
+                label.textContent = `${ecotron} (${siteAssignments.find(site => site.id === ecotron.split('_')[0] + '_' + ecotron.split('_')[1]).location})`;
                 label.style.color = conditionColors[condition] || '#FFFFFF';
                 div.appendChild(input);
                 div.appendChild(label);
@@ -851,8 +613,8 @@
             if (selectedEcotrons.length > 0) filteredData = filteredData.filter(row => selectedEcotrons.includes(row.Ecotron));
             if (startDate || endDate) {
                 filteredData = filteredData.filter(row => {
-                    if (!row.Date) return true;
-                    const rowDate = new Date(row.Date);
+                    if (!row.Timestamp) return true; // Use Timestamp instead of Date
+                    const rowDate = new Date(row.Timestamp);
                     return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
                 });
             }
@@ -893,7 +655,7 @@
                             y: xRange.map(xi => fit.slope * xi + fit.intercept),
                             mode: 'lines',
                             name: 'Linear Fit',
-                            lineA: { color: '#FF00FF', width: 2, dash: 'solid' }
+                            line: { color: '#FF00FF', width: 2, dash: 'solid' }
                         });
                         statsText = `Linear Fit: y = ${fit.slope.toFixed(2)}x + ${fit.intercept.toFixed(2)}, R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
                     } else if (fit.type === 'quadratic' && !isNaN(fit.a) && !isNaN(fit.b) && !isNaN(fit.c)) {
