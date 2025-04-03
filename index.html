@@ -512,7 +512,7 @@
         </div>
     </div>
 
-  <script>
+ <script>
     console.log('Script started');
 
     const siteAssignments = [
@@ -520,7 +520,10 @@
         { id: 'Site_2', location: 'University of Kansas, Lawrence, KS', biome: 'Prairie' },
         { id: 'Site_3', location: 'University of Arizona, Tucson, AZ', biome: 'Desert' },
         { id: 'Site_40', location: 'University of New Hampshire, Durham, NH', biome: 'Temperate_Forest' }
-        // Add more sites as needed up to Site_50
+        // Uncomment and expand to full 50 sites when ready
+        // { id: 'Site_4', location: '...', biome: '...' },
+        // ...
+        // { id: 'Site_50', location: '...', biome: '...' }
     ];
 
     const conditionColors = {
@@ -537,7 +540,7 @@
         'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index', 'Biodiversity_Shannon': 'H\''
     };
 
-    const apiUrl = 'https://my-json-server.typicode.com/typicode/demo/posts'; // Mock HTTPS API
+    const apiUrl = 'https://my-json-server.typicode.com/typicode/demo/posts'; // Replace with 'https://yourdomain.com/api/data'
     let data = [];
     let statsText = '';
     let startDate = null;
@@ -577,7 +580,7 @@
                 Organism: 'Plant',
                 Bacteria_A: 50 + item.id * 10,
                 Fungi_X: 30 + item.id * 5
-            }));
+            })); // Replace this mapping with: data = jsonData; when using real API
             console.log('Parsed data (first 5 rows):', data.slice(0, 5));
             if (data.length === 0) {
                 console.error('No valid data');
