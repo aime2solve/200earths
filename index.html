@@ -71,6 +71,15 @@
             from { text-shadow: 0 0 10px #DAA520, 0 0 20px #DAA520; }
             to { text-shadow: 0 0 20px #DAA520, 0 0 40px #DAA520; }
         }
+        .sidebar-subtitle {
+            font-family: 'Lato', sans-serif;
+            font-size: 16px;
+            color: #00FFFF;
+            text-align: center;
+            text-shadow: 0 0 5px #00FFFF;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
         .sidebar-toggle {
             position: absolute;
             top: 10px;
@@ -316,6 +325,9 @@
             .sidebar-title {
                 font-size: 20px;
             }
+            .sidebar-subtitle {
+                font-size: 14px;
+            }
         }
         @media (max-width: 480px) {
             h1 {
@@ -331,6 +343,9 @@
             }
             .sidebar-title {
                 font-size: 18px;
+            }
+            .sidebar-subtitle {
+                font-size: 12px;
             }
         }
         @media (orientation: landscape) and (max-height: 500px) {
@@ -352,6 +367,9 @@
             .sidebar-title {
                 font-size: 20px;
             }
+            .sidebar-subtitle {
+                font-size: 14px;
+            }
         }
     </style>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
@@ -365,6 +383,7 @@
         <div class="sidebar" id="sidebar">
             <button class="sidebar-toggle" id="sidebar-toggle">></button>
             <div class="sidebar-title">200 Earths</div>
+            <div class="sidebar-subtitle">2024 Mock Data</div>
             <div class="button-container">
                 <span class="button-label">Biome:</span>
                 <div class="dropdown-toggle" id="biome-toggle">Select Biomes</div>
@@ -1211,15 +1230,14 @@
             }
         });
 
-        // Ensure manual entry works and calendar updates
         document.querySelectorAll('#start-date-input, #end-date-input').forEach(input => {
             input.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     const picker = this._flatpickr;
                     const dateStr = this.value;
-                    picker.setDate(dateStr, true); // Parse and set the manually entered date
-                    picker.close(); // Close the calendar
+                    picker.setDate(dateStr, true);
+                    picker.close();
                     if (this.id === 'start-date-input') {
                         startDate = picker.selectedDates[0];
                     } else {
