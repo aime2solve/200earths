@@ -554,7 +554,7 @@
             'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index', 'Biodiversity_Shannon': 'H\''
         };
 
-        const csvUrl = './200earths.csv'; // Corrected to 200earths.csv
+        const csvUrl = './200earths.csv';
         let data = [];
         let statsText = '';
         let startDate = null;
@@ -617,8 +617,9 @@
         function populateSelectors() {
             console.log('Populating selectors');
             const biomes = [...new Set(siteAssignments.map(site => site.biome))].sort();
+            const conditions = ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'];
             const ecotrons = siteAssignments.flatMap(site => 
-                ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'].map(condition => `${site.id}_${condition}`)
+                conditions.map(condition => `${site.id}_${condition}`)
             );
 
             const biomeMenu = document.getElementById('biome-menu');
@@ -630,8 +631,11 @@
                 input.type = 'checkbox';
                 input.id = `biome-${biome}`;
                 input.value = biome;
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
+                input.checked = true; // All biomes checked by default
+                input.addEventListener('change', () => {
+                    updateEcotronDropdown();
+                    updateGraph();
+                });
                 const label = document.createElement('label');
                 label.htmlFor = `biome-${biome}`;
                 label.textContent = biome;
@@ -646,26 +650,7 @@
                 input.addEventListener('change', updateGraph);
             });
 
-            const ecotronFullList = document.getElementById('ecotron-full-list');
-            ecotronFullList.innerHTML = '';
-            ecotrons.forEach(ecotron => {
-                const div = document.createElement('div');
-                div.className = 'dropdown-item';
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = `ecotron-${ecotron}`;
-                input.value = ecotron;
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
-                const condition = ecotron.split('_').slice(-1)[0];
-                const label = document.createElement('label');
-                label.htmlFor = `ecotron-${ecotron}`;
-                label.textContent = `${ecotron} (${siteAssignments.find(site => site.id === ecotron.split('_')[0] + '_' + ecotron.split('_')[1]).location})`;
-                label.style.color = conditionColors[condition] || '#FFFFFF';
-                div.appendChild(input);
-                div.appendChild(label);
-                ecotronFullList.appendChild(div);
-            });
+            updateEcotronDropdown(); // Initial population of ecotrons based on all biomes
 
             const independentMenu = document.getElementById('independent-menu');
             independentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
@@ -705,12 +690,45 @@
             updateViewOptions();
         }
 
+        function updateEcotronDropdown() {
+            const selectedBiomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
+            const conditions = ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'];
+            const ecotronFullList = document.getElementById('ecotron-full-list');
+            ecotronFullList.innerHTML = '';
+
+            const relevantSites = siteAssignments.filter(site => selectedBiomes.includes(site.biome));
+            const ecotrons = relevantSites.flatMap(site => 
+                conditions.map(condition => `${site.id}_${condition}`)
+            );
+
+            ecotrons.forEach(ecotron => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = `ecotron-${ecotron}`;
+                input.value = ecotron;
+                input.checked = true; // Check only ecotrons from selected biomes
+                input.addEventListener('change', updateGraph);
+                const condition = ecotron.split('_').slice(-1)[0];
+                const siteId = ecotron.split('_')[0] + '_' + ecotron.split('_')[1];
+                const label = document.createElement('label');
+                label.htmlFor = `ecotron-${ecotron}`;
+                label.textContent = `${ecotron} (${siteAssignments.find(site => site.id === siteId).location})`;
+                label.style.color = conditionColors[condition] || '#FFFFFF';
+                div.appendChild(input);
+                div.appendChild(label);
+                ecotronFullList.appendChild(div);
+            });
+
+            console.log('Updated ecotrons for biomes:', selectedBiomes, 'Ecotrons:', ecotrons);
+            document.getElementById('ecotron-toggle').textContent = ecotrons.length === 0 ? 'No Ecotrons' : `Show ${ecotrons.length} Ecotrons`;
+        }
+
         function populateSelectorsFallback() {
             console.log('Populating selectors with fallback data');
             const biomes = [...new Set(siteAssignments.map(site => site.biome))].sort();
-            const ecotrons = siteAssignments.flatMap(site => 
-                ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'].map(condition => `${site.id}_${condition}`)
-            );
+            const conditions = ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'];
 
             const biomeMenu = document.getElementById('biome-menu');
             biomeMenu.innerHTML = '';
@@ -722,7 +740,10 @@
                 input.id = `biome-${biome}`;
                 input.value = biome;
                 input.checked = true;
-                input.addEventListener('change', updateGraph);
+                input.addEventListener('change', () => {
+                    updateEcotronDropdown();
+                    updateGraph();
+                });
                 const label = document.createElement('label');
                 label.htmlFor = `biome-${biome}`;
                 label.textContent = biome;
@@ -737,26 +758,7 @@
                 input.addEventListener('change', updateGraph);
             });
 
-            const ecotronFullList = document.getElementById('ecotron-full-list');
-            ecotronFullList.innerHTML = '';
-            ecotrons.forEach(ecotron => {
-                const div = document.createElement('div');
-                div.className = 'dropdown-item';
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = `ecotron-${ecotron}`;
-                input.value = ecotron;
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
-                const condition = ecotron.split('_').slice(-1)[0];
-                const label = document.createElement('label');
-                label.htmlFor = `ecotron-${ecotron}`;
-                label.textContent = `${ecotron} (${siteAssignments.find(site => site.id === ecotron.split('_')[0] + '_' + ecotron.split('_')[1]).location})`;
-                label.style.color = conditionColors[condition] || '#FFFFFF';
-                div.appendChild(input);
-                div.appendChild(label);
-                ecotronFullList.appendChild(div);
-            });
+            updateEcotronDropdown(); // Populate ecotrons based on all biomes in fallback
         }
 
         function toggleDropdown(id) {
