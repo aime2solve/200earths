@@ -61,11 +61,15 @@
             font-family: 'Merriweather', serif;
             font-size: 24px;
             font-weight: 700;
-            color: #00FFFF;
+            color: #DAA520; /* Sunburnt gold */
             text-align: center;
-            text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
-            animation: pulseGlow 1.5s ease-in-out infinite alternate;
+            text-shadow: 0 0 10px #DAA520, 0 0 20px #DAA520; /* Glowing effect */
+            animation: goldGlow 1.5s ease-in-out infinite alternate;
             margin-bottom: 10px;
+        }
+        @keyframes goldGlow {
+            from { text-shadow: 0 0 10px #DAA520, 0 0 20px #DAA520; }
+            to { text-shadow: 0 0 20px #DAA520, 0 0 40px #DAA520; }
         }
         .sidebar-toggle {
             position: absolute;
@@ -631,7 +635,7 @@
                 input.type = 'checkbox';
                 input.id = `biome-${biome}`;
                 input.value = biome;
-                input.checked = true; // All biomes checked by default
+                input.checked = true;
                 input.addEventListener('change', () => {
                     updateEcotronDropdown();
                     updateGraph();
@@ -650,7 +654,7 @@
                 input.addEventListener('change', updateGraph);
             });
 
-            updateEcotronDropdown(); // Initial population of ecotrons based on all biomes
+            updateEcotronDropdown();
 
             const independentMenu = document.getElementById('independent-menu');
             independentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
@@ -708,7 +712,7 @@
                 input.type = 'checkbox';
                 input.id = `ecotron-${ecotron}`;
                 input.value = ecotron;
-                input.checked = true; // Check only ecotrons from selected biomes
+                input.checked = true;
                 input.addEventListener('change', updateGraph);
                 const condition = ecotron.split('_').slice(-1)[0];
                 const siteId = ecotron.split('_')[0] + '_' + ecotron.split('_')[1];
@@ -758,7 +762,7 @@
                 input.addEventListener('change', updateGraph);
             });
 
-            updateEcotronDropdown(); // Populate ecotrons based on all biomes in fallback
+            updateEcotronDropdown();
         }
 
         function toggleDropdown(id) {
@@ -841,7 +845,7 @@
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
                 title: {
-                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 10px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
+                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
                     font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
                     x: 0.5,
                     xanchor: 'center',
@@ -1182,10 +1186,11 @@
             updateGraph();
         });
 
-        flatpickr("#start-date-input", {
+        const startPicker = flatpickr("#start-date-input", {
             dateFormat: "m/d/Y",
             altInput: true,
             altFormat: "m/d/Y",
+            clickOpens: false, // Prevents auto-open on click, keeps calendar open during manual entry
             onChange: function(selectedDates, dateStr) {
                 startDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
@@ -1194,15 +1199,33 @@
             }
         });
 
-        flatpickr("#end-date-input", {
+        const endPicker = flatpickr("#end-date-input", {
             dateFormat: "m/d/Y",
             altInput: true,
             altFormat: "m/d/Y",
+            clickOpens: false, // Prevents auto-open on click, keeps calendar open during manual entry
             onChange: function(selectedDates, dateStr) {
                 endDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
                     `${startDate ? startDate.toLocaleDateString() : 'Start'} - ${endDate ? endDate.toLocaleDateString() : 'End'}`;
                 updateGraph();
+            }
+        });
+
+        // Handle Enter key for manual entry without closing calendar
+        document.getElementById('start-date-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                startPicker.setDate(this.value, true);
+                startPicker.open(); // Keep calendar open
+            }
+        });
+
+        document.getElementById('end-date-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                endPicker.setDate(this.value, true);
+                endPicker.open(); // Keep calendar open
             }
         });
 
