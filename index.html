@@ -513,15 +513,34 @@
     </div>
 
    <script>
-    // ... (previous constants and functions unchanged)
+    console.log('Script started');
 
-    const apiUrl = 'http://localhost:3000/api/data'; // Replace with your back-end URL
+    const siteAssignments = [
+        { id: 'Site_01', location: 'Cornell University, Ithaca, NY', biome: 'Temperate_Forest' },
+        { id: 'Site_40', location: 'University of New Hampshire, Durham, NH', biome: 'Temperate_Forest' },
+        // Add more sites as needed
+    ];
+
+    const conditionColors = {
+        'Inside_Control': '#008888',
+        'High_CO2': '#FF5555',
+        'Fertilizer': '#55FF55',
+        'Heat': '#FFAA55',
+        'Outside_Control': '#00CCCC'
+    };
+
+    const units = {
+        'CO2_Level': 'ppm', 'Temperature_Level': '°C', 'Fertilizer_Dose': 'kg/ha', 'GMO_Presence': 'binary', 'Vector_Presence': 'binary',
+        'Plant_Growth_Rate': 'mm/day', 'Photosynthesis_Rate': 'µmol/m²s', 'Soil_Carbon_Content': '%', 'Gene_Flow': '%',
+        'Off_Target_Mutations': '%', 'Genetic_Diversity': 'index', 'Biodiversity_Shannon': 'H\''
+    };
+
+    const apiUrl = 'https://my-json-server.typicode.com/typicode/demo/posts'; // Mock HTTPS API
     let data = [];
     let statsText = '';
     let startDate = null;
     let endDate = null;
 
-    // Initial plot while loading
     Plotly.newPlot('graph', [{
         x: [1, 2, 3],
         y: [2, 4, 6],
@@ -539,7 +558,6 @@
         margin: { l: 50, r: 50, t: 120, b: 50 }
     }, { responsive: true });
 
-    // Fetch data from API
     fetch(apiUrl)
         .then(response => {
             console.log('Fetch status:', response.status, 'URL:', apiUrl);
@@ -548,7 +566,17 @@
         })
         .then(jsonData => {
             console.log('Received JSON:', jsonData);
-            data = jsonData.ecotrons.filter(row => row.Ecotron && typeof row.Ecotron === 'string');
+            // Mock API returns [{id: 1, title: "Post 1"}, ...] - adapt to your data
+            data = jsonData.map(item => ({
+                Ecotron: `Site_${item.id}_High_CO2`, // Mock mapping
+                Biome: 'Temperate_Forest',
+                Dome_Type: 'High_CO2',
+                CO2_Level: 400 + item.id * 10,
+                Plant_Growth_Rate: 4 + item.id * 0.2,
+                Organism: 'Plant',
+                Bacteria_A: 50 + item.id * 10,
+                Fungi_X: 30 + item.id * 5
+            }));
             console.log('Parsed data (first 5 rows):', data.slice(0, 5));
             if (data.length === 0) {
                 console.error('No valid data');
@@ -565,10 +593,252 @@
             updateGraph();
         });
 
-    // ... (rest of the functions: populateSelectors, updateEcotronDropdown, etc. unchanged)
+    function populateSelectors() {
+        const biomes = [...new Set(siteAssignments.map(site => site.biome))].sort();
+        const biomeMenu = document.getElementById('biome-menu');
+        biomeMenu.innerHTML = '';
+        biomes.forEach(biome => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = `biome-${biome}`;
+            input.value = biome;
+            input.checked = true;
+            input.addEventListener('change', () => { updateEcotronDropdown(); updateGraph(); });
+            const label = document.createElement('label');
+            label.htmlFor = `biome-${biome}`;
+            label.textContent = biome;
+            div.appendChild(input);
+            div.appendChild(label);
+            biomeMenu.appendChild(div);
+        });
+
+        const conditionMenu = document.getElementById('condition-menu');
+        conditionMenu.querySelectorAll('input[type="checkbox"]').forEach(input => {
+            input.checked = true;
+            input.addEventListener('change', updateGraph);
+        });
+
+        updateEcotronDropdown();
+
+        ['independent', 'dependent', 'organism', 'view', 'fit'].forEach(menu => {
+            const menuElement = document.getElementById(`${menu}-menu`);
+            menuElement.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    document.getElementById(`${menu}-toggle`).textContent = e.target.nextElementSibling.textContent;
+                    if (menu === 'dependent') updateViewOptions();
+                    updateGraph();
+                });
+            });
+        });
+    }
+
+    function updateEcotronDropdown() {
+        const selectedBiomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
+        const conditions = ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'];
+        const ecotronFullList = document.getElementById('ecotron-full-list');
+        const relevantSites = siteAssignments.filter(site => selectedBiomes.includes(site.biome));
+        const ecotrons = relevantSites.flatMap(site => conditions.map(condition => `${site.id}_${condition}`));
+
+        function renderEcotrons(filter = '') {
+            ecotronFullList.innerHTML = '<input type="text" id="ecotron-search" placeholder="Search Ecotrons...">';
+            const filteredEcotrons = ecotrons.filter(ecotron => 
+                ecotron.toLowerCase().includes(filter.toLowerCase()) || 
+                siteAssignments.find(site => ecotron.startsWith(site.id)).location.toLowerCase().includes(filter.toLowerCase())
+            );
+            filteredEcotrons.forEach(ecotron => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = `ecotron-${ecotron}`;
+                input.value = ecotron;
+                input.checked = true;
+                input.addEventListener('change', updateGraph);
+                const condition = ecotron.split('_').slice(-1)[0];
+                const siteId = ecotron.split('_')[0] + '_' + ecotron.split('_')[1];
+                const label = document.createElement('label');
+                label.htmlFor = `ecotron-${ecotron}`;
+                label.textContent = `${ecotron} (${siteAssignments.find(site => site.id === siteId).location})`;
+                label.style.color = conditionColors[condition] || '#FFFFFF';
+                div.appendChild(input);
+                div.appendChild(label);
+                ecotronFullList.appendChild(div);
+            });
+            document.getElementById('ecotron-toggle').textContent = filteredEcotrons.length === 0 ? 'No Ecotrons' : `Show ${filteredEcotrons.length} Ecotrons`;
+        }
+
+        renderEcotrons();
+        ecotronFullList.addEventListener('input', (e) => {
+            if (e.target.id === 'ecotron-search') renderEcotrons(e.target.value);
+        });
+    }
+
+    function populateSelectorsFallback() {
+        const biomes = [...new Set(siteAssignments.map(site => site.biome))].sort();
+        const biomeMenu = document.getElementById('biome-menu');
+        biomeMenu.innerHTML = '';
+        biomes.forEach(biome => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = `biome-${biome}`;
+            input.value = biome;
+            input.checked = true;
+            input.addEventListener('change', () => { updateEcotronDropdown(); updateGraph(); });
+            const label = document.createElement('label');
+            label.htmlFor = `biome-${biome}`;
+            label.textContent = biome;
+            div.appendChild(input);
+            div.appendChild(label);
+            biomeMenu.appendChild(div);
+        });
+
+        const conditionMenu = document.getElementById('condition-menu');
+        conditionMenu.querySelectorAll('input[type="checkbox"]').forEach(input => {
+            input.checked = true;
+            input.addEventListener('change', updateGraph);
+        });
+
+        updateEcotronDropdown();
+    }
+
+    function toggleDropdown(id) {
+        const allMenus = ['biome-menu', 'condition-menu', 'ecotron-full-list', 'independent-menu', 'dependent-menu', 'organism-menu', 'time-range-menu', 'view-menu', 'fit-menu'];
+        allMenus.forEach(menuId => {
+            const menu = document.getElementById(menuId);
+            if (menuId !== id && menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                menu.style.display = 'none';
+            }
+        });
+
+        const menu = document.getElementById(id);
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            menu.style.display = 'none';
+        } else {
+            menu.style.display = 'block';
+            menu.classList.add('open');
+            if (id === 'ecotron-full-list') document.getElementById('ecotron-search').focus();
+        }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const graphContainer = document.getElementById('graph-container');
+        const toggle = document.getElementById('sidebar-toggle');
+        sidebar.classList.toggle('collapsed');
+        graphContainer.classList.toggle('full-width');
+        toggle.innerHTML = sidebar.classList.contains('collapsed') ? '<' : '>';
+        Plotly.Plots.resize(document.getElementById('graph'));
+        adjustTextSizes();
+    }
+
+    function toggleMobileSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const graphContainer = document.getElementById('graph-container');
+        sidebar.classList.toggle('open');
+        sidebar.classList.toggle('collapsed');
+        graphContainer.classList.toggle('full-width');
+        Plotly.Plots.resize(document.getElementById('graph'));
+        adjustTextSizes();
+    }
+
+    function updateViewOptions() {
+        const dependent = document.querySelector('#dependent-menu input:checked').value;
+        const viewMenu = document.getElementById('view-menu');
+        const viewOptions = viewMenu.querySelectorAll('.dropdown-item');
+        Array.from(viewOptions).forEach(option => {
+            const input = option.querySelector('input');
+            const value = input.value;
+            option.className = (value === 'scatter' || value === 'bubble' || value === 'volcano') ? 'dropdown-item' : 
+                              (value === 'gene_flow' && dependent === 'Gene_Flow') ? 'dropdown-item' : 
+                              (value === 'mutation_heatmap' && dependent === 'Off_Target_Mutations') ? 'dropdown-item' : 
+                              (value === 'diversity_bar' && (dependent === 'Genetic_Diversity' || dependent === 'Biodiversity_Shannon')) ? 'dropdown-item' : 
+                              'dropdown-item inactive';
+        });
+    }
+
+    function adjustTextSizes() {
+        const graphContainer = document.getElementById('graph-container');
+        const width = graphContainer.offsetWidth;
+        const height = graphContainer.offsetHeight;
+        const titleSize = Math.min(24, Math.max(12, width / 40));
+        const axisSize = Math.min(18, Math.max(10, Math.min(width, height) / 50));
+        return { titleSize, axisSize };
+    }
+
+    function layoutConfig(title = 'Select Variables to Begin') {
+        const cleanTitle = title.replace(/_/g, ' ');
+        const { titleSize, axisSize } = adjustTextSizes();
+        const addStats = document.getElementById('add-stats-to-chart')?.checked;
+        return {
+            plot_bgcolor: '#1A1A1A',
+            paper_bgcolor: '#1A1A1A',
+            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
+            title: {
+                text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ')}</span>` : cleanTitle,
+                font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
+                x: 0.5,
+                xanchor: 'center',
+                y: 0.97,
+                yanchor: 'top',
+                pad: { t: 20 }
+            },
+            xaxis: { gridcolor: '#333333', automargin: true, titlefont: { size: axisSize + 1 }, tickfont: { size: axisSize + 1 } },
+            yaxis: { gridcolor: '#333333', automargin: true, titlefont: { size: axisSize + 1 }, tickfont: { size: axisSize + 1 } },
+            showlegend: true,
+            margin: { l: 60, r: 60, t: 120, b: 60 },
+            autosize: true
+        };
+    }
+
+    function linearRegression(x, y) {
+        const n = x.length;
+        if (n < 2) return { slope: NaN, intercept: NaN, r2: NaN };
+        const sumX = x.reduce((a, b) => a + b, 0);
+        const sumY = y.reduce((a, b) => a + b, 0);
+        const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
+        const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+        const sumYY = y.map(yi => yi * yi).reduce((a, b) => a + b, 0);
+        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+        const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
+        return { slope, intercept, r2, type: 'linear' };
+    }
+
+    function bestFitCurve(x, y, fitType = 'auto') {
+        const fit = linearRegression(x, y);
+        if (fitType === 'auto' || fitType === 'linear') return fit;
+        return { type: 'none', r2: NaN };
+    }
+
+    function calculateDifferentialAbundance(filteredData) {
+        const conditions = ['Inside_Control', 'High_CO2', 'Fertilizer', 'Heat', 'Outside_Control'];
+        const taxa = ['Bacteria_A', 'Bacteria_B', 'Fungi_X', 'Fungi_Y'];
+        const result = {};
+        conditions.forEach(condition => {
+            if (condition === 'Inside_Control') return;
+            const conditionData = filteredData.filter(row => row.Dome_Type === condition);
+            const controlData = filteredData.filter(row => row.Dome_Type === 'Inside_Control');
+            taxa.forEach(taxon => {
+                const conditionMean = conditionData.reduce((sum, row) => sum + (row[taxon] || 0), 0) / (conditionData.length || 1);
+                const controlMean = controlData.reduce((sum, row) => sum + (row[taxon] || 0), 0) / (controlData.length || 1);
+                const foldChange = conditionMean / (controlMean || 1);
+                const pValue = Math.random() * 0.05; // Placeholder
+                result[`${taxon}_${condition}`] = { 
+                    foldChange: foldChange > 0 ? Math.log2(foldChange) : -Infinity, 
+                    pValue: pValue > 0 ? -Math.log10(pValue) : Infinity 
+                };
+            });
+        });
+        return result;
+    }
 
     function updateGraph() {
-        console.log('Updating graph');
         const biomes = Array.from(document.getElementById('biome-menu').querySelectorAll('input:checked')).map(input => input.value);
         const conditions = Array.from(document.getElementById('condition-menu').querySelectorAll('input:checked')).map(input => input.value);
         const selectedEcotrons = Array.from(document.getElementById('ecotron-full-list').querySelectorAll('input:checked')).map(input => input.value);
@@ -625,7 +895,7 @@
             layout.xaxis.title = `${independent.replace(/_/g, ' ')} (${units[independent] || ''})`;
             layout.yaxis.title = `${dependent.replace(/_/g, ' ')} (${units[dependent] || ''})`;
         } else if (view === 'bubble') {
-            const taxa = ['Bacteria_A', 'Bacteria_B', 'Fungi_X', 'Fungi_Y']; // Adjust based on back-end data
+            const taxa = ['Bacteria_A', 'Bacteria_B', 'Fungi_X', 'Fungi_Y'];
             taxa.forEach(taxon => {
                 const taxonData = filteredData.filter(row => row[taxon] !== undefined);
                 const x = taxonData.map(row => parseFloat(row[independent])).filter(v => !isNaN(v));
@@ -672,7 +942,6 @@
         Plotly.newPlot('graph', traces, layout, { responsive: true });
     }
 
-    // Event listeners
     document.getElementById('biome-toggle').addEventListener('click', () => toggleDropdown('biome-menu'));
     document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
     document.getElementById('ecotron-toggle').addEventListener('click', () => toggleDropdown('ecotron-full-list'));
